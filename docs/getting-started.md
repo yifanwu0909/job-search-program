@@ -42,7 +42,7 @@ Recruiters will write back. Decide in advance:
 ## Your accounts
 
 - LinkedIn, with Premium Career active. Used for job alerts, connection invitations, and replies. Your Muse signs in as you in its browser.
-- LinkedIn notification emails turned on (job alerts, messages, invitations). The system reads that mail to discover jobs and hear about new messages. Step by step: docs/linkedin-notifications.md.
+- LinkedIn alerts and notifications. Your Muse sets these up for you during onboarding, from your job search answers: job alerts saved with the past 24 hours filter, alert emails daily; email, inbox message, and invitation notifications on individual; every other notification off. The system reads that mail to discover jobs and hear about new messages. Details: docs/linkedin-notifications.md.
 - Jobright, on a paid plan. One of the two main sources of new postings.
 - Indeed. The second source. Indeed is used for finding and screening only; applications always go in on the employer's own site.
 - Gmail, with Google Calendar and Google Tasks connected. Confirmations and recruiter mail land in Gmail. Interviews go on the calendar. Interview requests and assessments become tasks.

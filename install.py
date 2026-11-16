@@ -132,8 +132,8 @@ def main():
                               else "no output")
 
     print("\n5. What remains (needs the user and their Muse)")
-    print("  a. Onboarding:  python3 onboarding.py   (must-reads first,")
-    print("     then the interview — do not skip it)")
+    print("  a. Onboarding:  python3 onboarding.py   (the setup")
+    print("     conversation — do not skip it)")
     print("  b. Accounts: connect Gmail + Google Calendar + Google Tasks;")
     print("     LinkedIn Premium Career; a paid Jobright plan; sign in to")
     print("     LinkedIn, Jobright, and Indeed in the browser.")

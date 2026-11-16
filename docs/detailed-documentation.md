@@ -14,8 +14,8 @@ pacing parameters, log format, verification checks) is code and data here.
 
 ## Files
 - `config/answers.yaml` — the standing answer set (single copy). Applications
-  NEVER name ***REMOVED***; employer history is the base resume (CenterPoint Energy
-  latest). ***REMOVED*** appears only under `replies_only`.
+  NEVER name YOUR_CURRENT_EMPLOYER; employer history is the base resume (CenterPoint Energy
+  latest). YOUR_CURRENT_EMPLOYER appears only under `replies_only`.
 - `config/rules.yaml` — machine-checked parameters (targets, pacing, spacing,
   diversification, verification timing, true-blocker list, blocked-count check
   read from the log).

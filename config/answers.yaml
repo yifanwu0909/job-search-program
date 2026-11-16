@@ -1,7 +1,7 @@
 # Standing answer set for job applications — SINGLE COPY (application program v1).
 # Source: application-program-design-2026-11-04.md + MEMORY.md standing facts.
-# HARD RULE: applications must NEVER name ***REMOVED***. Application employer history is
-# the base resume exactly (CenterPoint Energy latest). ***REMOVED*** appears below ONLY
+# HARD RULE: applications must NEVER name YOUR_CURRENT_EMPLOYER. Application employer history is
+# the base resume exactly (CenterPoint Energy latest). YOUR_CURRENT_EMPLOYER appears below ONLY
 # as a replies-only fact, fenced off under replies_only.
 
 applicant:
@@ -22,7 +22,7 @@ applicant:
 
 applications:
   # Employer history EXACTLY as the base resume (~/workspace/user/files/
-  # ***REMOVED***_Senior_Software_Engineer__ML_Platform_20260827.pdf). Never add ***REMOVED***.
+  # YOUR_RESUME.pdf). Never add YOUR_CURRENT_EMPLOYER.
   current_employer: "CenterPoint Energy"
   current_title: "Senior Data Scientist"
   employer_history:
@@ -41,7 +41,7 @@ applications:
       location: null        # resume states no location; Workday fallback: "Remote"
       start: "2019-07"
       end: "2022-07"
-  never_name: ["***REMOVED***"]
+  never_name: ["YOUR_CURRENT_EMPLOYER"]
   education:
     - school: "Georgetown University"
       degree: "MS Analytics (Data Science Concentration)"
@@ -79,8 +79,8 @@ applications:
 
 replies_only:
   # For LinkedIn/Gmail replies ONLY. Never on any application form, resume, or portal profile.
-  current_role: "Senior Data Scientist at ***REMOVED*** since August 24, 2026"
-  availability: "free for calls after 2:00 PM CT (standing); no calls Nov 2-6, 2026 (vacation week)"
+  current_role: "Senior Data Scientist at YOUR_CURRENT_EMPLOYER since YYYY-MM-DD"
+  availability: "free for calls after 2:00 PM CT (standing); no calls YYYY-MM-DD to YYYY-MM-DD (vacation)"
 
 # Screening answers confirmed live with the user on the Workday (JR-0108977) form, Nov 4, 2026 (the user said "Go"):
 screening_answers:

@@ -334,7 +334,7 @@ building the tailored resume is PART OF STOCKING, not a later
 step. For every item you stock for application: build its
 tailored resume from the base resume FIRST (posting text from
 the apply route; humanizer pass; read-back verify — header
-contact line + U.S. Green Card Holder printed, zero ***REMOVED***),
+contact line + U.S. Green Card Holder printed, zero YOUR_CURRENT_EMPLOYER),
 then hand stock.py the form WITH "resume_file" and
 "resume_verified": true, so the item lands on the bench
 application-ready with its PREP READY line written by code.
@@ -363,7 +363,7 @@ sweep and the audit can see it.
   issued. Blocked companies (57, in the log) are declined on sight.
 - Diversification: max 1 application per company per window (the
   program enforces it in the orders it issues).
-- Applications never name ***REMOVED***: employment history is the base
+- Applications never name YOUR_CURRENT_EMPLOYER: employment history is the base
   resume exactly (CenterPoint Energy latest). Tailored resumes come
   from the order's resume path — built from the base resume only,
   bold headings + job-title lines, header with contact line +

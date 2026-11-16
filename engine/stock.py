@@ -98,6 +98,7 @@ import state as state_mod  # noqa: E402
 
 LOG_PATH = GOAL / "hidden_files" / "outreach-log.md"
 RULES_PATH = BASE / "config" / "rules.yaml"
+ANSWERS_PATH = BASE / "config" / "answers.yaml"
 MARKER = "(Recorded by stock program.)"
 SOURCES = ("LINKEDIN", "JOBRIGHT", "INDEED", "LINKEDIN_ALERT")
 
@@ -746,6 +747,15 @@ def record(form: dict, log_path: Path = LOG_PATH,
     events_path = Path(events_path) if events_path else _dev
     stocked_path = Path(stocked_path) if stocked_path else _dst
     rules = yaml.safe_load(RULES_PATH.read_text(encoding="utf-8"))
+    try:
+        _answers = yaml.safe_load(
+            ANSWERS_PATH.read_text(encoding="utf-8")) or {}
+        _never = (_answers.get("applications") or {}).get(
+            "never_name") or []
+    except Exception:
+        _never = []
+    never_txt = "/".join(str(n) for n in _never) if _never \
+        else "never-name employers"
     gate_cfg = rules.get("gate") or {}
     pay_cfg = rules.get("pay_filter") or {}
     disc_cfg = rules.get("discovery") or {}
@@ -1158,7 +1168,7 @@ def record(form: dict, log_path: Path = LOG_PATH,
                 f"{raw['resume_file']} (#{iid}) built from the base "
                 f"resume only and read-back verified (header contact "
                 f"line + U.S. Green Card Holder printed; zero "
-                f"***REMOVED***). {MARKER}")
+                f"{never_txt}). {MARKER}")
 
         # keep the in-memory parse current for dedupe within the batch
         log_state = state_mod.parse_log(str(log_path))

@@ -57,9 +57,9 @@ The program has no scheduler of its own. Its whole daily rhythm lives in **18 sc
 Create one job per file with your cron tools, with two adjustments:
 
 1. **Path substitution.** The bodies reference the original install path, `~/workspace/goals/linkedin-ai-recruiter-outreach-weekly`. Replace every occurrence with the path where you placed the program in Step 1 (the goal folder that contains `program/` and `hidden_files/`). Create a `hidden_files/` folder there if your placement does not have one; several jobs write the outreach log into it.
-2. **Session times.** The tap and captcha session jobs (`linkedin-tap-session-*`, `linkedin-captcha-session-*`) run at the two daily times your user picked in onboarding Step 8. Set their schedules to those times in the user's timezone.
+2. **Session times.** The tap and captcha session jobs (`linkedin-tap-session-*`, `linkedin-captcha-session-*`) run at the two daily windows your user picked (see docs/getting-started.md, "Your two daily windows"). Set their schedules to those times in the user's timezone.
 
-When all 17 exist, list them back and check each one against its file: id, schedule, timezone, enabled. Two jobs to know by name: `linkedin-batch-guardian` (every 30 minutes; it launches and watches the application workers) and `linkedin-nightly-audit` (daily; it re-checks the whole previous day, now including the code/agent interaction track).
+When all 18 exist, list them back and check each one against its file: id, schedule, timezone, enabled. Two jobs to know by name: `linkedin-batch-guardian` (every 30 minutes; it launches and watches the application workers) and `linkedin-nightly-audit` (daily; it re-checks the whole previous day, now including the code/agent interaction track).
 
 ## Step 7: First run, small
 
