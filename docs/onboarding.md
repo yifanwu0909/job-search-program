@@ -37,10 +37,4 @@ Two groups, both written into `program/config/answers.yaml`:
 
 Some applications come to you as manual packets, to submit yourself. Jobright's free autofill plugin fills those forms in for you. Onboarding prompts you to install it in your browser: search your browser's extension store for the Jobright AI autofill plugin. Type "done" when it is installed, or skip it and install it before your first manual application.
 
-## If you stop halfway
-
-You can always come back and finish the onboarding later. Everything finished is saved: account decisions in `program/state/onboarding.json`, the resume path in `program/config/answers.yaml`. Run onboarding again and it picks up where you stopped.
-
-## When you're done
-
-`python3 program/onboarding.py status` reports anything still missing, and says "Onboarding complete" when nothing is left. Do not start the daily workflow until it does.
+Anything you skipped, your Muse will ask you about when it comes up.

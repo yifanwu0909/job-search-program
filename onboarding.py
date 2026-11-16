@@ -473,6 +473,8 @@ def main():
     print("Next: your Muse connects the accounts you set up, then "
           "starts with a small first run so you can watch the "
           "screening decisions before the volume goes up.")
+    print("Anything you skipped, your Muse will ask you about when "
+          "it comes up.")
     return 0
 
 
