@@ -5,24 +5,24 @@ An automated job search that runs on your own Muse, in six blocks. Click a block
 <table>
   <tr>
     <td bgcolor="#dbeafe" align="center" width="33%">
-      <a href="docs/detailed-documentation.md#how-a-day-runs" target="_blank" rel="noopener"><b>🔍 Job discovery</b></a>
+      <a href="docs/detailed-documentation.md#job-discovery" target="_blank" rel="noopener"><b>🔍 Job discovery</b></a>
     </td>
     <td bgcolor="#dcfce7" align="center" width="33%">
-      <a href="docs/detailed-documentation.md#how-a-day-runs" target="_blank" rel="noopener"><b>🛡️ Screening</b></a>
+      <a href="docs/detailed-documentation.md#screening" target="_blank" rel="noopener"><b>🛡️ Screening</b></a>
     </td>
     <td bgcolor="#fef9c3" align="center" width="34%">
-      <a href="docs/detailed-documentation.md#how-a-day-runs" target="_blank" rel="noopener"><b>📝 Application</b></a>
+      <a href="docs/detailed-documentation.md#application" target="_blank" rel="noopener"><b>📝 Application</b></a>
     </td>
   </tr>
   <tr>
     <td bgcolor="#ffedd5" align="center">
-      <a href="docs/detailed-documentation.md#the-application-email-scan-every-30-minutes" target="_blank" rel="noopener"><b>📬 Application follow-up</b></a>
+      <a href="docs/detailed-documentation.md#application-follow-up" target="_blank" rel="noopener"><b>📬 Application follow-up</b></a>
     </td>
     <td bgcolor="#e9d5ff" align="center">
-      <a href="docs/detailed-documentation.md#how-a-day-runs" target="_blank" rel="noopener"><b>🤝 LinkedIn networking</b></a>
+      <a href="docs/detailed-documentation.md#linkedin-networking" target="_blank" rel="noopener"><b>🤝 LinkedIn networking</b></a>
     </td>
     <td bgcolor="#fee2e2" align="center">
-      <a href="docs/detailed-documentation.md#watching-for-linkedin-messages-every-15-minutes" target="_blank" rel="noopener"><b>💬 LinkedIn inbox replies</b></a>
+      <a href="docs/detailed-documentation.md#linkedin-inbox-replies" target="_blank" rel="noopener"><b>💬 LinkedIn inbox replies</b></a>
     </td>
   </tr>
 </table>
