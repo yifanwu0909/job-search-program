@@ -1,6 +1,6 @@
 # Onboarding
 
-Setup is a conversation. Your Muse runs it with you, one step at a time, and writes your answers into the program as you go. It takes about 15 minutes. You can stop at any point and pick it up later; nothing you finished is asked again.
+Setup is a conversation. Your Muse runs it with you, one step at a time, and writes your answers into the program as you go. It takes about 15 minutes. At the start, Muse shows you the main components of the session, each with its estimated time to complete in [~N minutes] brackets, and repeats that estimate when each component starts. You can stop at any point and always come back and finish the onboarding later; nothing you finished is asked again.
 
 There are two ways to run it. They are the same flow, with the same words, in the same order:
 
@@ -9,11 +9,11 @@ There are two ways to run it. They are the same flow, with the same words, in th
 
 ## How it goes
 
-1. **Welcome.** Muse explains what the system does and what setup involves.
-2. **Must-read items.** Eight short items, in four groups: costs, access, the vault, and captchas. Muse shows you one at a time. You answer **"I understand"** to each before it moves on. No bundling, no skipping. Each acknowledgment is recorded with its time in `program/state/onboarding.json`.
-3. **The interview.** Eight short steps of questions (below). Muse writes each step into `program/config/answers.yaml` and `program/config/rules.yaml` as you finish it.
-4. **Permissions.** Every account access the system may need, asked for up front (below). Each one can be set up now or skipped for later.
-5. **FYI items.** Five shorter notes, each acknowledged the same way.
+1. **Welcome.** Muse explains what the system does and what setup involves, and shows the roadmap: must-read items [~2 minutes], the interview [~10 minutes], permissions [~2 minutes], and the good-to-know items and read-back [~1 minute].
+2. **Must-read items [~2 minutes].** Eight short items, in four groups: costs, access, the vault, and captchas. Muse shows you one at a time. You answer **"I understand"** to each before it moves on. No bundling, no skipping. Each acknowledgment is recorded with its time in `program/state/onboarding.json`.
+3. **The interview [~10 minutes].** Eight short steps of questions (below), each with its own estimated time. Muse writes each step into `program/config/answers.yaml` and `program/config/rules.yaml` as you finish it.
+4. **Permissions [~2 minutes].** Every account access the system may need, asked for up front (below). Each one can be set up now or skipped for later.
+5. **FYI items [~1 minute].** Five shorter notes, each acknowledged the same way.
 6. **Read-back.** Muse reads everything back to you, including which permissions you set up and which you skipped. Check it. Then Muse starts with a small first run so you can watch the screening decisions before the volume goes up.
 
 ## The must-read items
@@ -31,18 +31,18 @@ These are the deal terms. Muse reads them exactly as written in `program/onboard
 
 ## The interview
 
-Eight steps. Muse asks, you answer, Muse writes it down before moving on.
+Eight steps. Muse asks, you answer, Muse writes it down before moving on. Each step shows its estimated time, and you can stop between steps and come back and finish later.
 
-1. **Your resume.** Send the PDF. Every tailored resume is built from it.
-2. **The facts forms ask for.** Full legal name, your name in your native language if you have one, email, phone, LinkedIn profile link, home address.
-3. **Work authorization.** Citizen, permanent resident, sponsorship, or something else, in the words a form should get.
-4. **Education and employers.** Schools, degrees, years, grade point averages. Employers and titles exactly as they appear on your resume, most recent first.
-5. **Standing choices.** Notice period. Equal opportunity answers. Whether Muse may invent a fun fact when a form asks for one. Whether it may agree to AI notetakers recording your interviews.
-6. **What you're looking for.** Job titles to search, the places the location searches should cover, whether remote roles count, and your pay floors for onsite and for remote work. Plus any work you refuse under any title.
-7. **Companies.** Your block list, if you have one. Then the company gate: Muse explains the default (companies under 100 people skipped; companies with more than half their staff in South Asia blocked) and that the second half of that rule is personal to the original user. You keep it, change the numbers, or turn it off.
-8. **Replies and your daily windows.** When you're free for recruiter calls. Whether your phone number may be shared inside an active role conversation. The two times a day you'll tap approvals and solve captchas.
+1. **Your resume [~1 minute].** Send the PDF. Every tailored resume is built from it.
+2. **The facts forms ask for [~2 minutes].** Full legal name, your name in your native language if you have one, email, phone, LinkedIn profile link, home address.
+3. **Work authorization [~1 minute].** Citizen, permanent resident, sponsorship, or something else, in the words a form should get.
+4. **Education and employers [~2 minutes].** Schools, degrees, years, grade point averages. Employers and titles exactly as they appear on your resume, most recent first.
+5. **Standing choices [~1 minute].** Notice period. Equal opportunity answers. Whether Muse may invent a fun fact when a form asks for one. Whether it may agree to AI notetakers recording your interviews.
+6. **What you're looking for [~1 minute].** Job titles to search, the places the location searches should cover, whether remote roles count, and your pay floors for onsite and for remote work. Plus any work you refuse under any title.
+7. **Companies [~1 minute].** Your block list, if you have one. Then the company gate: Muse explains the default (companies under 100 people skipped; companies with more than half their staff in South Asia blocked) and that the second half of that rule is personal to the original user. You keep it, change the numbers, or turn it off.
+8. **Replies and your daily windows [~1 minute].** When you're free for recruiter calls. Whether your phone number may be shared inside an active role conversation. The two times a day you'll tap approvals and solve captchas.
 
-## Permissions: set up now, or skip for later
+## Permissions: set up now, or skip for later [~2 minutes]
 
 The system works across your accounts, so onboarding asks for all of the access it may ever need, up front, one item at a time. For each item you choose:
 
@@ -72,7 +72,7 @@ Shorter notes, acknowledged one at a time at the end: the daily count only inclu
 
 ## If you stop halfway
 
-Everything finished is saved: acknowledgments in `program/state/onboarding.json`, answers in the config files after each step. Run onboarding again and it picks up where you stopped. Finished steps show your existing answers as defaults, so changing one answer later is quick.
+You can always come back and finish the onboarding later. Everything finished is saved: acknowledgments in `program/state/onboarding.json`, answers in the config files after each step. Run onboarding again and it picks up where you stopped. Finished steps show your existing answers as defaults, so changing one answer later is quick.
 
 ## When you're done
 

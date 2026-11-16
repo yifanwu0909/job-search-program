@@ -8,6 +8,11 @@ Run it and it walks a new user through setup, step by step:
     python3 onboarding.py status     # what is still missing / unacknowledged
 
 The flow:
+  0. The welcome message opens with a roadmap: the main components of
+     the session, each with its estimated time in [~N minutes]
+     brackets, and a reminder that the user can stop at any point and
+     always come back and finish the onboarding later. Each component
+     repeats its estimate when it starts.
   1. A welcome message.
   2. MUST-READ items on costs, access, the credential vault, and captchas.
      Each one must be acknowledged by typing "I understand" before the
@@ -49,9 +54,23 @@ DEFAULT_STATE = os.path.join(HERE, "state", "onboarding.json")
 
 WELCOME = """Welcome to your job search program.
 
-I'll set this up with you, step by step. It takes about 15 minutes.
-You answer questions, I write everything down, and at the end I read
-it all back so you can check it.
+I'll set this up with you, step by step. It takes about 15 minutes
+in total. You answer questions, I write everything down, and at the
+end I read it all back so you can check it.
+
+Here's what we'll cover:
+- Must-read items: costs, access, the vault, and captchas [~2 minutes]
+- The interview: your resume, the facts forms ask for, work
+  authorization, education and employers, standing choices, what
+  you're looking for, companies, and your reply rules and daily
+  windows [~10 minutes]
+- Permissions: the account access I may need, set up now or skipped
+  for later [~2 minutes]
+- Good-to-know items and the final read-back [~1 minute]
+
+You do not have to finish in one sitting. You can stop at any point
+and always come back and finish the onboarding later: your progress
+is saved after every step, and nothing you finished is asked again.
 
 Once we're done, I search for new postings every morning, screen them
 against your rules, apply on the employer's own site with a resume
@@ -138,6 +157,9 @@ or remove the saved login, and it stops being used.
 For every item, Muse explains why it is needed before asking for
 anything. Passwords are never typed into this chat: you enter them on
 a secure vault form, and your Muse never sees them.
+
+You can also stop here and come back and finish the onboarding
+later; every decision you have made is saved.
 
 One part needs no access at all: the contacto contact-finding runs on
 public web search, and the company pages it checks are public."""
@@ -325,6 +347,16 @@ def acknowledge(kind, index, topic, text, state, state_path):
 
 
 def acknowledge_all(kind, items, state, state_path):
+    remaining = [i for i in range(len(items))
+                 if f"{kind}:{i}" not in state["acknowledged"]]
+    if remaining:
+        print()
+        if kind == "Must-read":
+            print("=== Must-read items [~2 minutes] ===")
+        else:
+            print("=== Good-to-know items [~1 minute] ===")
+        print("  You can stop at any point and come back and finish "
+              "the onboarding later; finished items are not asked again.")
     for i, item in enumerate(items):
         if kind == "Must-read":
             topic, text = item
@@ -346,7 +378,8 @@ def permissions_step(state, state_path):
         pass  # all decided in an earlier run; fall through to summary
     else:
         print()
-        print("=== Permissions: set up access now, or skip for later ===")
+        print("=== Permissions: set up access now, or skip for later "
+              "[~2 minutes] ===")
         print(PERMISSIONS_INTRO)
     for key, title, text in PERMISSIONS:
         if key in perms:
@@ -403,7 +436,17 @@ def interview(answers, rules):
     notes = []
 
     print()
-    print("=== Step 1 of 8: your resume ===")
+    print("=== The interview [~10 minutes] ===")
+    print("  Eight steps: your resume [~1 minute], the facts forms ask")
+    print("  for [~2 minutes], work authorization [~1 minute],")
+    print("  education and employers [~2 minutes], standing choices")
+    print("  [~1 minute], what you're looking for [~1 minute],")
+    print("  companies [~1 minute], and replies and your daily windows")
+    print("  [~1 minute]. You can stop at any point and come back and")
+    print("  finish the onboarding later; finished steps are saved.")
+
+    print()
+    print("=== Step 1 of 8: your resume [~1 minute] ===")
     resume = ask("Path to your current resume (PDF)",
                  default=current(answers, "applicant", "resume_file"))
     while not os.path.exists(resume):
@@ -414,7 +457,7 @@ def interview(answers, rules):
     print("  nothing goes on an application that is not on it or below.")
 
     print()
-    print("=== Step 2 of 8: the facts forms ask for ===")
+    print("=== Step 2 of 8: the facts forms ask for [~2 minutes] ===")
     set_path(answers, ask("Your full legal name",
              default=current(answers, "applicant", "full_name")),
              "applicant", "full_name")
@@ -456,7 +499,7 @@ def interview(answers, rules):
              "contact_line")
 
     print()
-    print("=== Step 3 of 8: work authorization ===")
+    print("=== Step 3 of 8: work authorization [~1 minute] ===")
     print("  1) US citizen")
     print("  2) US permanent resident (green card)")
     print("  3) I need sponsorship")
@@ -490,7 +533,7 @@ def interview(answers, rules):
              "applications", "resume_header", "status_line")
 
     print()
-    print("=== Step 4 of 8: education and employers ===")
+    print("=== Step 4 of 8: education and employers [~2 minutes] ===")
     print("  Education first. One school at a time; blank school name "
           "when done.")
     education = []
@@ -531,7 +574,7 @@ def interview(answers, rules):
                  "current_title")
 
     print()
-    print("=== Step 5 of 8: standing choices ===")
+    print("=== Step 5 of 8: standing choices [~1 minute] ===")
     weeks = ask_int("Notice period, in weeks", default=2)
     set_path(answers, weeks, "applications", "notice_period", "weeks")
     set_path(answers, round(weeks / 4.33, 1), "applications",
@@ -562,7 +605,7 @@ def interview(answers, rules):
              "ai_notetaker_interview_consent")
 
     print()
-    print("=== Step 6 of 8: what you're looking for ===")
+    print("=== Step 6 of 8: what you're looking for [~1 minute] ===")
     titles_raw = ask("Job titles to search for, separated by commas",
                      default=None)
     titles = [t.strip() for t in titles_raw.split(",") if t.strip()]
@@ -599,7 +642,7 @@ def interview(answers, rules):
         notes.append(f"Refused work: {refused}")
 
     print()
-    print("=== Step 7 of 8: companies ===")
+    print("=== Step 7 of 8: companies [~1 minute] ===")
     blocked_raw = ask("Companies you will never apply to, separated by "
                       "commas. Blank for none.", allow_blank=True)
     if blocked_raw:
@@ -634,7 +677,8 @@ def interview(answers, rules):
                      "over 50% South Asia blocked)")
 
     print()
-    print("=== Step 8 of 8: replies and your daily windows ===")
+    print("=== Step 8 of 8: replies and your daily windows "
+          "[~1 minute] ===")
     free_after = ask("You're free for recruiter calls after what time? "
                      "(for example: 2:00 PM CT)", default="2:00 PM CT")
     set_path(answers, f"free for calls after {free_after} (standing)",
@@ -798,7 +842,7 @@ def main():
         return 0
 
     print()
-    print("=== Read-back: what I have for you ===")
+    print("=== Read-back: what I have for you [~1 minute] ===")
     print(f"Name: {get_path(answers, 'applicant', 'full_name')}")
     print(f"Email: {get_path(answers, 'applicant', 'email')}")
     print(f"Phone: {get_path(answers, 'applicant', 'phone')}")
