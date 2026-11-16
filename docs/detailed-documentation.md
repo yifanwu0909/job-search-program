@@ -304,39 +304,39 @@ The system sends email rarely, and only inside threads the user is already part 
 
 # How a day runs
 
-Times are Central. The window for a day's 60-application target opens at 8:23 AM.
+Times are Central. The window for a day's **60-application target** (customizable) opens at **8:23 AM**.
 
 ### Job discovery
 
-8:23 AM: the daily batch starts (`linkedin-recommended-applications-daily`). Workers search Jobright and Indeed for postings from the last 24 hours and take in the LinkedIn job alert emails.
+**8:23 AM:** the daily batch starts (`linkedin-recommended-applications-daily`). Workers search **Jobright** and **Indeed** for postings from the **last 24 hours** and take in the **LinkedIn job alert emails**.
 
 ### Screening
 
-Screening runs in code, before any posting is opened: blocked companies first, then companies already applied to, then the company gate on Revelio (company size and where its staff are based; LinkedIn company pages are the fallback when Revelio has no data). A posting that fails a screen is dropped and logged with the reason. A posting that passes is vetted: a read of the posting for role fit (technical work, not reporting work and not consulting), work authorization, and pay against the user's floors.
+Screening runs **in code, before any posting is opened**: **blocked companies** (your block list, customizable) first, then companies **already applied to**, then the **company gate** on Revelio (company size and where its staff are based; LinkedIn company pages are the fallback when Revelio has no data). A posting that fails a screen is **dropped and logged with the reason**. A posting that passes is **vetted**: a read of the posting for **role fit** (technical work, not reporting work and not consulting), **work authorization**, and **pay against the user's floors** (customizable).
 
 ### Application
 
-Prep: a tailored resume is built from the base resume and read back. An item is stocked to the bench only when its resume exists. A sweep every 30 minutes (`linkedin-bench-prep-sweep`) builds any resume the first pass missed.
+Prep: a **tailored resume** is built from the base resume and read back. An item is stocked to the **bench** only when its resume exists. A sweep every 30 minutes (`linkedin-bench-prep-sweep`) builds any resume the first pass missed.
 
-Applying: up to three workers run in parallel. The guardian (`linkedin-batch-guardian`, every 30 minutes) keeps them alive and restarts them if one dies. Applications go in on the employer's own site. When a worker reaches a step only the user can do, the item waits for the 1:30 PM or 7:30 PM tap session or captcha session. Sites that block this browser entirely (Lever, Gem, Rippling, Paycom) become manual packets the user submits herself.
+Applying: up to **three workers** run in parallel. The **guardian** (`linkedin-batch-guardian`, every 30 minutes) keeps them alive and restarts them if one dies. Applications go in on the **employer's own site**. When a worker reaches a step only the user can do, the item waits for the **1:30 PM or 7:30 PM tap session or captcha session** (times customizable). Sites that block this browser entirely (Lever, Gem, Rippling, Paycom) become **manual packets** the user submits herself.
 
 ### Application follow-up
 
-Verification: a submission counts toward the 60 when the employer's confirmation email arrives, or when the site showed a successful application message at submit time. If a submission cannot be proved, it is not counted. The confirmation email is checked at +10 and +30 minutes after each submission as a backstop. Submissions with neither proof sit in limbo and are never re-applied.
+Verification: a submission counts toward the 60 when the employer's **confirmation email** arrives, or when the site showed a **successful application message** at submit time. If a submission cannot be proved, it is **not counted**. The confirmation email is checked at **+10 and +30 minutes** after each submission as a backstop. Submissions with neither proof sit in **limbo** and are **never re-applied**.
 
-The application email scan (every 30 minutes) watches for what comes back. Interview requests and assessments become to-dos, interviews are booked on the user's calendar, and a researched briefing lands one hour before each one. Rejections are logged and left alone.
+The **application email scan** (every 30 minutes) watches for what comes back. Interview requests and assessments become **to-dos**, interviews are **booked** on the user's calendar, and a researched **briefing lands one hour before** each one. **Rejections are logged and left alone.**
 
 ### LinkedIn networking
 
-10:23 AM: networking (`linkedin-recruiter-outreach-weekly`). For the most recent applications, contacto finds the hiring contacts, the program checks them against the rules (seniority above the user's, real influence on the role, still at the company), and invitations go out on LinkedIn: up to 30 a day, inside LinkedIn's weekly cap of roughly 100.
+**10:23 AM:** networking (`linkedin-recruiter-outreach-weekly`). For the most recent applications, **contacto** finds the hiring contacts, the program checks them against the rules (**seniority above the user's**, real influence on the role, still at the company), and invitations go out on LinkedIn: up to **30 a day** (customizable), inside LinkedIn's **weekly cap of roughly 100**.
 
 ### LinkedIn inbox replies
 
-The message watch (every 15 minutes) answers new LinkedIn messages under the user's standing reply rules, one person at a time. A daily check at 8:30 AM picks up anything the watch missed, plus connection invitations.
+The **message watch** (every 15 minutes) answers new LinkedIn messages under the user's standing **reply rules** (customizable), one person at a time. A **daily check at 8:30 AM** picks up anything the watch missed, plus **connection invitations**.
 
 ### Checks that run all day
 
-The shadow pass (every 30 minutes) compares the written log with the program's own event record, flags any disagreement, checks for stalls, and drains the verification queue. The next morning at 8:47 AM, the nightly audit (`linkedin-nightly-audit`) re-reads the whole previous day for gaps and rule breaks. A watchdog (`linkedin-watchdog`, 11:23 AM) checks the system itself once a day.
+The **shadow pass** (every 30 minutes) compares the written log with the program's own event record, flags any disagreement, checks for stalls, and drains the verification queue. The next morning at **8:47 AM**, the **nightly audit** (`linkedin-nightly-audit`) re-reads the whole previous day for gaps and rule breaks. A **watchdog** (`linkedin-watchdog`, 11:23 AM) checks the system itself once a day.
 
 # Main functions and where they live
 
