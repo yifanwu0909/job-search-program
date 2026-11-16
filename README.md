@@ -57,6 +57,8 @@ flowchart TD
     class Y person;
 ```
 
+The full running order, step by step: <a href="docs/detailed-documentation.md#how-a-day-runs" target="_blank" rel="noopener"><b>How a day runs</b></a>.
+
 Design principle: **code decides and tracks, Muse does the legwork.** The code is the air traffic control tower, and each Muse agent is an individual aircraft: the tower assigns every mission and keeps the record, and each plane flies only the mission it was given.
 
 - 🌐 Searches <a href="https://jobright.ai" target="_blank" rel="noopener">Jobright</a> and Indeed each morning for **postings from the last 24 hours**, runs the free **career-ops scan** over the public ATS boards on the same 24-hour window, and takes in your LinkedIn job alert emails.
