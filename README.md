@@ -160,7 +160,7 @@ The same goes for the pay floors, the job titles searched, the block list, the d
 
 ## Peace of mind 😌
 
-**Will this put your LinkedIn account at risk? No.** It runs on LinkedIn's own notification emails and public job sources — LinkedIn itself is barely touched, and what's left is spread out and capped. If LinkedIn ever pushes back, it stops and tells you.
+**Will this put your LinkedIn account at risk? No.** It runs on LinkedIn's own notification emails and public job sources — LinkedIn itself is barely touched, and what's left is spread out and capped.
 
 ## More documentation
 
