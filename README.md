@@ -109,7 +109,7 @@ A few minutes a day, in two forms:
 - Your LinkedIn account, signed in, Premium Career active.
 - **LinkedIn notification emails turned on.** There is a <a href="docs/linkedin-notifications.md" target="_blank" rel="noopener">step-by-step setup guide</a>.
 - Your Gmail connected for confirmations, recruiter replies, and LinkedIn notifications.
-- Your base resume and your standing answers (<a href="#standing-answers-checklist">checklist</a> in the dropdown below).
+- Your base resume and your standing answers (<a href="#standing-answers-checklist">checklist</a>).
 
 <a id="standing-answers-checklist"></a>
 <details>
