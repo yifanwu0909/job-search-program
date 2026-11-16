@@ -33,7 +33,7 @@ It was built and tuned over several months of daily use. The daily target is **6
 
 Hand this repo to your Muse and say "install it and onboard me now.” Your muse will install this whole skill and then kick-off the onboarding process.
 
-Installing takes [~20 minutes] and onboarding takes [~12 minutes] on its own, and you can always come back and pick up where you left off at any point during this process.
+Installing takes [~20 minutes] and onboarding takes [~8 minutes] on its own, and you can always come back and pick up where you left off at any point during this process.
 
 ## What it does
 
@@ -109,7 +109,7 @@ A few minutes a day, in two forms:
 ## Access it needs
 
 - Your LinkedIn account, signed in, Premium Career active.
-- **LinkedIn notification emails turned on.** There is a <a href="docs/linkedin-notifications.md" target="_blank" rel="noopener">step-by-step setup guide</a>.
+- **LinkedIn alerts and notifications.** Muse sets these up for you during onboarding, from your job search answers. Details: <a href="docs/linkedin-notifications.md" target="_blank" rel="noopener">the LinkedIn setup</a>.
 - Your Gmail connected for confirmations, recruiter replies, and LinkedIn notifications.
 - Your base resume and your standing answers (<a href="#standing-answers-checklist">checklist</a>).
 
@@ -161,7 +161,7 @@ The same goes for the pay floors, the job titles searched, the block list, the d
 ## More documentation
 
 - <a href="docs/onboarding.md" target="_blank" rel="noopener">docs/onboarding.md</a>: **start here.** The interactive setup. Your Muse walks you through it step by step.
-- <a href="docs/linkedin-notifications.md" target="_blank" rel="noopener">docs/linkedin-notifications.md</a>: the one-time LinkedIn setup. Turn on the job alert, message, and invitation emails the system reads.
+- <a href="docs/linkedin-notifications.md" target="_blank" rel="noopener">docs/linkedin-notifications.md</a>: the LinkedIn alerts and notifications Muse sets up for you, and the emails the system reads.
 - <a href="docs/tap-sessions/" target="_blank" rel="noopener">docs/tap-sessions/README.md</a>: the approvals only you can give, why they cannot be automated, and how the sessions run.
 - <a href="docs/captcha-sessions/" target="_blank" rel="noopener">docs/captcha-sessions/README.md</a>: why Muse never touches a captcha, and how captcha sessions work.
 - <a href="docs/manual-packets/" target="_blank" rel="noopener">docs/manual-packets/README.md</a>: the applications you submit yourself, why those sites cannot be reached any other way, and how to submit one.

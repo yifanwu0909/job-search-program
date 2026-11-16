@@ -1,21 +1,27 @@
-# Set up your LinkedIn notification emails first
+# LinkedIn alerts and notifications: Muse sets these up
 
-Job alerts, message notifications, and invitation emails are a prerequisite: the system discovers jobs and hears about new messages by scanning that mail.
+You do not set these up yourself. During onboarding, once you give your job search, Muse sets them up in your LinkedIn, from your answers:
 
-This system does not browse LinkedIn looking for news. It reads three kinds of LinkedIn notification email in your Gmail:
+- **Job alerts** saved for every title and location you gave, with the date posted filter set to **past 24 hours** and alert emails **daily**.
+- **Email notifications** on **individual** (each one as it happens).
+- **Inbox message notifications** on **individual**.
+- **Invitation notifications** on **individual**.
+- **Every other notification off.**
 
-- **Job alerts.** New postings from the alerts you saved. One of the three discovery sources.
+Job alerts, message notifications, and invitation emails are a prerequisite: the system discovers jobs and hears about new messages by scanning that mail. It does not browse LinkedIn looking for news. It reads three kinds of LinkedIn notification email in your Gmail:
+
+- **Job alerts.** New postings from your saved alerts. One of the three discovery sources.
 - **Message notifications.** "Someone messaged you" emails. These drive the inbox replies.
 - **Invitation emails.** Connection invitations you received. These are handled once a day.
 
-If the email toggles below are off, none of that mail exists, and those parts of the system have nothing to work with. This setup takes about ten minutes, once.
+If these are off, none of that mail exists, and those parts of the system have nothing to work with. The steps below are only a reference, if you ever want to check the settings yourself.
 
 ## Step 1: Create your job alerts
 
 Job alerts are saved searches. Each alert emails you the new postings that match it.
 
 1. Go to linkedin.com and click **Jobs** at the top.
-2. Search for a job title and a location (or choose a remote filter), and run the search.
+2. Search for a job title and a location (or choose a remote filter), set **Date posted** to **Past 24 hours**, and run the search.
 3. At the top of the results, click **Set alert** (the bell icon).
 4. Set the alert frequency: **Daily** is the better fit for this system. The alert emails are picked up within 24 hours either way.
 5. Make sure the alert's delivery includes **Email**, then save.
