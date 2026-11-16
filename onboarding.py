@@ -45,10 +45,13 @@ LinkedIn alerts and notifications are NOT a user step. Once the user
 has given their job search (step 4), Muse itself sets them up in
 the user's LinkedIn, from those answers: job alerts saved for every
 title and location, the date-posted filter set to past 24 hours,
-alert emails daily; email, inbox message, and invitation
-notifications on individual; every other notification off. The
-setup is recorded as owed in state/onboarding.json, and the program
-already handles the emails that result.
+alert emails daily. Notifications: exactly four categories stay
+on — InMail, Messages, Invitations to connect, and Job alerts —
+each with in-app notifications OFF and email ON, at individual
+email frequency where LinkedIn offers one; every other
+notification is OFF completely. The setup is recorded as owed in
+state/onboarding.json, and the program already handles the
+emails that result.
 
 Every prompt ends with two buttons, as typed options: "skip" (Skip
 this now) and "break" (Take a break). Break stops the session and
@@ -420,19 +423,26 @@ def record_linkedin_setup(state, state_path, answers):
                    "locations": job_search.get("locations", []),
                    "date_posted": "past 24 hours",
                    "email_frequency": "daily"},
-        "notifications": {"email": "individual",
-                          "inbox_messages": "individual",
-                          "invitations": "individual",
-                          "all_others": "off"}}
+        "notifications": {
+            "inmail": {"in_app": "off", "email": "on",
+                       "email_frequency": "individual"},
+            "messages": {"in_app": "off", "email": "on",
+                         "email_frequency": "individual"},
+            "invitations_to_connect": {
+                "in_app": "off", "email": "on",
+                "email_frequency": "individual"},
+            "job_alerts": {"in_app": "off", "email": "on"},
+            "all_others": "off"}}
     save_state(state_path, state)
     print()
     print("=== LinkedIn alerts and notifications ===")
     print("  I set these up myself, from your job search answers.")
     print("  You do not need to do anything: job alerts saved for")
     print("  your titles and locations, date posted set to past 24")
-    print("  hours, alert emails daily; email, inbox message, and")
-    print("  invitation notifications on individual; and every")
-    print("  other notification off.")
+    print("  hours, alert emails daily. Notifications: only InMail,")
+    print("  Messages, Invitations to connect, and Job alerts stay")
+    print("  on — in-app off, email on, individual frequency — and")
+    print("  every other notification is off completely.")
 
 
 def plugin_step(state, state_path):
