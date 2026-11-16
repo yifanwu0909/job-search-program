@@ -4,6 +4,10 @@ Every setting in this repo is one person's setup. This page lists the fields you
 
 Ask your Muse to change any of them. It will update the setting everywhere it is written down and read it back to confirm.
 
+## How to change
+
+Just tell Muse to change it. Say what you want different, in plain words. Muse updates the setting everywhere it is written and reads the change back to you. You never edit these files by hand.
+
 ## Who you are (answers.yaml)
 
 - Legal name, including your name in your native language if forms ask for it.
