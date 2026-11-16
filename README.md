@@ -31,7 +31,7 @@ It was built and tuned over several months of daily use. The daily target is **6
 
 ## Installing it 🛠️
 
-Hand this repo to your Muse and say "install it.” Your muse will install this whole skill and then kick-off the onboarding process.
+Hand this repo to your Muse and say "install it and onboard me now.” Your muse will install this whole skill and then kick-off the onboarding process.
 
 ## What it does
 
