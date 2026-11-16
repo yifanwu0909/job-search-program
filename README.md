@@ -105,7 +105,7 @@ A few minutes a day, in two forms:
 - Your LinkedIn account, signed in, Premium Career active.
 - **LinkedIn notification emails turned on.** There is a <a href="docs/linkedin-notifications.md" target="_blank" rel="noopener">step-by-step setup guide</a>.
 - Your Gmail connected for confirmations, recruiter replies, and LinkedIn notifications.
-- Your base resume and your standing answers (checklist in the dropdown below).
+- Your base resume and your standing answers (<a href="#standing-answers-checklist">checklist</a> in the dropdown below).
 
 ## What it will not do
 
@@ -123,6 +123,7 @@ One example: the **company gate**. This setup checks each company on Revelio bef
 
 The same goes for the pay floors, the job titles searched, the block list, the daily targets, the reply rules, and the session times. The full list of customizable fields, and where each one lives, is in <a href="docs/customization.md" target="_blank" rel="noopener">docs/customization.md</a>.
 
+<a id="standing-answers-checklist"></a>
 <details>
 <summary>📋 <b>What you need to hand over before it can run</b></summary>
 
