@@ -41,7 +41,7 @@ flowchart TD
     D --> E["📬 Verify"]
     E --> F["🤝 Outreach"]
     F --> G["💬 Inbox + report"]
-    G --> H["📬 Interview schedule + prep"]
+    G --> H["🗓️ Interview schedule + prep"]
     Y["🧑 User input<br/>+ permission"] -.-> D
     Y -.-> G
 
