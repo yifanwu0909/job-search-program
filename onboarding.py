@@ -221,6 +221,9 @@ def doctor(answers, state):
         not is_placeholder(get_path(answers, "job_search", "workplace"))
     notif_ok = "linkedin_setup" in state or \
         "linkedin_notifications" in state
+    notif_verified = ((state.get("linkedin_setup") or {})
+                      .get("verification") or {}).get("status") \
+        == "verified"
     about = state.get("about_you", {})
     unpersonalized = [label for keys, label in UNPERSONALIZED_WATCH
                       if is_placeholder(get_path(answers, *keys))]
@@ -231,6 +234,7 @@ def doctor(answers, state):
         "q_missing": q_missing,
         "search_ok": search_ok,
         "notif_ok": notif_ok,
+        "notif_verified": notif_verified,
         "plugin_ok": "plugin" in state,
         "about_you": about.get("decision"),
         "unpersonalized": unpersonalized,
@@ -432,7 +436,8 @@ def record_linkedin_setup(state, state_path, answers):
                 "in_app": "off", "email": "on",
                 "email_frequency": "individual"},
             "job_alerts": {"in_app": "off", "email": "on"},
-            "all_others": "off"}}
+            "all_others": "off"},
+        "verification": {"status": "not_verified", "checks": {}}}
     save_state(state_path, state)
     print()
     print("=== LinkedIn alerts and notifications ===")
@@ -442,7 +447,11 @@ def record_linkedin_setup(state, state_path, answers):
     print("  hours, alert emails daily. Notifications: only InMail,")
     print("  Messages, Invitations to connect, and Job alerts stay")
     print("  on — in-app off, email on, individual frequency — and")
-    print("  every other notification is off completely.")
+    print("  every other notification is off completely. Right")
+    print("  after onboarding I apply these settings in your")
+    print("  LinkedIn and verify every one of them (onboarding.py")
+    print("  linkedin-verify) — the workflow depends on this mail,")
+    print("  so nothing runs until the setup checks out.")
 
 
 def plugin_step(state, state_path):
@@ -554,6 +563,11 @@ def cmd_status(args):
     if not report["notif_ok"]:
         print("LinkedIn alerts and notifications setup not recorded "
               "yet.")
+    elif not report["notif_verified"]:
+        print("LinkedIn notification setup: recorded but NOT "
+              "VERIFIED. The workflow depends on this mail — apply "
+              "the setup in LinkedIn, then run: python3 "
+              "onboarding.py linkedin-verify")
     if not report["plugin_ok"]:
         print("No decision yet for: the Jobright plugin.")
     if report["about_you"] is None:
@@ -567,6 +581,95 @@ def cmd_status(args):
     return 0 if report["complete"] else 3
 
 
+# ------------------------------------------------------- linkedin verify
+# The notification configuration is verified RIGHT AFTER onboarding,
+# before anything runs: the whole workflow (message watch, invitation
+# sweeps, job-alert discovery) reads the mail these settings produce,
+# so a wrong setting silently starves it. This command is run by the
+# Muse who applied the setup, answering from the actual LinkedIn
+# settings pages and from Gmail — never from memory.
+VERIFY_CHECKS = [
+    ("alerts_saved",
+     "Job alerts saved for the recorded titles and locations, "
+     "date posted = past 24 hours, alert emails daily"),
+    ("inmail",
+     "InMail notifications: in-app OFF, email ON, frequency "
+     "Individual"),
+    ("messages",
+     "Messages notifications: in-app OFF, email ON, frequency "
+     "Individual"),
+    ("invitations_to_connect",
+     "Invitations to connect: in-app OFF, email ON, frequency "
+     "Individual"),
+    ("job_alerts",
+     "Job alerts notifications: in-app OFF, email ON"),
+    ("all_others_off",
+     "Every other notification category is OFF completely"),
+]
+VERIFY_OBSERVE = [
+    ("alert_email_seen",
+     "A job-alert email from jobalerts-noreply@linkedin.com has "
+     "arrived in Gmail"),
+    ("message_email_seen",
+     "A message notification from "
+     "messaging-digest-noreply@linkedin.com has arrived in Gmail"),
+    ("invitation_email_seen",
+     "An invitation email from invitations@linkedin.com has "
+     "arrived in Gmail"),
+]
+
+
+def _ask_yes(label):
+    while True:
+        raw = input(f"  {label} [y/n]: ").strip().lower()
+        if raw in ("y", "yes"):
+            return True
+        if raw in ("n", "no"):
+            return False
+
+
+def cmd_linkedin_verify(args):
+    state = load_state(args.state)
+    setup = state.get("linkedin_setup")
+    if not setup:
+        print("No LinkedIn setup recorded yet — finish onboarding "
+              "first.")
+        return 3
+    print("Verify the LinkedIn alerts + notifications setup.")
+    print("Answer from the actual settings pages and Gmail — the "
+          "workflow depends on this mail.")
+    checks = {}
+    for key, label in VERIFY_CHECKS:
+        checks[key] = _ask_yes(label)
+    for key, label in VERIFY_OBSERVE:
+        checks[key] = _ask_yes(label + " (observed; not a gate)")
+    failed = [label for key, label in VERIFY_CHECKS
+              if not checks[key]]
+    verification = {"status": "verified" if not failed else
+                    "not_verified",
+                    "at": now_iso(), "checks": checks}
+    setup["verification"] = verification
+    setup["status"] = "verified" if not failed else "applied"
+    save_state(args.state, state)
+    if failed:
+        print("NOT VERIFIED — still wrong or missing:")
+        for label in failed:
+            print(f"  - {label}")
+        print("Fix those in LinkedIn and run this command again. "
+              "Do not start the workflow until it passes.")
+        return 3
+    print("LinkedIn notification setup VERIFIED — every setting "
+          "matches the recorded spec.")
+    unseen = [label for key, label in VERIFY_OBSERVE
+              if not checks[key]]
+    if unseen:
+        print("Not yet observed (fine for now — confirm before the "
+              "first full run):")
+        for label in unseen:
+            print(f"  - {label}")
+    return 0
+
+
 ANSWERS_HEADER = ("# Standing answer set for job applications, filled in "
                   "by onboarding.py.\n# Personal values: keep this file "
                   "local. Do not commit it with real values.\n")
@@ -575,7 +678,8 @@ ANSWERS_HEADER = ("# Standing answer set for job applications, filled in "
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("command", nargs="?", default="run",
-                        choices=["run", "welcome", "status"])
+                        choices=["run", "welcome", "status",
+                                 "linkedin-verify"])
     parser.add_argument("--answers", default=DEFAULT_ANSWERS)
     parser.add_argument("--rules", default=DEFAULT_RULES)
     parser.add_argument("--state", default=DEFAULT_STATE)
@@ -586,6 +690,8 @@ def main():
         return 0
     if args.command == "status":
         return cmd_status(args)
+    if args.command == "linkedin-verify":
+        return cmd_linkedin_verify(args)
 
     state = load_state(args.state)
     answers = load_yaml(args.answers)
