@@ -60,7 +60,7 @@ DEFAULT_STATE = os.path.join(HERE, "state", "onboarding.json")
 
 WELCOME = """Welcome to your job search program.
 
-I'll set this up with you, step by step. It takes about 11 minutes
+I'll set this up with you, step by step. It takes about 12 minutes
 in total. You answer questions, and I write everything down.
 
 Here's what we'll cover: permissions, your resume, a few standing
@@ -332,18 +332,38 @@ def search_step(answers):
 
 
 def notifications_step(state, state_path):
-    """Plain instructions for the user's LinkedIn alerts and
-    notifications. The user says when it is done; done or skipped,
-    both are recorded."""
+    """LinkedIn alerts and notifications, with the official how-to
+    for the alerts and a frequency choice for each item, picked
+    individually. The user says when it is done; done or skipped,
+    both are recorded, with the frequencies."""
     if "linkedin_notifications" in state:
         return state["linkedin_notifications"].get("decision")
     print()
-    print("=== LinkedIn alerts and notifications [~3 minutes] ===")
-    print("  In LinkedIn:")
-    print("  1. Add and save job alerts for your titles and locations.")
-    print("  2. Turn on email notifications.")
-    print("  3. Turn on inbox message notifications.")
-    print("  4. Turn on invitation notifications.")
+    print("=== LinkedIn alerts and notifications [~4 minutes] ===")
+    print("  1. Add and save job alerts. LinkedIn's own way: go to")
+    print("     Jobs, search with your title and location, turn on")
+    print("     the job alert for that search, pick how often, and")
+    print("     save. Do one for each title and location.")
+    print("  2. Turn on email notifications (Settings, then")
+    print("     Communications, then Email).")
+    print("  3. Turn on inbox message notifications (Settings, then")
+    print("     Communications, then Messages).")
+    print("  4. Turn on invitation notifications (Settings, then")
+    print("     Communications, then Notifications).")
+    print("  For each one, pick how often you want it:")
+    try:
+        alerts = ask("Job alerts: daily or weekly?", default="daily")
+        email = ask("Email notifications: individual (each one as it "
+                    "happens) or weekly digest?", default="individual")
+        inbox = ask("Inbox message notifications: individual or "
+                    "weekly digest?", default="individual")
+        invites = ask("Invitation notifications: individual or "
+                      "weekly digest?", default="individual")
+    except SkipPrompt:
+        state["linkedin_notifications"] = {"decision": "skipped",
+                                           "at": now_iso()}
+        save_state(state_path, state)
+        return "skipped"
     print("  Tell me when it's done and we'll move on.")
     while True:
         raw = input('Type "done" when it is done, or "skip" to do it '
@@ -351,8 +371,11 @@ def notifications_step(state, state_path):
         if raw == "break":
             raise BreakPrompt
         if raw in ("done", "yes", "y"):
-            state["linkedin_notifications"] = {"decision": "done",
-                                               "at": now_iso()}
+            state["linkedin_notifications"] = {
+                "decision": "done", "at": now_iso(),
+                "frequencies": {"job_alerts": alerts, "email": email,
+                                "inbox_messages": inbox,
+                                "invitations": invites}}
             break
         if raw in ("skip", "s", "later", "no", "n"):
             state["linkedin_notifications"] = {"decision": "skipped",
