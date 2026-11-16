@@ -103,7 +103,7 @@ A few minutes a day, in two forms:
 ## Access it needs
 
 - Your LinkedIn account, signed in, Premium Career active.
-- **LinkedIn notification emails turned on.** There is a step-by-step setup guide in <a href="docs/linkedin-notifications.md" target="_blank" rel="noopener">docs/linkedin-notifications.md</a>.
+- **LinkedIn notification emails turned on.** There is a <a href="docs/linkedin-notifications.md" target="_blank" rel="noopener">step-by-step setup guide</a>.
 - Your Gmail connected for confirmations, recruiter replies, and LinkedIn notifications.
 - Your base resume and your standing answers (checklist in the dropdown below).
 
