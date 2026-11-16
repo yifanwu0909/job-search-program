@@ -31,7 +31,7 @@ It was built and tuned over several months of daily use. The daily target is **6
 
 ## Installing it 🛠️
 
-Hand this repo to your Muse and say **"install it."** Installation instructions written for Muse live in <a href="INSTALL.md" target="_blank" rel="noopener">INSTALL.md</a>: place the repo, run `program/install.py`, pass the test suites, do onboarding, connect accounts, create the scheduled jobs. Your part is the onboarding conversation and the sign-ins.
+Hand this repo to your Muse and say "install it.” Your muse will install this whole skill and then kick-off the onboarding process.
 
 ## What it does
 
