@@ -626,6 +626,13 @@ def test_invite_config() -> None:
     check("o19 no invitation subject gate in config",
           not (cfg.get("invitation_subject_patterns") or []),
           str(cfg.get("invitation_subject_patterns")))
+    hs = cfg.get("invitation_hourly_search") or {}
+    check("o21 invitation_hourly_search block: sender-only + 2h window",
+          hs.get("from_address") == "invitations@linkedin.com"
+          and not hs.get("subject_contains")
+          and hs.get("window_minutes") == 120
+          and (hs.get("query") or "") == "from:invitations@linkedin.com",
+          str(hs))
     live_cfg = ib._inbox_cfg()
     check("o20 invite triage is sender-only (any subject passes)",
           ib._invite_triage(

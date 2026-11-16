@@ -373,9 +373,21 @@ inbox:
     window_minutes: 720          # past 12 hours (the sweep runs four times a day, each scan covering
                                  # the past 12 hours only — was 1440 under the once-daily cadence):
                                  # invitations are handled by the inbox sweep
-                                 # (linkedin-inbox-replies), NOT the every-15-minute watch.
-                                 # The message watch window stays 60 minutes.
+                                 # (linkedin-inbox-replies) is the BACKSTOP scan; the hourly
+                                 # invitation sweep (invitation_hourly_search below) takes
+                                 # invitations first. The message watch window stays 60 minutes.
     query: 'from:invitations@linkedin.com'   # SENDER-ONLY — the run appends the past-12-hours bound
+  invitation_hourly_search:      # CONNECTION INVITATIONS — THE HOURLY SWEEP (design note): the
+                                 # invitation email sweep runs ONCE EVERY HOUR, 24 times a day.
+                                 # The dedicated linkedin-invitation-sweep job searches Gmail for
+                                 # the pinned sender over the past 2 HOURS (one hour of overlap,
+                                 # so a delayed run cannot leave a gap; the shared processed pool
+                                 # dedupes) and hands every find to the SAME invite-intake.
+                                 # Sender-only, exactly like invitation_search above.
+    from_address: invitations@linkedin.com   # the same pinned invitation sender.
+    window_minutes: 120          # past 2 hours — the hourly sweep's search bound (the intake's own
+                                 # staleness window stays 720, the backstop's).
+    query: 'from:invitations@linkedin.com'   # SENDER-ONLY — the run appends the past-2-hours bound
   job_alert_sender:              # JOB-ALERT EMAILS — PINNED KNOWN SENDER (design note): ALL LinkedIn job-alert email comes
                                  # from this exact address only. It is the watch list's third pinned sender
                                  # (messages = messaging-digest-noreply@linkedin.com; invitations =

@@ -10,7 +10,7 @@ Job alerts, message notifications, and invitation emails are a prerequisite: the
 
 - **Job alerts.** New postings from your saved alerts. One of the three discovery sources.
 - **Message notifications.** "Someone messaged you" emails. These drive the inbox replies.
-- **Invitation emails.** Connection invitations you received. These are handled by the inbox sweep, four times a day.
+- **Invitation emails.** Connection invitations you received. These are handled by the hourly invitation sweep (24 times a day), with the inbox sweep as backstop.
 
 If these are off, none of that mail exists, and those parts of the system have nothing to work with. The steps below are only a reference, if you ever want to check the settings yourself.
 
@@ -41,7 +41,7 @@ With this on, every new LinkedIn message produces an email from messaging-digest
 1. Still in **Settings & Privacy → Notifications**, open **Invitations to connect**. Set **In-app notifications** to **Off** and **Email** to **On**, with email frequency **Individual**.
 2. Open **Job alerts**. Set **In-app notifications** to **Off** and **Email** to **On**.
 
-Invitation emails are picked up by the inbox sweep (four times a day, past 12 hours), which accepts them through the link in the email. The sweep finds them by sender alone — invitations@linkedin.com — with no subject test, which works because the settings on this page make that address send invitations and nothing else.
+Invitation emails are picked up by the hourly invitation sweep (past 2 hours), which accepts them through the link in the email; the four-times-daily inbox sweep re-checks over the past 12 hours as a backstop. The sweeps find them by sender alone — invitations@linkedin.com — with no subject test, which works because the settings on this page make that address send invitations and nothing else.
 
 ## Step 4: Turn everything else off
 
@@ -57,6 +57,10 @@ Every other category in **Settings & Privacy → Notifications**: **in-app notif
 - Within a day, a job alert email should arrive from **jobalerts-noreply@linkedin.com**.
 - Ask someone to send you a LinkedIn message, or wait for the next one: a "messaged you" email should arrive within minutes.
 - Tell your Muse once the first alert email lands. It can scan your Gmail and confirm all three kinds of mail are flowing before the first full run.
+
+## Verify the setup (right after setting it)
+
+The workflow depends on this mail, so the setup is not done until it is verified. Reopen each of the four category pages and confirm the settings are exactly as above, confirm every other category is off, and check Gmail for the first alert email. The Muse who applied the setup records the result with `python3 onboarding.py linkedin-verify`, answering from the pages and the inbox — nothing in the workflow starts until that verification passes.
 
 ## If an email kind never arrives
 

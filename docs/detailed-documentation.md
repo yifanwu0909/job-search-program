@@ -305,19 +305,9 @@ Jobs: `linkedin-inbox-replies` (8:30 AM), `linkedin-inbox-replies-midday` (12:30
 
 **1. Inbox messages the watch missed.** The program computes the scope in code: LinkedIn conversations whose latest incoming message has not been claimed — every thread the watch or an earlier run already claimed in the shared ledger is excluded. The run works only those conversations, under the same reply rules as the watch.
 
-**2. Connection invitations.**
+**2. Connection invitations** — this pass is the backstop for the invitation scan documented under "LinkedIn networking" (the hourly invitation sweep takes them first). The test here is the same: **from invitations@linkedin.com**, sender-only, no subject condition. Each invitation is accepted through the **Accept link inside the email** — never through LinkedIn's invitations page — and the acceptance is verified on the landing page before it is recorded. The code refuses anything stale, already processed, or matching the ad/marketing and group-invitation patterns.
 
-- **From:** invitations@linkedin.com.
-- **Subject:** no condition — **sender-only**, exactly like job alerts. Under the notification settings above, that address sends connection invitations and nothing else, so the sender alone identifies the mail. (An earlier filter also tested the subject; it missed a real invitation after LinkedIn changed its sender and subject, and was scrapped.)
-
-Each invitation is accepted through the **Accept link inside the email** — never through LinkedIn's invitations page — and the acceptance is verified on the landing page before it is recorded. The code refuses anything stale, already processed, or matching the ad/marketing and group-invitation patterns.
-
-**3. Job alert emails** (these feed the discovery lane).
-
-- **From:** jobalerts-noreply@linkedin.com.
-- **Subject:** no condition, ever — **sender-only**. Alert subjects are built from the first company on the list and arrive in many formats, so the subject is never consulted.
-
-Each alert email's job list is vetted up to a hard limit of five pages, and every posting goes through the same screening as the other discovery sources before anything is stocked.
+**3. Job alert emails** — these feed the discovery lane; the scan itself is documented under "Job discovery". The test is the sender alone: **from jobalerts-noreply@linkedin.com**, no subject condition. Each alert email's job list is vetted up to a hard limit of five pages, and every posting goes through the same screening as the other discovery sources before anything is stocked.
 
 **4. The sweep itself — the catch-all, and forward movement.** The sweep is the fourth scan in its own right: four times a day it re-checks the LinkedIn inbox directly, so anything the notification emails missed still gets caught within the same 12-hour window. And when a message it picks up moves an application forward — an interview request, a scheduling ask, next steps, an offer — the sweep acts on it in the same run: it checks the company's recorded gate verdict, books the interview on Google Calendar once the company and role are known (checking Google Calendar and the paired phone's calendar for conflicts first, under the user's standing availability), creates the forward-movement to-do on Google Tasks, and reports the news to the user in chat. A researched briefing then lands one hour before the meeting.
 
@@ -346,6 +336,8 @@ Times are Central. The window for a day's **60-application target** (customizabl
 
 **8:23 AM:** the daily batch starts (`linkedin-recommended-applications-daily`). Workers search **Jobright** and **Indeed** for postings from the **last 24 hours**, run the **career-ops scan** over the public ATS boards on the same window, and take in the **LinkedIn job alert emails**.
 
+**The job alert email scan:** the four-times-daily inbox sweep searches Gmail for **from jobalerts-noreply@linkedin.com** — **sender-only, no subject test, ever** (alert subjects are built from the first company on the list and arrive in many formats, so the subject is never consulted). Each alert's job list is vetted up to a hard limit of **five pages**, and every posting goes through the same screening as the other discovery sources before anything is stocked.
+
 ### Screening
 
 Screening runs **in code, before any posting is opened**: **blocked companies** (your block list, customizable) first, then companies **already applied to**, then the **company gate** on Revelio (company size and where its staff are based; LinkedIn company pages are the fallback when Revelio has no data). A posting that fails a screen is **dropped and logged with the reason**. A posting that passes is **vetted**: a read of the posting for **role fit** (technical work, not reporting work and not consulting), **work authorization**, and **pay against the user's floors** (customizable).
@@ -366,20 +358,29 @@ The **application email scan** (every 30 minutes) watches for what comes back. I
 
 **10:23 AM:** networking (`linkedin-recruiter-outreach-weekly`). For the most recent applications, **contacto** finds the hiring contacts, the program checks them against the rules (**seniority above the user's**, real influence on the role, still at the company), and invitations go out on LinkedIn: up to **30 a day** (customizable), inside LinkedIn's **weekly cap of roughly 100**.
 
+**Incoming connection invitations** run on their own cadence: an **hourly invitation sweep** (24 times a day) searches Gmail over the past 2 hours for **from invitations@linkedin.com** — **sender-only, no subject test** (under the notification setup described under LinkedIn inbox replies, that address sends connection invitations and nothing else) — and the four-times-daily inbox sweep re-checks over the past 12 hours as the backstop. Each invitation is accepted through the **Accept link inside the email**, and the acceptance is verified before it is recorded.
+
 ### LinkedIn inbox replies
 
-The **message watch** (every 15 minutes) answers new LinkedIn messages under the user's standing **reply rules** (customizable), one person at a time. A **sweep four times a day** (8:30 AM, 12:30 PM, 4:30 PM, 8:30 PM) picks up anything the watch missed, plus **connection invitations** and **job alerts**.
+The message watch answers LinkedIn messages.
 
-**The notification setup this runs on** — Muse sets it during onboarding; the user never sets it by hand. Exactly four LinkedIn notification categories on: **InMail, Messages, Invitations to connect, and Job alerts**. On each one: **in-app notifications off, email on**, and email frequency **Individual** where LinkedIn offers a frequency choice (the Job alerts page offers none). **Every other category off completely.** Because nothing else is on, each LinkedIn sender address carries one kind of mail and nothing else — which is what makes the sender-only tests below safe.
+**The notification setup this runs on** — Muse sets it during onboarding; the user never sets it by hand. Exactly four categories on, each with in-app notifications off and email on:
+
+- **InMail** — email frequency Individual.
+- **Messages** — email frequency Individual.
+- **Invitations to connect** — email frequency Individual.
+- **Job alerts** — the page offers no frequency choice.
+
+Every other category is off completely. Because nothing else is on, each LinkedIn sender address carries one kind of mail and nothing else — which is what makes the sender-only tests below safe.
 
 **What each scan looks for in the email:**
 
 - **Inbox messages** — the watch, every 15 minutes: **from messaging-digest-noreply@linkedin.com** AND **subject contains "messaged you"**, past hour only. The sweep additionally re-checks the LinkedIn inbox itself for conversations whose latest incoming message no earlier run has claimed.
-- **Connection invitations** — the sweep, four times a day: **from invitations@linkedin.com**, **no subject test** (sender-only — under the setup above, that address sends connection invitations and nothing else). Each one is accepted through the Accept link inside the email, and the acceptance is verified before it is recorded.
-- **Job alerts** — the sweep, four times a day: **from jobalerts-noreply@linkedin.com**, **no subject test** (sender-only — alert subjects are built from the first company on the list and arrive in many formats). Each alert's job list is vetted up to five pages and feeds the discovery lane.
+- **Connection invitations** — documented under **LinkedIn networking** above: an hourly sweep takes them first, and this sweep re-checks as the backstop.
+- **Job alerts** — documented under **Job discovery** above: this sweep picks the alert emails up and feeds the discovery lane.
 - **The sweep itself** — the fourth scan, four times a day: it re-checks the LinkedIn inbox directly and catches anything the notification emails missed in the past 12 hours. Anything that moves a job forward — an interview request or a scheduling ask — is acted on in the same run: the interview is booked on the user's Google Calendar (once the company and role are known), a to-do is created on Google Tasks, and the news is reported to the user, with a researched briefing one hour before the meeting.
 
-The same three scans are described again, in the mail-flow order, under "The mail parts" above.
+The mail-flow view of the inbox work is under "The mail parts" above.
 
 ### Checks that run all day
 

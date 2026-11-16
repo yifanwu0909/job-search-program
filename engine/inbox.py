@@ -269,20 +269,24 @@ Prints {"verdict": "CLAIMED", "matches": [...]} or {"verdict":
 
 6) INVITATION INTAKE — `spine.py inbox invite-intake
 candidates.json`
-The inbox sweep's invitation search (rules.yaml
-inbox.invitation_search; cadence, the user, Nov 12, 2026 —
-"invitation watch you can do daily", moved to FOUR runs a day on
-Nov 16, 2026: invitations are handled by linkedin-inbox-replies,
-NOT by the 15-minute watch):
-connection-invitation notifications come ONLY from
+Connection-invitation notifications come ONLY from
 invitations@linkedin.com — SENDER-ONLY identification (the user,
 Nov 16, 2026: she configured her LinkedIn notifications so that
 address sends connection invitations and nothing else; the
 subject is never a condition — the current subject is
-"I want to connect"). The run searches the past 12 hours and
-hands EVERY candidate to the program in the same JSON shape as
+"I want to connect"). TWO runs feed this ONE intake (cadence,
+the user, Nov 16, 2026 — the invitation email sweep runs once
+every hour, 24 times a day; the 15-minute message-watch
+frequency was excessive and four times a day was not enough):
+the HOURLY invitation sweep (linkedin-invitation-sweep,
+rules.yaml inbox.invitation_hourly_search) searches the past
+2 hours, and the four-times-daily inbox sweep
+(linkedin-inbox-replies, rules.yaml inbox.invitation_search)
+searches the past 12 hours as the backstop. Each run hands
+EVERY candidate to the program in the same JSON shape as
 watch-intake (gmail_id, sender, subject, date, snippet?, body?,
-links?, html?).
+links?, html?), and the shared processed pool means whichever
+run takes an invitation first, the other never sees it again.
 
 The program enforces, IN CODE: the From address EQUALS the pinned
 invitation sender (any other address is refused); received within
@@ -343,9 +347,9 @@ correspondence is ONE-TO-ONE AND CLOSED: nothing else arrives
 from that address, and every email from it is necessarily one of
 the alerts the user herself set up — any pinned-sender email inside
 the 24-hour window that this flow has not consumed is
-ACTIONABLE, full stop. The message and invitation intakes keep
-BOTH of their filters (pinned sender AND subject patterns) —
-sender-only is job alerts only; both of those intakes still
+ACTIONABLE, full stop. The message intake keeps BOTH of its
+filters (pinned sender AND subject patterns) and the invitation
+intake is sender-only like job alerts; both intakes still
 refuse this address as job-alert mail, under their own consumer
 stamp (see below).
 
