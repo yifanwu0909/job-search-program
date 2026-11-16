@@ -38,7 +38,7 @@ flowchart TD
     A["🔍 Morning search"] --> B["🛡️ Screening"]
     B --> C["📄 Tailored resume"]
     C --> D["📝 Apply"]
-    D --> E["📬 Verify"]
+    D --> E["✅ Verify"]
     E --> F["🤝 Outreach"]
     F --> G["💬 Inbox + report"]
     G --> H["🗓️ Interview schedule + prep"]
@@ -56,7 +56,7 @@ Design principle: **code decides and tracks, Muse does the legwork.** The code i
 - 🔍 Searches <a href="https://jobright.ai" target="_blank" rel="noopener">Jobright</a> and Indeed each morning for **postings from the last 24 hours**, and takes in your LinkedIn job alert emails.
 - 🛡️ Screens every posting before opening it: your **block list**, companies you **already applied to**, and a **company gate** (more on that below).
 - 📝 Builds a **tailored resume** for each posting from your base resume, then applies on the employer's own site.
-- 📬 Verifies each submission: the **confirmation email** in your Gmail, or the success message the site shows.
+- ✅ Verifies each submission: the **confirmation email** in your Gmail, or the success message the site shows.
 - 🤝 Finds hiring contacts for the roles you applied to and sends up to **30 LinkedIn invitations a day**, each with a short note written for that role.
 - 💬 **Replies to your LinkedIn inbox for you.** A watch checks for new recruiter messages every 15 minutes and answers under your standing reply rules. Interview requests and assessments become to-dos. Rejections are logged and left alone.
 - 🌅 Sends you a **short report every morning**: what went out, what moved, what needs you.
