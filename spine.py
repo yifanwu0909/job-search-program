@@ -710,7 +710,8 @@ def _discovery_state_path(sp: Spine) -> Path:
 
 def cmd_discovery_plan(sp: Spine, args) -> int:
     try:
-        plans = discovery_mod.build_plan(sp.rules, source=args.source)
+        plans = discovery_mod.build_plan(sp.rules, source=args.source,
+                                       answers=sp.answers)
     except ValueError as e:
         print(str(e))
         return 2
@@ -722,7 +723,8 @@ def cmd_discovery_record(sp: Spine, args) -> int:
     packet = json.loads(Path(args.packet).read_text(encoding="utf-8"))
     try:
         row = discovery_mod.record_pass(
-            _discovery_state_path(sp), packet, sp.rules)
+            _discovery_state_path(sp), packet, sp.rules,
+            answers=sp.answers)
     except ValueError as e:
         print(str(e))
         return 2

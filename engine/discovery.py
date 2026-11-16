@@ -10,10 +10,14 @@ and rode the `spine.py next` packet, but the WORK ORDER for a pass was
 prose in worker_template.md and nothing in code tracked which sources
 had actually run. This module is the sources' manager:
 
-  * SOURCES — the registry of the three live sources, built entirely
-    from rules.yaml `discovery:` (search matrices, the sites' own
-    filters, pass counts, page caps). Change a rule in config and the
-    plan changes; there is no second copy here.
+  * SOURCES — the registry of the three live sources, built from
+    rules.yaml `discovery:` (search matrices, the sites' own filters,
+    pass counts, page caps). Change a rule in config and the plan
+    changes; there is no second copy here. One override (the user,
+    Nov 16, 2026 — "wire it so the onboarding answers drive the
+    search"): when answers.yaml carries a real `job_search` (titles
+    and locations from onboarding), effective_cfg derives the worker
+    sources' matrices and job-type filters from it instead.
   * plan(rules, source?) — the short fixed instruction packet for one
     source (or all three): exactly what a worker is to run, nothing
     more. Jobright and Indeed are worker passes; LINKEDIN_ALERT is
@@ -47,6 +51,56 @@ WORKER_SOURCES = ("JOBRIGHT", "INDEED")
 ALL_SOURCES = ("JOBRIGHT", "INDEED", "LINKEDIN_ALERT")
 
 
+def _real_strings(values) -> list[str]:
+    out = []
+    for value in values or []:
+        if isinstance(value, str) and value.strip() \
+                and "YOUR_" not in value:
+            out.append(value.strip())
+    return out
+
+
+def effective_cfg(rules: dict, answers: dict | None = None) -> dict:
+    """The discovery config the plan and the pass validation run on.
+
+    When answers.yaml carries a real job_search (titles AND locations,
+    written by onboarding), the worker sources' search matrices and
+    job-type filters are derived from it: one location-field search
+    per title over the user's places combined into a single scope,
+    plus one Remote search per title when Remote is among the places
+    or the workplace says remote. Without a real job_search, the
+    rules.yaml discovery config is used exactly as written.
+    """
+    cfg = dict((rules or {}).get("discovery") or {})
+    js = (answers or {}).get("job_search") or {}
+    titles = _real_strings(js.get("titles"))
+    locations = _real_strings(js.get("locations"))
+    if not titles or not locations:
+        return cfg
+    remote = any(loc.lower() == "remote" for loc in locations)
+    if "remote" in str(js.get("workplace") or "").lower():
+        remote = True
+    scope = "/".join(loc for loc in locations if loc.lower() != "remote")
+
+    def rows(remote_via):
+        out = []
+        if scope:
+            out += [{"title": t, "location_scope": scope,
+                     "location_via": "location_field"} for t in titles]
+        if remote:
+            out += [{"title": t, "location_scope": "Remote",
+                     "remote_via": remote_via} for t in titles]
+        return out
+
+    cfg["jobright_searches"] = rows("work_model_filter")
+    cfg["indeed_searches"] = rows("location_field")
+    job_type = "part_time" if "part" in str(
+        js.get("employment_type") or "").lower() else "full_time"
+    cfg["jobright_job_type_filter"] = job_type
+    cfg["indeed_job_type_filter"] = job_type
+    return cfg
+
+
 def _search_rows(cfg: dict, key: str) -> list[dict]:
     rows = []
     for row in cfg.get(key) or []:
@@ -57,9 +111,11 @@ def _search_rows(cfg: dict, key: str) -> list[dict]:
     return rows
 
 
-def build_plan(rules: dict, source: str | None = None) -> dict:
-    """The per-source work orders, generated from rules.yaml only."""
-    cfg = (rules or {}).get("discovery") or {}
+def build_plan(rules: dict, source: str | None = None,
+               answers: dict | None = None) -> dict:
+    """The per-source work orders, generated from the effective
+    discovery config (see effective_cfg)."""
+    cfg = effective_cfg(rules, answers)
     plans: dict[str, dict] = {}
     plans["JOBRIGHT"] = {
         "source": "JOBRIGHT",
@@ -151,7 +207,8 @@ def _matrix_keys(cfg: dict, source: str) -> set:
 
 
 def record_pass(state_path, packet: dict, rules: dict,
-                now: datetime | None = None) -> dict:
+                now: datetime | None = None,
+                answers: dict | None = None) -> dict:
     """Validate and record ONE worker discovery pass. Returns the row.
 
     Raises ValueError (REFUSED, nothing written) on: unknown or
@@ -159,7 +216,7 @@ def record_pass(state_path, packet: dict, rules: dict,
     not cover the config matrix exactly, bad counts, or a second pass
     for the same run+source (the user's one-pass-per-run rule, in code).
     """
-    cfg = (rules or {}).get("discovery") or {}
+    cfg = effective_cfg(rules, answers)
     if not isinstance(packet, dict):
         raise ValueError("REFUSED — pass packet must be a JSON object.")
     source = str(packet.get("source") or "").upper()
