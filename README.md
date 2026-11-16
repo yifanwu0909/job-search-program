@@ -135,9 +135,9 @@ The longer version, with why each item is needed, is in <a href="docs/getting-st
 
 Almost everything about this system is a setting, and the settings in this repo are one person's. Change them before you run it.
 
-One example: the **company gate**. This setup checks each company on Revelio before applying, and skips companies under 100 people or with more than half their staff in South Asia. That rule is personal. It comes from this user's own job search history, and it will not fit everyone. Your Muse can set the gate to your own numbers, use a different source, or turn it off.
+> One example: the **company gate**. This setup checks each company on Revelio before applying, and skips companies under 100 people or with more than half their staff in South Asia. That rule is personal. It comes from this user's own job search history, and it will not fit everyone. Your Muse can set the gate to your own numbers, use a different source, or turn it off.
 
-The same goes for the pay floors, the job titles searched, the block list, the daily targets, the reply rules, and the session times. The full list of customizable fields, and where each one lives, is in <a href="docs/customization.md" target="_blank" rel="noopener">docs/customization.md</a>.
+The same goes for the pay floors, the job titles searched, the block list, the daily targets, the reply rules, and the session times. The full list of customizable fields, where each one lives, and how to customize them, is in <a href="docs/customization.md" target="_blank" rel="noopener">docs/customization.md</a>.
 ## It gets better the more you use it 🌱
 
 - **This system is tuned by use.** Nearly every rule in it started as someone noticing something mid-run and telling their Muse to change it.
