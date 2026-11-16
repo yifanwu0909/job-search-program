@@ -158,6 +158,10 @@ The same goes for the pay floors, the job titles searched, the block list, the d
 - **`tools/`:** one-off utilities.
 - **`config/`:** your answers and your rules. **`workflow/`:** the scheduled job definitions. **`career-ops/`:** the contact-finding skill. **`docs/`:** the guides. **`tests/`:** the test suites.
 
+## Peace of mind 😌
+
+**Will this trip bot detection, hit LinkedIn rate limits, or put your account at risk? No — the program is built so LinkedIn barely feels it.** Discovery runs on public sources and job boards (Jobright, Indeed, and company career pages), and most of what LinkedIn contributes arrives as email LinkedIn sends you anyway. The direct LinkedIn activity that remains is small, spread across the day, and capped — and the moment LinkedIn shows any friction, the program stops and tells you instead of pushing through.
+
 ## More documentation
 
 - <a href="docs/onboarding.md" target="_blank" rel="noopener">docs/onboarding.md</a>: **start here.** The interactive setup. Your Muse walks you through it step by step.
