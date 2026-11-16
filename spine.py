@@ -93,7 +93,17 @@ def _fmt_items(items) -> str:
 
 
 def cmd_status(sp: Spine, args) -> int:
-    s = sp.status(args.date)
+    try:
+        s = sp.status(args.date)
+    except ValueError as exc:
+        if args.date is None:
+            # Fresh install / empty log: no window has ever been
+            # written. That is a state to report, not a crash.
+            print(f"No batch windows yet — {exc}. Nothing has been "
+                  "recorded; the first window section is written "
+                  "when the first batch runs.")
+            return 0
+        raise
     if args.json:
         print(json.dumps(s, indent=2, default=str))
         return 0

@@ -564,6 +564,9 @@ class LogState:
 
     def window_for(self, wdate: str | None) -> Window:
         if wdate is None:
+            if not self.windows:
+                raise ValueError(
+                    "no batch window sections in the log yet")
             return self.windows[-1]
         for w in self.windows:
             if w.date == wdate:
