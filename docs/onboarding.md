@@ -10,4 +10,6 @@ Welcome to your job search program. I'll set this up with you, step by step. It 
 4. **Standing questions [~2 minutes].** Work authorization, and the equal-opportunity answers: race, gender, disability status, veteran status. "Prefer not to say" is always an answer.
 5. **Jobright plugin [~1 minute].** Some applications come to you as manual packets, to submit yourself. Jobright's free autofill plugin fills those forms in for you. Install it in your browser: search your browser's extension store for the Jobright AI autofill plugin.
 
+Muse can tell when a step is done: the vault card is finished, the connection shows connected, the resume arrives. The user never has to say "done."
+
 Anything you skipped, your Muse will ask you about when it comes up.
