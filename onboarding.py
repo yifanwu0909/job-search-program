@@ -67,16 +67,16 @@ PERMISSIONS = [
     ("linkedin_signin", "LinkedIn sign-in or register",
      "Why: invitations, accepts, and inbox replies all happen inside "
      "your LinkedIn account, so Muse signs in as you.\n"
-     "  To set up: sign in to LinkedIn in the browser window your "
-     "Muse opens, or register if you do not have an account. You "
-     "enter the login on the secure form; Muse never sees the "
-     "password."),
+     "  To set up: your Muse prompts the secure vault card. Enter "
+     "your LinkedIn login on it, or register first if you do not "
+     "have an account. Muse never sees the password."),
     ("google_account", "Gmail: connect Google",
      "Why: confirmations and recruiter replies land in Gmail, "
      "interviews go on Calendar, to-dos go in Tasks.\n"
-     "  To set up: connect your Google account on the page your Muse "
-     "opens, and give Muse access to Gmail, Calendar, and Tasks. "
-     "Muse sends email only with your approval."),
+     "  To set up: your Muse prompts the Google connect card. "
+     "Connect your account on it, and give Muse access to Gmail, "
+     "Calendar, and Tasks. Muse sends email only with your "
+     "approval."),
 ]
 
 PLACEHOLDER_BITS = (
