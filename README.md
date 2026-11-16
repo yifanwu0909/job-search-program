@@ -33,6 +33,8 @@ It was built and tuned over several months of daily use. The daily target is **6
 
 Hand this repo to your Muse and say "install it and onboard me now.” Your muse will install this whole skill and then kick-off the onboarding process.
 
+Installing takes [~20 minutes] and onboarding takes [~15 minutes] on its own, and you can always come back and pick up where you left off at any point during this process.
+
 ## What it does
 
 Here is one day, top to bottom:
