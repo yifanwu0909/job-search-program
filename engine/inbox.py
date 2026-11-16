@@ -23,9 +23,11 @@ The two jobs:
     Every refusal is recorded processed at intake, so it never
     resurfaces; an actionable notification is marked processed only
     by `watch-record`, after the run has handled it.
-  * linkedin-inbox-replies (daily 8:30 AM CT): the LinkedIn inbox
-    check limited to conversations whose latest incoming message is
-    within the past 24 hours. `daily-scope` computes the cutoff
+  * linkedin-inbox-replies (four times daily — 8:30 AM, 12:30 PM,
+    4:30 PM, 8:30 PM CT; cadence + window, the user, Nov 16, 2026):
+    the LinkedIn inbox check limited to conversations whose latest
+    incoming message is within the past 12 hours. `daily-scope`
+    computes the cutoff
     (now − rules.yaml inbox.daily_check_window_hours) and the
     stand_down list (threads already claimed in the claims ledger or
     handled by the email watch) in code. Outcomes return through
@@ -69,7 +71,7 @@ Job alerts (the user, Nov 12, 2026 — a third discovery source, via
 email only): the user's saved LinkedIn job alerts send one email per
 alert per day from the pinned jobalerts-noreply@linkedin.com.
 `jobalert-intake` validates the batch run's sender-only Gmail
-finds (from that address, past 24 hours) — identification is
+finds (from that address, past 12 hours) — identification is
 SENDER-ONLY: alert subjects arrive in many formats (built from
 the first company on the list, in a shape like "<role> job at
 <company> for you", and formats vary), so the subject is never
@@ -250,7 +252,7 @@ results with "verified" from a read-back of all three records.
 3) DAILY CHECK SCOPE — `spine.py inbox daily-scope`
 Prints {cutoff, window_hours, stand_down: [{person, claim_key,
 status, source}]}: the run works ONLY conversations whose latest
-incoming message is at/after "cutoff" (now minus the configured 24
+incoming message is at/after "cutoff" (now minus the configured 12
 hours) and stands down on every thread in "stand_down" (already
 claimed in the ledger, or handled by the email watch).
 
@@ -267,23 +269,24 @@ Prints {"verdict": "CLAIMED", "matches": [...]} or {"verdict":
 
 6) INVITATION INTAKE — `spine.py inbox invite-intake
 candidates.json`
-The DAILY inbox job's invitation search (rules.yaml
+The inbox sweep's invitation search (rules.yaml
 inbox.invitation_search; cadence, the user, Nov 12, 2026 —
-"invitation watch you can do daily": invitations are handled
-once a day by linkedin-inbox-replies, NOT by the 15-minute watch):
+"invitation watch you can do daily", moved to FOUR runs a day on
+Nov 16, 2026: invitations are handled by linkedin-inbox-replies,
+NOT by the 15-minute watch):
 connection-invitation notifications come ONLY from
 invitations@linkedin.com — SENDER-ONLY identification (the user,
 Nov 16, 2026: she configured her LinkedIn notifications so that
 address sends connection invitations and nothing else; the
 subject is never a condition — the current subject is
-"I want to connect"). The run searches the past 24 hours and
+"I want to connect"). The run searches the past 12 hours and
 hands EVERY candidate to the program in the same JSON shape as
 watch-intake (gmail_id, sender, subject, date, snippet?, body?,
 links?, html?).
 
 The program enforces, IN CODE: the From address EQUALS the pinned
 invitation sender (any other address is refused); received within
-the configured window (1440 minutes — 24 hours); not already processed (the SAME processed
+the configured window (720 minutes — 12 hours); not already processed (the SAME processed
 pool as the message watch — one source of truth); group-invitation
 patterns and the ad/marketing patterns refuse. Every refused
 candidate is recorded processed immediately and printed under
@@ -325,7 +328,7 @@ jobalerts-noreply@linkedin.com (rules.yaml
 inbox.job_alert_sender + inbox.jobalert_search — the watch list's
 third pinned sender). The batch run searches Gmail with the
 jobalert_search query — FROM-ONLY: from:jobalerts-noreply@
-linkedin.com, past 24 hours, NO subject terms, ever — and hands
+linkedin.com, past 12 hours, NO subject terms, ever — and hands
 EVERY find to this intake in the same JSON shape as the other
 intakes.
 
@@ -1464,7 +1467,7 @@ def jobalert_intake(candidates, now: datetime | None = None,
     """Validate the run's job-alert-email finds (the daily alert
     emails, from the run's sender-only Gmail search — rules.yaml
     inbox.jobalert_search: from jobalerts-noreply@linkedin.com,
-    past 24 hours, NO subject terms, ever).
+    past 12 hours, NO subject terms, ever).
 
     IDENTIFICATION IS SENDER-ONLY (the user, Nov 12, 2026): alert emails
     arrive in many subject formats — LinkedIn builds the subject
@@ -1504,7 +1507,7 @@ def jobalert_intake(candidates, now: datetime | None = None,
     cfg = _inbox_cfg(rules_path)
     search = cfg.get("jobalert_search") or {}
     window = timedelta(minutes=int(search.get("window_minutes")
-                                   or 1440))
+                                   or 720))
     skew = timedelta(minutes=int(cfg.get("future_skew_minutes", 5)))
     state = load_state(state_path, md_path)
     processed = state["processed"]
@@ -1881,7 +1884,7 @@ def daily_scope(now: datetime | None = None,
     and stands down on the listed threads."""
     now = now or datetime.now(CT)
     cfg = _inbox_cfg(rules_path)
-    hours = int(cfg.get("daily_check_window_hours", 24))
+    hours = int(cfg.get("daily_check_window_hours", 12))
     cutoff = now - timedelta(hours=hours)
     stand_down = []
     for entry in _claim_entries(claims_path):

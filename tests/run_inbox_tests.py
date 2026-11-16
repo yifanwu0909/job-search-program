@@ -301,9 +301,9 @@ def test_daily_scope() -> None:
     _record_jane(env)  # a watch-handled thread inside the window
     out = ib.daily_scope(now=NOW, claims_path=env.claims,
                          state_path=env.state, md_path=env.md)
-    check("h1 cutoff is exactly now - 24h",
-          out["cutoff"] == (NOW - timedelta(hours=24)).isoformat()
-          and out["window_hours"] == 24, str(out))
+    check("h1 cutoff is exactly now - 12h",
+          out["cutoff"] == (NOW - timedelta(hours=12)).isoformat()
+          and out["window_hours"] == 12, str(out))
     persons = {s["person"] for s in out["stand_down"]}
     check("h2 recent claim in stand_down", "Ian Fay" in persons, str(out))
     check("h3 old claim NOT in stand_down",
@@ -498,9 +498,10 @@ def test_invite_intake() -> None:
           got.get("accept_url") == INVITE_ACCEPT_URL, str(out))
 
     # CADENCE (the user, Nov 12, 2026 — "invitation watch you can do
-    # daily"): the invitation window is 24 HOURS (1440 minutes in
+    # daily"; window tightened Nov 16, 2026 with the four-runs-a-day
+    # cadence): the invitation window is 12 HOURS (720 minutes in
     # rules.yaml) — an invitation several hours old is actionable;
-    # only over-24h is stale.
+    # only over-12h is stale.
     out_h = ib.invite_intake(
         [icand("c0c0c0c0c0c0c0c0", 300, html=INVITE_HTML)],
         now=NOW, **env.kw())
@@ -619,7 +620,7 @@ def test_invite_config() -> None:
           gs.get("from_address") == "invitations@linkedin.com"
           and not gs.get("subject_contains")
           and not gs.get("subject_regex")
-          and gs.get("window_minutes") == 1440
+          and gs.get("window_minutes") == 720
           and (gs.get("query") or "") == "from:invitations@linkedin.com",
           str(gs))
     check("o19 no invitation subject gate in config",
@@ -939,7 +940,7 @@ def test_jobalert_config_and_other_filters() -> None:
     js = (rules.get("inbox") or {}).get("jobalert_search") or {}
     check("q19 jobalert search is sender-only FROM config",
           js.get("from_address") == "jobalerts-noreply@linkedin.com"
-          and js.get("window_minutes") == 1440
+          and js.get("window_minutes") == 720
           and js.get("query") == "from:jobalerts-noreply@linkedin.com"
           and "subject:" not in (js.get("query") or "")
           and not any("subject" in str(k) for k in js), str(js))

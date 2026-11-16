@@ -327,7 +327,8 @@ inbox:
   # it never resurfaces; only genuine new-message notifications come
   # back as the work packet. Outcomes return through `watch-record`,
   # which writes the claims-ledger line, the processed state, and
-  # the outreach-log skeleton itself. The daily check (8:30 AM CT)
+  # the outreach-log skeleton itself. The sweep (four times daily:
+  # 8:30 AM, 12:30 PM, 4:30 PM, 8:30 PM CT)
   # takes its scope from `spine.py inbox daily-scope`: the cutoff
   # (now minus daily_check_window_hours) and the stand_down list
   # (threads already claimed in the ledger or handled by the watch)
@@ -338,7 +339,7 @@ inbox:
   # them narrow — a notification that matches nothing here reaches
   # the run, and the run's judgment (not a pattern) decides the rest.
   past_hour_window_minutes: 60   # email watch: Gmail lookback, enforced at intake
-  daily_check_window_hours: 24   # daily LinkedIn check: latest-incoming window
+  daily_check_window_hours: 12   # LinkedIn sweep: latest-incoming window — 12 hours (the sweep runs four times a day and each scan covers the past 12 hours only; was 24 under the once-daily cadence)
   reply_answers:                 # RULE BOOK (design note):
                                  # standing answers in recruiter/company replies, all threads.
     no_relocation_compensation_ok: true   # no relocation compensation/assistance offered = okay; answer yes/fine, do not require it
@@ -362,17 +363,19 @@ inbox:
                                  # address sends nothing else. Identification is the sender alone,
                                  # exactly like job alerts — NO subject condition, ever. (An
                                  # earlier sender + subject filter missed real invitations after
-                                 # LinkedIn changed its sending address and subject.) The DAILY
-                                 # inbox job (linkedin-inbox-replies) searches Gmail for this
-                                 # sender over the past 24 HOURS and hands every find to
-                                 # `spine.py inbox invite-intake`; everything downstream
-                                 # (Accept link, record) is unchanged.
+                                 # LinkedIn changed its sending address and subject.) The inbox
+                                 # sweep (linkedin-inbox-replies, four times daily) searches
+                                 # Gmail for this sender over the past 12 HOURS and hands
+                                 # every find to `spine.py inbox invite-intake`; everything
+                                 # downstream (Accept link, record) is unchanged.
     from_address: invitations@linkedin.com   # THE pinned invitation sender (design note) — an invitation candidate from any other address
                                  # is refused at intake.
-    window_minutes: 1440         # past 24 hours: invitations are handled by the DAILY inbox job
-                                 # (linkedin-inbox-replies, 8:30 AM CT), NOT the every-15-minute
-                                 # watch. The message watch window stays 60 minutes.
-    query: 'from:invitations@linkedin.com'   # SENDER-ONLY — the run appends the past-24-hours bound
+    window_minutes: 720          # past 12 hours (the sweep runs four times a day, each scan covering
+                                 # the past 12 hours only — was 1440 under the once-daily cadence):
+                                 # invitations are handled by the inbox sweep
+                                 # (linkedin-inbox-replies), NOT the every-15-minute watch.
+                                 # The message watch window stays 60 minutes.
+    query: 'from:invitations@linkedin.com'   # SENDER-ONLY — the run appends the past-12-hours bound
   job_alert_sender:              # JOB-ALERT EMAILS — PINNED KNOWN SENDER (design note): ALL LinkedIn job-alert email comes
                                  # from this exact address only. It is the watch list's third pinned sender
                                  # (messages = messaging-digest-noreply@linkedin.com; invitations =
@@ -397,10 +400,11 @@ inbox:
                                  # this search
                                  # carries NO subject terms, ever, and the intake never consults the subject
                                  # for acceptance or refusal. There is deliberately NO subject field in this
-                                 # block. The message and invitation searches above keep BOTH of their
-                                 # filters (pinned sender AND subject) — sender-only is job alerts only.
+                                 # block. The message search above keeps BOTH of its filters
+                                 # (pinned sender AND subject); the invitation search is
+                                 # sender-only too.
     from_address: jobalerts-noreply@linkedin.com   # tied to job_alert_sender above — the one pinned alert sender
-    window_minutes: 1440         # past 24 hours — every alert email is picked up within 24 hours of when it arrives (design note); the run adds the time bound at search time
+    window_minutes: 720          # past 12 hours (design note: the sweep runs four times a day scanning 12 hours back, so every alert email is picked up within hours of arriving); the run adds the time bound at search time
     max_pages: 5                 # the See-all-jobs list page cap, stamped into the packet instructions (the user,
                                  # Nov 12, 2026: "only click until you reach five pages. Don't go beyond five pages.")
     query: 'from:jobalerts-noreply@linkedin.com'   # FROM-ONLY — no subject: term may ever be added to this query
