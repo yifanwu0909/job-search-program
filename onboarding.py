@@ -23,7 +23,11 @@ The flow:
   4. A few standing questions: work authorization, and the
      equal-opportunity answers (race, gender, disability, veteran),
      written into config/answers.yaml the same way.
-  5. A prompt to install the Jobright autofill plugin in the user's
+  5. Your job search: what titles, locations, full time or part
+     time, and hybrid, remote, or in the office 5 days a week, plus
+     anything else Muse needs to know. Written into
+     config/answers.yaml under job_search.
+  6. A prompt to install the Jobright autofill plugin in the user's
      own browser (it fills in the manual applications). Installed or
      skipped; the decision is recorded in state/onboarding.json.
 
@@ -52,11 +56,11 @@ DEFAULT_STATE = os.path.join(HERE, "state", "onboarding.json")
 
 WELCOME = """Welcome to your job search program.
 
-I'll set this up with you, step by step. It takes about 6 minutes
+I'll set this up with you, step by step. It takes about 8 minutes
 in total. You answer questions, and I write everything down.
 
 Here's what we'll cover: permissions, your resume, a few standing
-questions, and the Jobright plugin."""
+questions, your job search, and the Jobright plugin."""
 
 # ---------------------------------------------------------------- permissions
 # Asked for first, both of them, so there are fewer stops later. Every
@@ -299,6 +303,29 @@ def questions_step(answers):
              "veteran")
 
 
+def search_step(answers):
+    """What jobs to look for: titles, locations, type, workplace."""
+    print()
+    print("=== Your job search [~2 minutes] ===")
+    titles = ask("What job title are you looking for? "
+                 "(comma-separate if more than one)")
+    set_path(answers, [t.strip() for t in titles.split(",") if t.strip()],
+             "job_search", "titles")
+    locations = ask("Location: where? (comma-separate if more than one)")
+    set_path(answers,
+             [t.strip() for t in locations.split(",") if t.strip()],
+             "job_search", "locations")
+    set_path(answers, ask("Full time or part time?", default="Full-time"),
+             "job_search", "employment_type")
+    set_path(answers, ask("Hybrid, remote, or in the office 5 days "
+             "a week?"), "job_search", "workplace")
+    notes = ask("Anything else I need to know?", allow_blank=True)
+    if notes:
+        set_path(answers, notes, "job_search", "notes")
+    print("  You can always tell me more anytime in the future, and "
+          "I'll update your requirements.")
+
+
 def plugin_step(state, state_path):
     """Prompt the user to install the Jobright autofill plugin in
     their own browser. Installed or skipped; both are recorded."""
@@ -359,10 +386,16 @@ def cmd_status(args):
         print("All account access is decided.")
     if q_missing:
         print("Still missing: " + ", ".join(q_missing) + ".")
+    search_ok = bool(get_path(answers, "job_search", "titles")) and \
+        bool(get_path(answers, "job_search", "locations")) and \
+        not is_placeholder(get_path(answers, "job_search", "workplace"))
+    if not search_ok:
+        print("Still missing: your job search answers.")
     plugin_ok = "plugin" in state
     if not plugin_ok:
         print("No decision yet for: the Jobright plugin.")
-    complete = resume_ok and not undecided and not q_missing and plugin_ok
+    complete = resume_ok and not undecided and not q_missing and \
+        search_ok and plugin_ok
     print("Onboarding complete." if complete else
           "Onboarding not finished yet. Run: python3 onboarding.py")
     return 0 if complete else 3
@@ -409,6 +442,13 @@ def main():
             questions_done = False
             print("  Standing questions skipped for now; I will ask "
                   "again next time.")
+        try:
+            search_step(answers)
+            search_done = True
+        except SkipPrompt:
+            search_done = False
+            print("  Job search skipped for now; I will ask again "
+                  "next time.")
         plugin_decision = plugin_step(state, args.state)
         save_yaml(args.answers, answers, ANSWERS_HEADER)
     except BreakPrompt:
@@ -441,6 +481,9 @@ def main():
     if not questions_done:
         print("Standing questions: still needed. Run onboarding again "
               "to answer them.")
+    if not search_done:
+        print("Job search: still needed. Run onboarding again to "
+              "answer it.")
     if plugin_decision == "skipped":
         print("Jobright plugin: skipped for now. Install it before "
               "your first manual application.")
