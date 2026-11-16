@@ -1,0 +1,66 @@
+# Application Program — Design (Nov 4, 2026)
+
+Ordered by the user, Nov 4, 2026: turn the job-APPLICATION part of the LinkedIn system into software. Everything repetitive and detail-dense becomes code and data; Muse's judgment is spent only on browser control and exceptions. The rest of the ecosystem (inbox replies, outreach, guardian, watchdog, discovery, company research and gate) is UNCHANGED — the program consumes their output (stocked, gate-passed items in the outreach log) and owns everything from claim to verified.
+
+## The core idea (the user's framing)
+
+The batch driver is a loop, not a narrative:
+
+```
+while verified_total < window_target and window_open:
+    item = next_item()            # diversification order, source split respected
+    if item is None: break/park   # bench empty -> discovery refills (outside program)
+    work_order = build_order(item)  # answers, resume path, portal, salary figure
+    result = agent_browser_step(work_order)   # Muse drives the browser
+    record(result)                # fixed-format log entry, counters updated
+    if result == submitted: schedule_verification(item)   # +10 min Gmail check
+```
+
+Pacing, spacing, staging, and counting are conditions inside the loop, checked by code every pass — never remembered by an agent.
+
+## What is code (the spine, v1)
+
+Location: `~/workspace/goals/linkedin-ai-recruiter-outreach-weekly/program/`
+
+1. **config/answers.yaml** — the standing answer set as data (single copy): name, legal name (YOUR_LEGAL_NAME_IN_NATIVE_LANGUAGE), address, phone, email, LinkedIn URL, current-role facts for replies (***REMOVED*** — never for applications), application employer history exactly as the base resume (CenterPoint Energy latest; BDO; EagleView), education (Georgetown MS Analytics 2017–2019; UW BS Mathematics 2013–2017), EEO (Asian (Chinese) / female / no disability / not a veteran), work authorization (US permanent resident, no sponsorship), citizenship (China since birth; US LPR since MM/DD/YYYY), notice period (2 weeks / 0.5 months), AI-notetaker consent YES, salary rule (top of published range else researched above-market figure), green-card header line for resumes.
+2. **config/rules.yaml** — machine-checked parameters: window target split (LinkedIn 40 / Jobright 20, total 60), friction-ladder steps, Easy Apply pacing (45–75 min, max 2/hr), same-host spacing (~30 min) and per-host window cap (8–10), parallel window cap (3, different hosts), diversification (max 1 per company per window; 4+ all-time = fill-in only), verification timing (+10 min early check, 30 min deciding check), true-blocker list (card actually presented / CAPTCHA on screen / code step awaiting the user / the user-only document), blocked-companies count check (52 — read from the log's blocked list, never hardcode a second copy).
+3. **state.py** — parses the outreach log (which REMAINS the authoritative record) into structured state: every item's latest disposition, source tag, verified counts by source for the current window, company slots used this window, all-time verified per company, limbo list, staged list, claims. Deterministic: same log in → same numbers out.
+4. **pipeline.py** — the while-loop driver. It does not touch a browser. Each pass it: recomputes state, checks the stop conditions (window closed, target reached, friction flag set), picks the next item in queue order, verifies preconditions IN CODE (not already submitted/limbo/claimed; company slot free; gate + pay-filter PASS recorded; tailored resume file exists), and emits ONE work order as JSON. It consumes a result JSON (submitted / staged-at-blocker / skipped-with-reason / friction) and writes the outcome via the log writer. If a precondition fails, the item is dispositioned by code (with reason) and the loop moves on — no agent discretion, no silent drops.
+5. **log_writer.py** — appends entries to the outreach log in the house format (Central-time timestamps, the established entry shapes for CLAIM / SUBMITTED / VERIFIED / SKIPPED — reason / STAGED FOR TAP SESSION — blocker). One writer, one format.
+6. **verify.py** — the post-submission Gmail check: given company + submit time, searches Gmail (CLI) for the ATS confirmation; returns found (message id, sender, time) or not-found. +10 min = early check only; the 30-min check decides limbo per the standing rule. Never triggers resubmission.
+7. **spine.py (CLI)** — `status` (window counts by source, limbo, staged, bench), `next` (emit the next work order JSON), `record result.json` (write outcome + log entry), `verify <item>` (run the Gmail check). The CLI is how agent runs drive the loop: run → `next` → browser work → `record` → repeat. The loop's memory lives in the log + program state, not in any agent's context.
+
+## The functional log (the user, Nov 4, 2026)
+
+One principle governs how anything learns anything: **when something happens, it is appended to the functional log — once, at the moment it happens — and every workflow reads from there.** No private tallies, no run-to-run handoffs carried in an agent's head, no summary lines treated as evidence (the Nov 4 window proved why: guardian tallies contradicted per-item entries, a "NOT SUBMITTED" line outlived its own correction, and a blocked-count drifted between 50 and 52 across surfaces).
+
+Implementation in the program:
+- `events.jsonl` in `program/` — one compact dictionary per line, append-only, ONLY the most important info (the user, Nov 4, 2026: "Think dictionary or tuple. Only store the most important info."): `{"ts": <CT ISO>, "type": <event>, "item": <item #>, "src": <LINKEDIN|JOBRIGHT>, "win": <window date>}` — no actor, no payload, no prose. The only optional field is `"why"`, a short code (pay / role / card / code / dup / closed / id_doc) on skipped and staged events. Event types: stocked, claimed, submitted, verified, verification_missed, limbo, staged, unstaged, skipped, friction_set, friction_cleared, rule_changed, correction — plus **`captcha`, its own event type** (the user, Nov 4, 2026: "Separate the tap situations and captcha"). A CAPTCHA is never a tap and never rides inside staged: taps are approvals the user grants (cards, code shares); a CAPTCHA is a bot-check she solves by taking the browser. The program tracks and reports them as separate lists — `staged` (tap blockers, why ∈ card/code/id_doc/other) and `captcha` (awaiting her takeover) — in state, in status output, and in the fold; an item leaves the captcha list via `unstaged`-equivalent flow (a later submitted/staged event for the same item supersedes it, same precedence as staged). Anything richer belongs in the prose outreach log, which stays the human record.
+
+The scheduled jobs are split the same way as the queues (the user, Nov 4, 2026): the two existing session jobs at 1:30 PM / 7:30 PM the user-local (`linkedin-tap-session-afternoon`, `linkedin-tap-session-evening`) are TAP-ONLY and work only the staged/tap pile, and two new jobs at the same times (`linkedin-captcha-session-1330`, `linkedin-captcha-session-1930`) are CAPTCHA-ONLY and work only the captcha queue, one item at a time, holding a live browser window at the bot-check for the user's takeover. The scopes are disjoint; the guardian, the nightly audit, and the morning report all track the two piles separately.
+- `log_writer.py` writes BOTH representations of every outcome: the human-readable outreach-log entry (unchanged, for the user and the prose runs) and the structured event (for machines). Same call, same moment — they cannot drift apart.
+- `state.py` prefers events when present: state rebuilt from `events.jsonl` must equal state parsed from the prose log; the shadow-mode check compares them and reports any divergence as a bug.
+- Consumers read events, not each other: the guardian's pass = events since its last watermark; the audit = event stream vs. claimed tallies; the morning report renders from computed state. A workflow that needs to "notify everyone" does exactly one thing — append its event. Notification is a write, not a message.
+
+## What stays Muse (by design)
+
+- Driving the browser on real pages; matching an unseen form to the answer set; inventing fun facts (personal color only); tailoring resume wording to a JD (humanized); CAPTCHA takeovers with the user; any screen the program hasn't codified — the work order result "exception" hands the item to Muse with full context instead of guessing.
+- Discovery, gate research, inbox, outreach — untouched, as the user ordered.
+
+## Safety rails (in code, not prose)
+
+- **Never twice**: the driver refuses to issue a work order for a company+role that state.py shows submitted, verified, limbo, or post-submit-pending. Portal "already applied" = hard stop.
+- **Friction flag**: a result of type `friction` sets a stop file; every `next` call refuses while it exists (stop-at-first-friction across both lanes). Only the user or a logged all-clear removes it.
+- **Counters are computed**, never asserted: any run's reported tally must come from `spine.py status`.
+- **Append-only**: the program never edits or deletes log lines; corrections are appended CORRECTION entries, as today.
+
+## Rollout
+
+1. **Shadow mode — LIVE as of Nov 4, 2026, 5:30 PM CT** (the user, Nov 4, 2026: "Run shadow mode now"): job `linkedin-spine-shadow` (every 30 min) runs `program/shadow_pass.py` — tower status, an incremental fold of new prose dispositions into `hidden_files/shadow/shadow-events.jsonl` (watermark in `shadow-state.json`), a state-check of prose vs the shadow event stream, and the tower's next pick (read-only), one entry per pass in `hidden_files/shadow/shadow-log.md`. The job is silent unless a pass finds a VERIFIED-count divergence; the morning report carries a "Shadow: [n] passes, [n] divergences" line (or the counting divergence verbatim). First passes (by hand, Nov 4, 2026): VERIFIED 22 of 60 (LinkedIn 12, Jobright 10), staged 12, captcha 0, limbo 0 — zero divergences. The original plan was a driver-mode decision after one full clean shadow window (the Nov 5, 2026 window, reported the morning of Nov 6); **the user overrode that wait the same evening (Nov 4, 2026: "let's just deploy it in production now") and driver mode went live immediately** — see step 2.
+2. **Driver mode — LIVE as of Nov 4, 2026, 5:44 PM CT** (the user's decision, skipping the full-window shadow wait): before any body changed, the live `program/events.jsonl` was backfilled from the live prose log with the proven `tests/backfill_events.py` derivation — 56 events for 34 items in the Nov 4 window (22 submitted + 22 verified + 12 staged) — and `spine.py state-check` against the live events file showed **zero divergences**, the gate for proceeding. The write path then switched: `linkedin-recommended-applications-daily`, the guardian's Step 2F completion and Step 3 recovery/continuation templates, and all four session bodies (tap-afternoon, tap-evening, captcha-1330, captcha-1930) carry DRIVER MODE sections — work orders only from `spine.py next`, outcomes only via `spine.py record` (prose entry + event in the same call), continuations created at segment close carry the section forward, and a `SPINE FAILURE` prose fallback keeps the batch moving if the tower errors. Stocking, discovery, gate, and prep entries stay in prose. Runs already in flight at cutover kept their launch bodies and finished prose-style. The morning report's line now reads driver mode ("Driver: [n] passes, [n] divergences — outcomes now write through the tower"). One piece of the original step-2 plan is still open: retargeting the `linkedin-spine-shadow` job so its state-check compares prose against the LIVE `program/events.jsonl` (retiring the incremental shadow fold) — its saved definition could not be safely read at cutover (the read failed a system safety check, twice), so the job still runs its shadow-mode body for now and the retarget is pending a clean read; the morning report's driver line reads the shadow check log as written.
+3. **Old workflow decommissioned — Nov 4, 2026, ~5:55 PM CT** (the user: "I want the new Python integrated workflow fully functioning now, without the disruption or distraction from the old workflow"): the last pre-go-live run in flight, `linkedin-batch-continuation-20261104-1730`, was stopped mid-run (its logged findings stand in the outreach log), so no prose-body run remains to spawn prose continuations. The guardian's updated Step 3 template relaunches driver-mode work from here. All application work is now created from driver-mode bodies only.
+4. **Phase 2 (later)**: per-ATS codified flows inside work orders (Greenhouse first), narrowing the browser step further.
+
+## Acceptance test for v1 (real data)
+
+Run `spine.py status` against the live outreach log for the Nov 4 window. It must reproduce the hand-verified ground truth at build time: LinkedIn-sourced verified = Turo, Socure, Crusoe, Fleetio, Wayve, Aircall, Stripe, Navan (8); Jobright-sourced verified = SentiLink, Care Access, Alpaca, Wikimedia, Coalition, Wiley, Evolent, Peerspace, Motional, TRM Labs (10); total 18 of 60; Versa counted all-time only (one-off), NOT in the window tally; limbo = 0; staged = the 10 untouched tap items (Point72, Expel, Fingerprint, Mudflap, Fetch, NVIDIA, Disney, Intuit, CHS, Oracle).
