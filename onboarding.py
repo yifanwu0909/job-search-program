@@ -27,7 +27,11 @@ The flow:
      time, and hybrid, remote, or in the office 5 days a week, plus
      anything else Muse needs to know. Written into
      config/answers.yaml under job_search.
-  6. A prompt to install the Jobright autofill plugin in the user's
+  6. LinkedIn alerts and notifications: plain instructions to add
+     and save job alerts and to turn on email, inbox message, and
+     invitation notifications. The user says when it is done; the
+     answer is recorded in state/onboarding.json.
+  7. A prompt to install the Jobright autofill plugin in the user's
      own browser (it fills in the manual applications). Installed or
      skipped; the decision is recorded in state/onboarding.json.
 
@@ -56,11 +60,12 @@ DEFAULT_STATE = os.path.join(HERE, "state", "onboarding.json")
 
 WELCOME = """Welcome to your job search program.
 
-I'll set this up with you, step by step. It takes about 8 minutes
+I'll set this up with you, step by step. It takes about 11 minutes
 in total. You answer questions, and I write everything down.
 
 Here's what we'll cover: permissions, your resume, a few standing
-questions, your job search, and the Jobright plugin."""
+questions, your job search, your LinkedIn alerts and notifications,
+and the Jobright plugin."""
 
 # ---------------------------------------------------------------- permissions
 # Asked for first, both of them, so there are fewer stops later. Every
@@ -326,6 +331,38 @@ def search_step(answers):
           "I'll update your requirements.")
 
 
+def notifications_step(state, state_path):
+    """Plain instructions for the user's LinkedIn alerts and
+    notifications. The user says when it is done; done or skipped,
+    both are recorded."""
+    if "linkedin_notifications" in state:
+        return state["linkedin_notifications"].get("decision")
+    print()
+    print("=== LinkedIn alerts and notifications [~3 minutes] ===")
+    print("  In LinkedIn:")
+    print("  1. Add and save job alerts for your titles and locations.")
+    print("  2. Turn on email notifications.")
+    print("  3. Turn on inbox message notifications.")
+    print("  4. Turn on invitation notifications.")
+    print("  Tell me when it's done and we'll move on.")
+    while True:
+        raw = input('Type "done" when it is done, or "skip" to do it '
+                    "later [break = take a break]: ").strip().lower()
+        if raw == "break":
+            raise BreakPrompt
+        if raw in ("done", "yes", "y"):
+            state["linkedin_notifications"] = {"decision": "done",
+                                               "at": now_iso()}
+            break
+        if raw in ("skip", "s", "later", "no", "n"):
+            state["linkedin_notifications"] = {"decision": "skipped",
+                                               "at": now_iso()}
+            break
+        print('  I need one of the two: "done" or "skip".')
+    save_state(state_path, state)
+    return state["linkedin_notifications"]["decision"]
+
+
 def plugin_step(state, state_path):
     """Prompt the user to install the Jobright autofill plugin in
     their own browser. Installed or skipped; both are recorded."""
@@ -391,11 +428,14 @@ def cmd_status(args):
         not is_placeholder(get_path(answers, "job_search", "workplace"))
     if not search_ok:
         print("Still missing: your job search answers.")
+    notif_ok = "linkedin_notifications" in state
+    if not notif_ok:
+        print("No decision yet for: LinkedIn alerts and notifications.")
     plugin_ok = "plugin" in state
     if not plugin_ok:
         print("No decision yet for: the Jobright plugin.")
     complete = resume_ok and not undecided and not q_missing and \
-        search_ok and plugin_ok
+        search_ok and notif_ok and plugin_ok
     print("Onboarding complete." if complete else
           "Onboarding not finished yet. Run: python3 onboarding.py")
     return 0 if complete else 3
@@ -449,6 +489,7 @@ def main():
             search_done = False
             print("  Job search skipped for now; I will ask again "
                   "next time.")
+        notif_decision = notifications_step(state, args.state)
         plugin_decision = plugin_step(state, args.state)
         save_yaml(args.answers, answers, ANSWERS_HEADER)
     except BreakPrompt:
@@ -484,6 +525,9 @@ def main():
     if not search_done:
         print("Job search: still needed. Run onboarding again to "
               "answer it.")
+    if notif_decision == "skipped":
+        print("LinkedIn alerts and notifications: skipped for now. "
+              "Set them up before the first daily run.")
     if plugin_decision == "skipped":
         print("Jobright plugin: skipped for now. Install it before "
               "your first manual application.")

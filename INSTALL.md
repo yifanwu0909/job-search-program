@@ -32,7 +32,7 @@ Every suite must pass before you continue. A failure here means the install is w
 
 ## Step 4: Onboarding, with your user
 
-This step is a conversation, and it is mandatory. Run it as written in [docs/onboarding.md](docs/onboarding.md): the welcome, the **permissions** first (LinkedIn and Google; each one set up now or skipped for later), then the user's **resume**, then a few **standing questions** (work authorization and the equal-opportunity answers), the user's **job search** (titles, locations, full time or part time, hybrid, remote, or in the office 5 days a week, plus anything else), and a prompt to install the **Jobright autofill plugin** in the user's browser. It records the account decisions in `program/state/onboarding.json` and the resume path and standing answers in `config/answers.yaml` (the copy in this repo is placeholders).
+This step is a conversation, and it is mandatory. Run it as written in [docs/onboarding.md](docs/onboarding.md): the welcome, the **permissions** first (LinkedIn and Google; each one set up now or skipped for later), then the user's **resume**, then a few **standing questions** (work authorization and the equal-opportunity answers), the user's **job search** (titles, locations, full time or part time, hybrid, remote, or in the office 5 days a week, plus anything else), plain instructions to set up **LinkedIn alerts and notifications**, and a prompt to install the **Jobright autofill plugin** in the user's browser. It records the account decisions in `program/state/onboarding.json` and the resume path and standing answers in `config/answers.yaml` (the copy in this repo is placeholders).
 
 Verify when you finish:
 
