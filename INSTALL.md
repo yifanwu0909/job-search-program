@@ -53,7 +53,7 @@ It must say **"Onboarding complete."** If it lists anything missing or unacknowl
 
 ## Step 6: Create the scheduled jobs
 
-The program has no scheduler of its own. Its whole daily rhythm lives in **17 scheduled jobs**, snapshotted in `workflow/jobs/`, one file per job. Each file's frontmatter carries the job's id, schedule, timezone, and owner; the body below the frontmatter is the job's instructions.
+The program has no scheduler of its own. Its whole daily rhythm lives in **18 scheduled jobs**, snapshotted in `workflow/jobs/`, one file per job. Each file's frontmatter carries the job's id, schedule, timezone, and owner; the body below the frontmatter is the job's instructions.
 
 Create one job per file with your cron tools, with two adjustments:
 
@@ -72,7 +72,7 @@ Do not turn the full workflow loose on day one. Ask the program for one small di
 - [ ] All 11 test suites pass, run sequentially.
 - [ ] `python3 onboarding.py status` says "Onboarding complete."
 - [ ] Gmail, Calendar, and Tasks are connected; LinkedIn, Jobright, and Indeed are signed in; Premium Career is active; job alert emails are set.
-- [ ] All 17 scheduled jobs exist, with the install path substituted and the session times set to your user's.
+- [ ] All 18 scheduled jobs exist, with the install path substituted and the session times set to your user's.
 - [ ] One small discovery pass and one full morning cycle have been reviewed with the user.
 
 Anything unchecked, the install is not finished. Say which item is missing rather than working around it.
