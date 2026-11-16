@@ -66,13 +66,16 @@ questions, and the Jobright plugin."""
 PERMISSIONS = [
     ("linkedin_signin", "LinkedIn sign-in or register",
      "Why: invitations, accepts, and inbox replies all happen inside "
-     "your LinkedIn account, so Muse signs in as you. Sign in, or "
-     "register if you do not have an account. You enter the login on "
-     "the secure form; Muse never sees the password."),
+     "your LinkedIn account, so Muse signs in as you.\n"
+     "  To set up: sign in to LinkedIn in the browser window your "
+     "Muse opens, or register if you do not have an account. You "
+     "enter the login on the secure form; Muse never sees the "
+     "password."),
     ("google_account", "Gmail: connect Google",
-     "Why: connect your Google account and give Muse access to "
-     "Gmail, Calendar, and Tasks. Confirmations and recruiter replies "
-     "land in Gmail, interviews go on Calendar, to-dos go in Tasks. "
+     "Why: confirmations and recruiter replies land in Gmail, "
+     "interviews go on Calendar, to-dos go in Tasks.\n"
+     "  To set up: connect your Google account on the page your Muse "
+     "opens, and give Muse access to Gmail, Calendar, and Tasks. "
      "Muse sends email only with your approval."),
 ]
 
@@ -210,19 +213,17 @@ def permissions_step(state, state_path):
         print(f"--- {title} ---")
         print(text)
         while True:
-            raw = input('Type "grant" to set this up now, or "skip" '
-                        "for later "
-                        '[break = take a break]: ').strip().lower()
+            raw = input("Press Enter when done "
+                        "[skip · break]: ").strip().lower()
             if raw == "break":
                 raise BreakPrompt
-            if raw in ("grant", "g", "now", "yes", "y"):
+            if raw in ("", "done", "grant", "g", "now", "yes", "y"):
                 perms[key] = {"decision": "granted", "at": now_iso()}
                 break
             if raw in ("skip", "s", "later", "no", "n"):
                 perms[key] = {"decision": "skipped", "at": now_iso()}
                 break
-            print('  I need one of the two: "grant" or "skip". Skipping '
-                  "is fine; it only means I ask again when it comes up.")
+            print('  Press Enter when it is set up, or type "skip".')
         save_state(state_path, state)
     granted = [t for k, t, _ in PERMISSIONS
                if perms.get(k, {}).get("decision") == "granted"]
@@ -427,7 +428,7 @@ def main():
     print()
     print("=== Done ===")
     if perm_granted:
-        print("Set up now: " + "; ".join(perm_granted))
+        print("Set up: " + "; ".join(perm_granted))
     if perm_skipped:
         print("Skipped for later: " + "; ".join(perm_skipped)
               + " (your Muse will ask again when each one comes up, "
