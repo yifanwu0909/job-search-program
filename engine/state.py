@@ -393,7 +393,7 @@ class Item:
     id: int
     company: str = ""
     role: str = ""
-    source: str = ""               # LINKEDIN | JOBRIGHT | INDEED | LINKEDIN_ALERT | ""
+    source: str = ""               # LINKEDIN | JOBRIGHT | INDEED | LINKEDIN_ALERT | CAREEROPS | ""
     events: list = field(default_factory=list)   # (line_no, ts, kind, detail)
     gate: str = ""                 # pass | alert | fail | ""
     resume_file: str = ""
@@ -515,7 +515,7 @@ IDENTITY_HEADS = (
 RANGE_RE = re.compile(r"#(\d{2,3})\s*[–—-]\s*#?(\d{2,3})")
 PDF_RE = re.compile(r"([\w][\w.\-]*\.pdf)")
 LINKEDIN_ID_RE = re.compile(r"LinkedIn(?: job)? (\d{10})|jobs/view/(\d{10})")
-SOURCE_TAG_RE = re.compile(r"SOURCE TAG: (LINKEDIN_ALERT|LINKEDIN|JOBRIGHT|INDEED)")
+SOURCE_TAG_RE = re.compile(r"SOURCE TAG: (LINKEDIN_ALERT|LINKEDIN|JOBRIGHT|INDEED|CAREEROPS)")
 
 
 def expand_ranges(text: str) -> set[int]:

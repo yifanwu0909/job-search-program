@@ -55,7 +55,12 @@ def main() -> int:
     now = datetime.now(state_mod.CT)
     closes = datetime.fromisoformat(w["closes"])
     base = {"window": w["date"], "verified": verified,
-            "targets": {k: targets[k] for k in ("linkedin", "jobright", "total")},
+            "targets": {**{k: targets[k] for k in ("linkedin", "jobright", "total")},
+                        # CareerOps passthrough (the user, Nov 16,
+                        # 2026): a status dict from before the source
+                        # was added has no careerops target — default
+                        # 0, never KeyError.
+                        "careerops": targets.get("careerops", 0)},
             "verified_by_source": status["verified_counts"],
             "bench": [b["id"] for b in status["bench"]],
             "claimed_unfinished": [c["id"] for c in status["claimed_unfinished"]],
@@ -91,7 +96,8 @@ def main() -> int:
                                  "launch a Jobright-mode recovery if no "
                                  "batch-family run is in flight (the user, "
                                  "Nov 7, 2026). Bench empty means the "
-                                 "recovery stocks via Jobright discovery "
+                                 "recovery stocks via external discovery "
+                                 "(Jobright + Indeed + the CareerOps scan) "
                                  "first."
                                  if jobright_only else
                                  "window open, target unmet — launch a fresh "

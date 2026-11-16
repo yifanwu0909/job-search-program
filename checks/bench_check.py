@@ -26,7 +26,9 @@ Verdicts:
                   RESTOCK_NEEDED (exit 3). Since Nov 12, 2026 the
                   bench that counts in this mode is the EXTERNAL
                   bench (Jobright + Indeed — Indeed added on the
-                  exact Jobright rules); the verdict name is
+                  exact Jobright rules); since Nov 16, 2026 the
+                  CareerOps scan bench counts too (CAREEROPS added
+                  as a third external source); the verdict name is
                   unchanged.
 
 Usage: python3 bench_check.py [--date YYYY-MM-DD]
@@ -75,11 +77,13 @@ def verdict_for(status: dict, rules: dict, now: datetime) -> dict:
     if jobright_only:
         # The bench that counts is the external bench: Jobright +
         # Indeed (Indeed added Nov 12, 2026 on the Jobright rules) +
-        # LinkedIn alerts (added Nov 12, 2026 — the alert lane is its
-        # own lane and stays servable under LinkedIn-lane friction).
+        # the CareerOps scan (added Nov 16, 2026 as a third external
+        # source) + LinkedIn alerts (added Nov 12, 2026 — the alert
+        # lane is its own lane and stays servable under LinkedIn-lane
+        # friction).
         bench = [b for b in bench
                  if (b.get("source") or "").upper()
-                 in ("JOBRIGHT", "INDEED", "LINKEDIN_ALERT")]
+                 in ("JOBRIGHT", "INDEED", "CAREEROPS", "LINKEDIN_ALERT")]
         base = {**base, "bench_count": len(bench),
                 "bench": [b["id"] for b in bench],
                 "jobright_only": True}
@@ -92,14 +96,17 @@ def verdict_for(status: dict, rules: dict, now: datetime) -> dict:
     if jobright_only and len(bench) <= watermark and len(bench) < remaining:
         return {**base, "verdict": "RESTOCK_NEEDED_JOBRIGHT",
                 "detail": "LinkedIn lane stopped by friction; external "
-                          "bench (Jobright + Indeed + LinkedIn alerts) "
+                          "bench (Jobright + Indeed + CareerOps scan + "
+                          "LinkedIn alerts) "
                           "at/below the low "
                           "watermark while the "
                           "target is unmet — trigger a guardian pass; "
                           "workers restock from the external sources "
-                          "only — JOBRIGHT + INDEED + LINKEDIN_ALERT (the user, "
+                          "only — JOBRIGHT + INDEED + CAREEROPS + "
+                          "LINKEDIN_ALERT (the user, "
                           "Nov 7, 2026; Indeed + LinkedIn alerts added "
-                          "Nov 12, 2026)"}
+                          "Nov 12, 2026; CareerOps scan added "
+                          "Nov 16, 2026)"}
     if len(bench) <= watermark and len(bench) < remaining:
         return {**base, "verdict": "RESTOCK_NEEDED",
                 "detail": "bench at/below the low watermark while the "

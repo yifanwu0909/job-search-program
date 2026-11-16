@@ -1047,10 +1047,11 @@ def main() -> int:
     # --- Past-24-hours scan window (the user, Nov 12, 2026): config
     # carries the window for JOBRIGHT + INDEED only.
     _disc = (copy_sp.rules.get("discovery") or {})
-    check("24h scan window: config carries 24h for JOBRIGHT+INDEED",
+    check("24h scan window: config carries 24h for "
+          "JOBRIGHT+INDEED+CAREEROPS",
           _disc.get("max_posting_age_hours") == 24
           and _disc.get("max_posting_age_sources")
-          == ["JOBRIGHT", "INDEED"],
+          == ["JOBRIGHT", "INDEED", "CAREEROPS"],
           str({k: _disc.get(k) for k in
                ("max_posting_age_hours", "max_posting_age_sources")}))
     check("site filters: config carries the date + full-time "

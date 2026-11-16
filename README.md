@@ -59,7 +59,7 @@ flowchart TD
 
 Design principle: **code decides and tracks, Muse does the legwork.** The code is the air traffic control tower, and each Muse agent is an individual aircraft: the tower assigns every mission and keeps the record, and each plane flies only the mission it was given.
 
-- 🌐 Searches <a href="https://jobright.ai" target="_blank" rel="noopener">Jobright</a> and Indeed each morning for **postings from the last 24 hours**, and takes in your LinkedIn job alert emails.
+- 🌐 Searches <a href="https://jobright.ai" target="_blank" rel="noopener">Jobright</a> and Indeed each morning for **postings from the last 24 hours**, runs the free **career-ops scan** over the public ATS boards on the same 24-hour window, and takes in your LinkedIn job alert emails.
 - 🔍 Screens every posting before opening it: your **block list**, companies you **already applied to**, and a **company gate** (more on that below).
 - 📝 Builds a **tailored resume** for each posting from your base resume, then applies on the employer's own site.
 - ✅ Verifies each submission: the **confirmation email** in your Gmail, or the success message the site shows.
@@ -89,15 +89,15 @@ What you would save: Premium Career starts at **$39.99 a month**, or **$239.88 a
 <details>
 <summary>🟢 Don't want to pay for Jobright?</summary>
 
-That is fine too. You lose one of the three discovery sources: **the Jobright searches**. No Jobright results come in during the morning search.
+That is fine too. You lose one of the four discovery sources: **the Jobright searches**. No Jobright results come in during the morning search.
 
-Jobs still arrive through **Indeed** and your **LinkedIn job alert emails**, just fewer of them each day, so reaching the daily target of **60 verified applications** gets harder. Everything after discovery works the same on whatever is found: screening, tailored resumes, applying, outreach, inbox replies, and interview scheduling.
+Jobs still arrive through **Indeed**, the **career-ops scan**, and your **LinkedIn job alert emails**, just fewer of them each day, so reaching the daily target of **60 verified applications** gets harder. Everything after discovery works the same on whatever is found: screening, tailored resumes, applying, outreach, inbox replies, and interview scheduling.
 
 What you would save: Jobright's paid plan, Turbo, is billed **weekly at $17.99**, monthly at $39.99, or quarterly at $89.99. Jobright has no public pricing page; the prices appear in the app when you sign up, so check the figure it shows you before you commit.
 
 </details>
 
-Indeed, LinkedIn job alerts, and Revelio are free. So are Gmail, Google Calendar, and Google Tasks. There are no per-application fees.
+Indeed, the career-ops scan, LinkedIn job alerts, and Revelio are free. So are Gmail, Google Calendar, and Google Tasks. There are no per-application fees.
 
 ## Your part
 

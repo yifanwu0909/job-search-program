@@ -112,6 +112,7 @@ def cmd_status(sp: Spine, args) -> int:
     li = counts.get("LINKEDIN", 0)
     jr = counts.get("JOBRIGHT", 0)
     ind = counts.get("INDEED", 0)
+    co = counts.get("CAREEROPS", 0)
     la = counts.get("LINKEDIN_ALERT", 0)
     t = s["targets"]
     print(f"Window {w['date']}  (opens {w['opens']}, closes {w['closes']})")
@@ -119,6 +120,7 @@ def cmd_status(sp: Spine, args) -> int:
     print(f"VERIFIED {s['verified_total']} of {t['total']} — "
           f"LinkedIn {li}/{t['linkedin']}, Jobright {jr}/{t['jobright']}, "
           f"Indeed {ind}/{t.get('indeed', 0)}, "
+          f"CareerOps {co}/{t.get('careerops', 0)}, "
           f"LinkedIn alerts {la}/{t.get('linkedin_alert', 0)}")
     for src, items in s["verified_by_source"].items():
         print(f"  {src} ({len(items)}): {_fmt_items(items)}")
@@ -143,8 +145,10 @@ def cmd_status(sp: Spine, args) -> int:
     if s["friction"]:
         print(f"Friction scope: {s.get('friction_scope')} — "
               + ("LinkedIn lane stopped; Jobright + Indeed + the "
+                 "CareerOps scan + the "
                  "LinkedIn-alert lane continue "
-                 "(the user, Nov 7, 2026; Indeed + alerts added Nov 12, 2026)"
+                 "(the user, Nov 7, 2026; Indeed + alerts added Nov 12, 2026; "
+                 "CareerOps scan added Nov 16, 2026)"
                  if s.get("friction_scope") == "linkedin"
                  else "all lanes stopped"))
     return 0
@@ -175,6 +179,7 @@ def cmd_record(sp: Spine, args) -> int:
           f"(LinkedIn {s['verified_counts'].get('LINKEDIN', 0)}, "
           f"Jobright {s['verified_counts'].get('JOBRIGHT', 0)}, "
           f"Indeed {s['verified_counts'].get('INDEED', 0)}, "
+          f"CareerOps {s['verified_counts'].get('CAREEROPS', 0)}, "
           f"LinkedIn alerts "
           f"{s['verified_counts'].get('LINKEDIN_ALERT', 0)})")
     # KEEP-GOING LOOP (the user, Nov 4, 2026: "if anything stick, keep going down
@@ -190,13 +195,15 @@ def cmd_record(sp: Spine, args) -> int:
             print("LINKEDIN LANE STOPPED: friction recorded on a "
                   "LinkedIn-sourced item — no LinkedIn work until the "
                   "flag is cleared. EXTERNAL SOURCES CONTINUE — "
-                  "Jobright + Indeed, plus the LinkedIn-alert lane "
+                  "Jobright + Indeed + the CareerOps scan, plus the "
+                  "LinkedIn-alert lane "
                   "(the user, Nov 7, 2026; Indeed + alerts added "
-                  "Nov 12, 2026): the next order below is "
+                  "Nov 12, 2026; CareerOps scan added Nov 16, 2026): "
+                  "the next order below is "
                   "external-sources-only.")
             nxt = sp.next_order(args.date)
             print("KEEP GOING (EXTERNAL SOURCES ONLY — JOBRIGHT + "
-                  "INDEED + LINKEDIN ALERTS) — next from the program:",
+                  "INDEED + CAREEROPS + LINKEDIN ALERTS) — next from the program:",
                   json.dumps(nxt, indent=1, default=str))
         else:
             print("STOPPED: friction recorded — no next order. "
@@ -522,7 +529,8 @@ def cmd_closeout(sp: Spine, args) -> int:
             f"{t['total']} target (LinkedIn {vc.get('LINKEDIN', 0)}/"
             f"{t['linkedin']}, Jobright {vc.get('JOBRIGHT', 0)}/"
             f"{t['jobright']}, Indeed {vc.get('INDEED', 0)}/"
-            f"{t.get('indeed', 0)}, LinkedIn alerts "
+            f"{t.get('indeed', 0)}, CareerOps {vc.get('CAREEROPS', 0)}/"
+            f"{t.get('careerops', 0)}, LinkedIn alerts "
             f"{vc.get('LINKEDIN_ALERT', 0)}/"
             f"{t.get('linkedin_alert', 0)}). Staged for tap session: "
             f"{fmt(s['staged'])}. "
@@ -938,13 +946,14 @@ def main() -> int:
     disc = p_disc.add_subparsers(dest="discovery_cmd", required=True)
     p_disc_plan = disc.add_parser("plan")
     p_disc_plan.add_argument("--source", default=None,
-                             help="JOBRIGHT, INDEED or LINKEDIN_ALERT "
-                                  "(default: all three)")
+                             help="JOBRIGHT, INDEED, CAREEROPS or "
+                                  "LINKEDIN_ALERT (default: all four)")
     p_disc_record = disc.add_parser("record")
     p_disc_record.add_argument(
         "packet", help="JSON pass packet {source, run_id, "
-                       "searches_done: [{title, location_scope}], "
-                       "cards_seen, candidates}")
+                       "searches_done: [{title, location_scope}] "
+                       "(JOBRIGHT/INDEED) or steps_done: [scanner "
+                       "names] (CAREEROPS), cards_seen, candidates}")
     p_disc_status = disc.add_parser("status")
     p_disc_status.add_argument("--date", default=None)
     p_disc_status.add_argument("--json", action="store_true")

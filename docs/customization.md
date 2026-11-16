@@ -22,7 +22,7 @@ Just tell Muse to change it. Say what you want different, in plain words. Muse u
 
 ## What you are looking for (rules.yaml)
 
-- Job titles searched. Example: Your Job Title and Your Second Job Title on Jobright and Indeed, plus your saved titles on the LinkedIn alert lane.
+- Job titles searched. Example: Your Job Title and Your Second Job Title on Jobright and Indeed and in the career-ops scan's portal filters, plus your saved titles on the LinkedIn alert lane.
 - Locations: which states or cities, and whether remote roles count.
 - Pay floors. Here: $YOUR_BAR attainable pay for any onsite or hybrid role, $YOUR_BASE for nationally priced remote roles, and a researched city equivalent for remote roles priced by city. A posting below the floor is skipped and logged.
 - Daily targets. Here: 60 verified applications a day across all sources, and 30 connection invitations a day.

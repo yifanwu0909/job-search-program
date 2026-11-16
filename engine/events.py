@@ -5,7 +5,7 @@ info (the user, Nov 4, 2026: "Don't make the log wordy or complicated. Think
 dictionary or tuple. Only store the most important info."):
 
     {"ts": <CT ISO>, "type": <event>, "item": <item #>,
-     "src": <LINKEDIN|JOBRIGHT|INDEED|LINKEDIN_ALERT>, "win": <window date YYYY-MM-DD>}
+     "src": <LINKEDIN|JOBRIGHT|INDEED|LINKEDIN_ALERT|CAREEROPS>, "win": <window date YYYY-MM-DD>}
 
 Those are the only keys, ever: no actor, no company, no payload, no prose.
 `src` is omitted on events with no source (e.g. friction_set); `item` and
@@ -83,7 +83,7 @@ INVITE_REQUIRED_KEYS = {
     "invite_counter": {"day", "phase", "counter"},
 }
 
-SOURCES = ("LINKEDIN", "JOBRIGHT", "INDEED", "LINKEDIN_ALERT")
+SOURCES = ("LINKEDIN", "JOBRIGHT", "INDEED", "LINKEDIN_ALERT", "CAREEROPS")
 WHY_CODES = ("pay", "role", "gate", "dup", "closed", "card",
              "code", "id_doc", "other")
 WHY_TYPES = ("skipped", "staged")

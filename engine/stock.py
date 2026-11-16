@@ -100,7 +100,7 @@ LOG_PATH = GOAL / "hidden_files" / "outreach-log.md"
 RULES_PATH = BASE / "config" / "rules.yaml"
 ANSWERS_PATH = BASE / "config" / "answers.yaml"
 MARKER = "(Recorded by stock program.)"
-SOURCES = ("LINKEDIN", "JOBRIGHT", "INDEED", "LINKEDIN_ALERT")
+SOURCES = ("LINKEDIN", "JOBRIGHT", "INDEED", "LINKEDIN_ALERT", "CAREEROPS")
 
 # Host -> ATS name, computed from the apply URL the form carries —
 # a data operation on a URL, never a read of prose.
@@ -182,11 +182,19 @@ RETURN FORM — stock.py record takes a JSON file of this shape:
       "company": "Central Insurance",            // required, exact name
       "role": "Machine Learning Engineer",       // required, exact title
       "source": "JOBRIGHT",                      // LINKEDIN | JOBRIGHT |
-                                                 //   INDEED | LINKEDIN_ALERT
+                                                 //   INDEED | LINKEDIN_ALERT |
+                                                 //   CAREEROPS
                                                  //   (the user, Nov 12, 2026 —
                                                  //   Indeed a discovery
                                                  //   source on the exact
                                                  //   Jobright rules;
+                                                 //   CAREEROPS added
+                                                 //   Nov 16, 2026 — the
+                                                 //   career-ops scan as an
+                                                 //   ADDITIONAL source
+                                                 //   alongside Jobright and
+                                                 //   Indeed, never a
+                                                 //   replacement;
                                                  //   LINKEDIN_ALERT =
                                                  //   LinkedIn job alerts
                                                  //   via the daily alert
@@ -199,7 +207,8 @@ RETURN FORM — stock.py record takes a JSON file of this shape:
                                                  //   age when the source shows
                                                  //   it (or "posted_text":
                                                  //   "2 days ago"). JOBRIGHT /
-                                                 //   INDEED stocks whose KNOWN
+                                                 //   INDEED / CAREEROPS stocks
+                                                 //   whose KNOWN
                                                  //   age exceeds discovery
                                                  //   .max_posting_age_hours (24)
                                                  //   are REFUSED (the user, Nov 12,
@@ -415,8 +424,9 @@ def _validate(raw: dict, gate_cfg: dict | None = None,
     if raw["source"] not in SOURCES:
         return f"source must be one of {SOURCES}; got {raw['source']!r}"
     # PAST-24-HOURS SCAN WINDOW (the user, Nov 12, 2026: "For indeed and
-    # jobright, also only scan the past 24 hours"): a Jobright /
-    # Indeed stock whose KNOWN posting age exceeds the configured
+    # jobright, also only scan the past 24 hours"; the CareerOps scan
+    # joined the same window Nov 16, 2026): a Jobright / Indeed /
+    # CAREEROPS stock whose KNOWN posting age exceeds the configured
     # window is refused — the pass stops at the boundary, and this
     # is the code backstop. LINKEDIN_ALERT is exempt (the daily
     # email is the window) and an unknown age is allowed.

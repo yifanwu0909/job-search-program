@@ -31,7 +31,8 @@ appeared, stand down on that item and pull the next order.
    (the LINKEDIN ALERTS section below) — alert jobs may be applied
    to via LinkedIn Easy Apply, because the user said "EZ applies are
    okay. There aren't that many of them anyway." Otherwise:
-   discovery and applications run through Jobright, Indeed, and
+   discovery and applications run through Jobright, Indeed, the
+   CareerOps scan, and
    external employer/ATS sites ONLY. No
    LinkedIn discovery or search of any kind, no Easy Apply outside
    the alert lane, no LinkedIn SSO (use Google
@@ -40,22 +41,26 @@ appeared, stand down on that item and pull the next order.
    separate daily outreach job (connection invitations) and the
    alert-email route — never
    by a batch worker in any other way. The window target is the one in rules.yaml, ALL
-   sourced from Jobright + Indeed + LinkedIn alerts (Indeed
-   added Nov 12, 2026 on the exact Jobright rules; LinkedIn alerts
+   sourced from Jobright + Indeed + the CareerOps scan +
+   LinkedIn alerts (Indeed
+   added Nov 12, 2026 on the exact Jobright rules; the CareerOps
+   scan added Nov 16, 2026 as an additional source; LinkedIn alerts
    added Nov 12, 2026 via email only; rules.yaml
    window.targets: linkedin 0, jobright 60, indeed 60,
+   careerops 60,
    linkedin_alert 60, total 60 —
-   ONE shared total, not 180). If your launch state or the order says
+   ONE shared total, not 240). If your launch state or the order says
    jobright_only (the Nov 7, 2026 friction fallback), it means the
    same thing from the friction side; either way you work
-   the external sources (Jobright + Indeed) plus the alert lane exclusively and keep
+   the external sources (Jobright + Indeed + the CareerOps scan) plus the alert lane exclusively and keep
    going as usual. If it says
    complete or closed,
    go to Closeout, then Finish. If it returns a pacing hold or the
    bench is empty / discovery, run the ONE discovery round (below):
-   ONE Jobright pass and ONE Indeed pass — never a second round in
+   ONE Jobright pass, ONE Indeed pass and ONE CareerOps scan
+   pass — never a second round in
    this run (the user, Nov 12, 2026: "Do the indeed and jobright one pass
-   only"). Then ask ONCE more; if there is still no application
+   only" — the one-pass rule, extended to the scan Nov 16, 2026). Then ask ONCE more; if there is still no application
    order (a pacing hold included), Finish — a later
    guardian-launched worker re-covers the rolling 24-hour window.
 3. FLY the order (rules below). The order carries the item, route,
@@ -72,7 +77,7 @@ appeared, stand down on that item and pull the next order.
    a hard deadline on a browser task — the bound lives in the task
    text, so make it concrete. Scope every browser call to ~15
    minutes of work (rules.yaml supervisor.browser_task_bound_
-   minutes), ONE source (Jobright, Indeed, or one alert email — one source per call) or ONE bounded application stage, at most ~50
+   minutes), ONE source (Jobright, Indeed, the CareerOps scan, or one alert email — one source per call) or ONE bounded application stage, at most ~50
    cards/listings on a discovery call. The task text MUST state a
    wall-clock return-by time — "Return by <now + 15 minutes> CT
    with whatever you have: partial results are a success,
@@ -97,7 +102,7 @@ appeared, stand down on that item and pull the next order.
    closed / a full-stop friction refusal) or the ~7:45 AM CT
    no-new-starts cutoff has passed. In jobright-only mode a
    LinkedIn-friction record hands back the next external-source
-   (Jobright / Indeed) order in
+   (Jobright / Indeed / CareerOps) order in
    the same output — take it and keep going. NEVER hand-write an
    outcome in the outreach log. Claims,
    stocking, discovery, gate, and prep notes are not outcomes — those
@@ -130,22 +135,29 @@ continue; never block the batch on the program being down.
 CODE MANAGES THE SOURCES (the user, Nov 13, 2026): every packet the
 program hands you (work order, pacing hold, or empty) carries the
 search rules as its `discovery_plan` — the code tells you the
-Jobright/Indeed searches, filters and one-pass rule at initiation;
-you may also pull `spine.py discovery plan --source JOBRIGHT` or
-`--source INDEED`. Run ONLY what the packet lists. When the pass ends,
+Jobright/Indeed searches, the CareerOps scan steps, filters and
+one-pass rule at initiation;
+you may also pull `spine.py discovery plan --source JOBRIGHT`,
+`--source INDEED` or
+`--source CAREEROPS`. Run ONLY what the packet lists. When the pass ends,
 return the pass packet — {"source", "run_id", "searches_done":
-[{title, location_scope} for every search run], "cards_seen",
+[{title, location_scope} for every search run] (Jobright/Indeed)
+or "steps_done": [the scanner names the plan lists] (CAREEROPS),
+"cards_seen",
 "candidates"} — via `spine.py discovery record <file>`; code
-refuses an incomplete matrix and a second pass for the same run.
+refuses an incomplete matrix/step set and a second pass for the same run.
 The detail paragraphs below are background; the code packet is the
 work order, and where they differ the packet wins.
 
 Sources: Jobright + Indeed (the user, Nov 11, 2026 strategy; Indeed
-added Nov 12, 2026 on the exact same rules) + LinkedIn job alerts
+added Nov 12, 2026 on the exact same rules) + the CareerOps scan
+(CAREEROPS — added Nov 16, 2026 as an ADDITIONAL source) + LinkedIn job alerts
 via email (added Nov 12, 2026 — the LINKEDIN ALERTS section
-below) — sign in with
+below) — for Jobright/Indeed, sign in with
 the saved login; a code, checkpoint, or rejected credential on a
-source parks THAT source for the session (not friction). LinkedIn Jobs, the
+source parks THAT source for the session (not friction). The scan
+needs no sign-in at all: it is node scripts over the public ATS
+APIs. LinkedIn Jobs, the
 LinkedIn feed, and the LinkedIn Premium "hear back" list are NOT
 sources: batch work opens LinkedIn ONLY through the alert-email
 links, under the alert section's rules.
@@ -163,7 +175,7 @@ posted 24 hours ago use it" + "Both of these: full time only") —
 Jobright's posted-within-24-hours date filter AND job type
 Full-time; the filtered result set IS the scan. Page it
 newest-first; STOP at the past-24-hours boundary for anything the
-filter lets through oddly (stock.py also refuses a Jobright/Indeed
+filter lets through oddly (stock.py also refuses a Jobright/Indeed/CareerOps
 stock whose known posting age exceeds 24 hours). If a filter
 control cannot be found/set in a pass, fall back to newest-first +
 the boundary stop and NOTE the fallback in your report — never
@@ -188,7 +200,37 @@ employer/ATS site and apply there, exactly as with Jobright.
 Indeed is already signed in in the browser (Google sign-in,
 you@example.com). Stock Indeed finds through stock.py with
 source INDEED.
-LINKEDIN JOB ALERTS (the user, Nov 12, 2026 — the third discovery
+CAREEROPS SCAN PASS (design note — an ADDITIONAL source
+alongside Jobright and Indeed, never a replacement): from the
+career-ops
+install root the plan names (~/workspace/custom-skills/career-ops),
+set the scanner env the plan carries (the proxy recipe in
+rules.yaml's careerops_env — strip the credential out of the proxy
+env vars and set CAREER_OPS_TRUST_PROXY_EGRESS=1), then run BOTH
+scan steps in order: `node scan-ats-full.mjs --since 1` (the
+keyword-first sweep of the public ATS datasets — Greenhouse,
+Lever, Ashby, Workday, iCIMS, BambooHR, Paylocity, Workable), then
+`node scan.mjs --since 1` (the tracked companies in the install's
+portals.yml). `--since 1` is the past-24-hours window (below) —
+scan-ats-full's own default is 3 days; never rely on it and never
+widen it. The scan writes its NEW matches into the install's
+data/pipeline.md (Pending) and prints them: company, title, URL,
+location, posting date (pay when the ATS feed provides it). Those
+matches are the pass's candidates, worked NEWEST FIRST through
+the stocking flow below — the scan changes WHERE candidates come
+from, never how they are screened. The scan's title/location
+filters live in portals.yml (Senior Data Scientist + Machine
+Learning Engineer; US locations — CA/WA + US Remote; plain "Data
+Scientist" is NOT a scan title, and Senior MLE is out on this
+lane, exactly as on Jobright/Indeed). The scan is a script pass,
+not a browser pass: it runs in ONE bounded exec call with the
+same wall-clock return-by discipline, not a series of browser
+calls. If a scanner step errors (a board
+down, a network failure), record the pass with the matches you
+got, name the failed step in your report, and move on — never
+retry it in a loop. Stock scan finds through
+stock.py with source CAREEROPS.
+LINKEDIN JOB ALERTS (the user, Nov 12, 2026 — the fourth discovery
 source, email only): once a day, search Gmail with the sender-only
 query in rules.yaml inbox.jobalert_search (from:
 jobalerts-noreply@linkedin.com, past 24 hours — NO subject terms;
@@ -237,7 +279,8 @@ and the gate packet carried in the item's gate field. When every
 job in the email is vetted, close the email with `spine.py inbox
 jobalert-record` (outcome: screened).
 ONE PASS PER SOURCE PER RUN (the user, Nov 12, 2026): the discovery
-round is a Jobright pass, then an Indeed pass — one pass per
+round is a Jobright pass, then an Indeed pass, then a CareerOps
+scan pass — one pass per
 source, Jobright first (prioritized) — and that is the whole
 round; do NOT loop back for more passes in the same run. Each
 source's position carries forward in your notes independently,
@@ -246,17 +289,18 @@ The alert pass is separate and finite: ONE alert pass per day
 covers all unprocessed alert emails (the LINKEDIN ALERTS section
 below).
 NEWEST POSTINGS FIRST (the user, Nov 8,
-2026): screen both sources newest-first — Jobright's newest
-sort, Indeed's Date sort — and work the results in that order. Do not dig deep into old
+2026): screen all sources newest-first — Jobright's newest
+sort, Indeed's Date sort, the scan's newest matches first — and work the results in that order. Do not dig deep into old
 postings while newer ones remain unscreened; reach older postings
 only after the newest supply is screened through.
-PAST-24-HOURS SCAN WINDOW — JOBRIGHT + INDEED (the user, Nov 12, 2026:
-"For indeed and jobright, also only scan the past 24 hours"):
-each Jobright/Indeed pass works newest-first and STOPS at the
+PAST-24-HOURS SCAN WINDOW — JOBRIGHT + INDEED + CAREEROPS (the user, Nov 12, 2026:
+"For indeed and jobright, also only scan the past 24 hours";
+the CareerOps scan joined the same window Nov 16, 2026):
+each Jobright/Indeed pass and the scan pass works newest-first and STOPS at the
 24-hour boundary; postings older than 24 hours are not scanned,
 screened, or stocked in the pass (stock.py enforces it for known
 ages; an age the source does not show is allowed). This reinstates
-the Nov 10, 2026 window for these two sources and supersedes the
+the Nov 10, 2026 window for these sources and supersedes the
 Nov 11, 2026 no-age-filter rule for them. LINKEDIN_ALERT is
 exempt — the daily alert email is itself the window. Dedupe in
 code (stock.py) keeps already-seen postings from being re-worked.
@@ -268,8 +312,8 @@ such calls — continue where the last call stopped, position in the
 list carries forward in your notes, not in one long call.
 JOBRIGHT-ONLY MODE: when the program's answer carries
 jobright_only_mode / discovery_sources [JOBRIGHT, INDEED,
-LINKEDIN_ALERT], discovery is
-the external sources (Jobright + Indeed) plus the alert lane —
+CAREEROPS, LINKEDIN_ALERT], discovery is
+the external sources (Jobright + Indeed + the CareerOps scan) plus the alert lane —
 LinkedIn opens ONLY through the alert-email links, exactly as in
 the LINKEDIN ALERTS section.
 Screen under the standing rules in rules.yaml + GOAL.md: role filter
@@ -436,7 +480,7 @@ sweep and the audit can see it.
   outcome friction at once and end your LinkedIn work — the program
   scopes the stop by the item's source (a LinkedIn-sourced trigger
   stops the LinkedIn lane only and the external sources (Jobright
-  + Indeed) carry on under other
+  + Indeed + the CareerOps scan) carry on under other
   workers; any other trigger stops everything). LinkedIn sign-in
   problems alert the user immediately. Every
   disposition line you write in prose carries a Central-time

@@ -27,6 +27,12 @@ window:
     linkedin: 0
     jobright: 60
     indeed: 60
+    # CAREEROPS (design note): the career-ops scan can be enabled
+    # as an additional worker discovery source alongside Jobright
+    # and Indeed (see the discovery block). careerops carries the
+    # full 60 on the same terms — ONE shared window total of 60
+    # binds; the figures never sum.
+    careerops: 60
     # LINKEDIN ALERTS ADDED (design note): LinkedIn job alerts via the
     # daily alert emails are a third discovery source (see the
     # discovery block's linkedin_alert definition and the inbox
@@ -942,7 +948,7 @@ discovery:
   # the agent the Jobright/Indeed search rules every time it
   # initiates a worker, not only when the worker asks for a plan.
   in_worker_packet: "discovery_plan (pipeline.py next_order, all packet shapes)"
-  sources: ["JOBRIGHT", "INDEED", "LINKEDIN_ALERT"]
+  sources: ["JOBRIGHT", "INDEED", "CAREEROPS", "LINKEDIN_ALERT"]
   # NEWEST POSTINGS FIRST (design note):
   # discovery screens BOTH sources newest-first — on LinkedIn Jobs use
   # the most-recent sort / date-posted ordering, on Jobright use the
@@ -953,7 +959,7 @@ discovery:
   # (role, gate, pay, dedupe) is unchanged.
   newest_first: true
   order: newest_posted_first
-  # PAST-24-HOURS SCAN WINDOW — JOBRIGHT + INDEED ONLY (the user,
+  # PAST-24-HOURS SCAN WINDOW — JOBRIGHT + INDEED + THE CAREEROPS SCAN (the user,
   # Nov 12, 2026, 5:22 PM CT: "For indeed and jobright, also only
   # scan the past 24 hours."): each keyword pass on Jobright and
   # Indeed works newest-first and STOPS at the 24-hour boundary —
@@ -971,7 +977,7 @@ discovery:
   # clause is NOT reinstated (the user did not restate it). LINKEDIN_ALERT
   # is EXEMPT: the daily alert email is itself the window.
   max_posting_age_hours: 24
-  max_posting_age_sources: ["JOBRIGHT", "INDEED"]
+  max_posting_age_sources: ["JOBRIGHT", "INDEED", "CAREEROPS"]
   # ONE PASS PER SOURCE PER RUN (design note): per worker run,
   # discovery is ONE Jobright pass and ONE Indeed pass — each pass
   # covers that source's three keyword titles, newest-first, to the
@@ -986,7 +992,48 @@ discovery:
   # pass-counting is run behavior the code issues but cannot
   # refuse after the fact).
   passes_per_source_per_run: 1
-  passes_per_source_scope: ["JOBRIGHT", "INDEED"]
+  passes_per_source_scope: ["JOBRIGHT", "INDEED", "CAREEROPS"]
+  # CAREEROPS — AN ADDITIONAL WORKER SOURCE (design note): the
+  # career-ops SCAN function — the zero-token scanners in the
+  # career-ops install (scan-ats-full.mjs, the keyword-first sweep of
+  # the public ATS datasets, and scan.mjs over the tracked companies
+  # in portals.yml) — can run as an ADDITIONAL worker source
+  # alongside the Jobright and Indeed passes (never a replacement).
+  # Scan output is a CANDIDATE FEED ONLY: every candidate stocks
+  # through stock.py, whose screening order is unchanged —
+  # (1) blacklist, (2) duplication (the all-time applied record plus
+  # the cross-platform posting-ID match), (3) the company gate. This
+  # program remains the only system of record; career-ops
+  # evaluation/tracker/CV modes stay OFF.
+  careerops_method: career_ops_scan
+  careerops_root: "~/workspace/custom-skills/career-ops"
+  careerops_portals: "portals.yml in the install root (User Layer) — its title_filter / location_filter / max_posting_age_days mirror this block and answers.yaml job_search"
+  # THE SCAN STEPS — one pass is BOTH steps, run from the install
+  # root: scan-ats-full sweeps the public ATS datasets (Greenhouse,
+  # Lever, Ashby, Workday, iCIMS, BambooHR, Paylocity, Workable)
+  # keyword-first; scan.mjs covers the tracked companies in
+  # portals.yml. --since 1 is the past-24-hours window (below) —
+  # scan-ats-full's own default is 3 days; never rely on it.
+  careerops_scanners:
+    - {scanner: "scan-ats-full", command: "node scan-ats-full.mjs --since 1"}
+    - {scanner: "scan", command: "node scan.mjs --since 1"}
+  # SCAN TITLES + LOCATIONS: derived from answers.yaml job_search
+  # in code (discovery.effective_cfg) whenever onboarding wrote a
+  # real one; the values below are the fallback the code reads when
+  # answers carry none. portals.yml's filters mirror them.
+  careerops_titles: ["Senior Data Scientist", "Machine Learning Engineer"]
+  careerops_locations: ["Remote", "California", "Washington"]
+  careerops_job_type: full_time
+  # SCANNER ENV: the scanners reach the public ATS APIs through the
+  # sandbox egress proxy where one is present. career-ops' provider
+  # HTTP layer uses the proxy only under
+  # CAREER_OPS_TRUST_PROXY_EGRESS=1, and it refuses a proxy URL that
+  # carries credentials over http — so the pass runs with the
+  # credential stripped out of the proxy env vars first:
+  #   for v in http_proxy https_proxy HTTP_PROXY HTTPS_PROXY ALL_PROXY all_proxy; do
+  #     export $v=$(printf %s "${!v}" | sed -E 's#://[^@]*@#://#'); done
+  #   CAREER_OPS_TRUST_PROXY_EGRESS=1 node scan-ats-full.mjs --since 1
+  careerops_env: "CAREER_OPS_TRUST_PROXY_EGRESS=1; strip credentials from the http_proxy/https_proxy/HTTP_PROXY/HTTPS_PROXY/ALL_PROXY env vars first (sed -E 's#://[^@]*@#://#')"
   # LINKEDIN KEYWORD SEARCH (design note):
   # LinkedIn discovery uses Jobs SEARCH, not the personalized feed.
   # Run one search per title in linkedin_search_titles with the

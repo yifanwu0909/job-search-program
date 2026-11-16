@@ -153,6 +153,7 @@ def shadow_main() -> int:
     counts = status["verified_counts"]
     li = counts.get("LINKEDIN", 0)
     jr = counts.get("JOBRIGHT", 0)
+    co = counts.get("CAREEROPS", 0)
 
     # (b) incremental fold of new prose dispositions into shadow events
     st = sp.load_state()
@@ -211,7 +212,8 @@ def shadow_main() -> int:
         f"- Tower status: VERIFIED {status['verified_total']} of "
         f"{status['targets']['total']} (LinkedIn {li}/"
         f"{status['targets']['linkedin']}, Jobright {jr}/"
-        f"{status['targets']['jobright']}); staged "
+        f"{status['targets']['jobright']}, CareerOps {co}/"
+        f"{status['targets'].get('careerops', 0)}); staged "
         f"{len(status['staged'])}; captcha {len(status['captcha'])}; "
         f"limbo {len(status['limbo'])}; bench {len(status['bench'])}; "
         f"claimed-unfinished {len(status['claimed_unfinished'])}.\n"
@@ -238,6 +240,7 @@ def shadow_main() -> int:
         "pass": sstate["passes"], "window": wdate,
         "verified_total": status["verified_total"],
         "verified_linkedin": li, "verified_jobright": jr,
+        "verified_careerops": co,
         "staged": len(status["staged"]), "captcha": len(status["captcha"]),
         "limbo": len(status["limbo"]), "bench": len(status["bench"]),
         "events_folded": folded, "divergences": divergences,
@@ -268,6 +271,7 @@ def driver_main() -> int:
     counts = status["verified_counts"]
     li = counts.get("LINKEDIN", 0)
     jr = counts.get("JOBRIGHT", 0)
+    co = counts.get("CAREEROPS", 0)
 
     chk = sp.state_check(wdate)
     divergences = chk["divergences"]
@@ -287,7 +291,8 @@ def driver_main() -> int:
         f"- Tower status: VERIFIED {status['verified_total']} of "
         f"{status['targets']['total']} (LinkedIn {li}/"
         f"{status['targets']['linkedin']}, Jobright {jr}/"
-        f"{status['targets']['jobright']}); staged "
+        f"{status['targets']['jobright']}, CareerOps {co}/"
+        f"{status['targets'].get('careerops', 0)}); staged "
         f"{len(status['staged'])}; captcha {len(status['captcha'])}; "
         f"limbo {len(status['limbo'])}; bench {len(status['bench'])}; "
         f"claimed-unfinished {len(status['claimed_unfinished'])}.\n"
@@ -317,6 +322,7 @@ def driver_main() -> int:
         "window": wdate,
         "verified_total": status["verified_total"],
         "verified_linkedin": li, "verified_jobright": jr,
+        "verified_careerops": co,
         "staged": len(status["staged"]), "captcha": len(status["captcha"]),
         "limbo": len(status["limbo"]), "bench": len(status["bench"]),
         "prose_verified": chk["prose"]["verified_total"],

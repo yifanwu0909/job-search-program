@@ -82,6 +82,11 @@ The verdict (one JSON line):
                  external sources — Jobright + Indeed: next_order
                  serves Jobright- and Indeed-sourced items and both
                  sources' discovery. The verdict name is unchanged.
+                 Since Nov 16, 2026 the mode also covers the
+                 CareerOps scan (CAREEROPS), added as a third external
+                 worker source alongside Jobright + Indeed (the user
+                 reversed a scan-replaces-both change the same day:
+                 "Use career ops as additional resources").
                  LinkedIn job alerts (the user, Nov 12, 2026) ride the same
                  mode: LINKEDIN_ALERT is its own lane — alert-sourced
                  items stay servable under LinkedIn-lane friction
@@ -361,6 +366,9 @@ def verdict_for(status: dict, rules: dict, now: datetime,
                         # status dict from before the change has no
                         # indeed target — default 0, never KeyError.
                         "indeed": targets.get("indeed", 0),
+                        # CareerOps passthrough (the user, Nov 16,
+                        # 2026): same default-0 rule as Indeed.
+                        "careerops": targets.get("careerops", 0),
                         # LinkedIn-alert passthrough (the user, Nov 12,
                         # 2026): same default-0 rule as Indeed.
                         "linkedin_alert": targets.get(
@@ -438,10 +446,12 @@ def verdict_for(status: dict, rules: dict, now: datetime,
                 "jobright_only": jobright_only,
                 "template": "program/worker_template.md",
                 "detail": ("LinkedIn lane stopped by friction — "
-                           "the external sources (Jobright + Indeed) "
+                           "the external sources (Jobright + Indeed + "
+                           "the CareerOps scan) "
                            "and the LinkedIn-alert lane "
                            "carry the window (the user, Nov 7, 2026; Indeed "
-                           "and LinkedIn alerts added Nov 12, 2026): "
+                           "and LinkedIn alerts added Nov 12, 2026; "
+                           "CareerOps scan added Nov 16, 2026): "
                            "work remains and "
                            "worker slots are "
                            "free — the guardian claims each launch, "

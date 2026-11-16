@@ -43,8 +43,9 @@ Recruiters will write back. Decide in advance:
 
 - LinkedIn, with Premium Career active. Used for job alerts, connection invitations, and replies. Your Muse signs in as you in its browser.
 - LinkedIn alerts and notifications. Your Muse sets these up for you during onboarding, from your job search answers: job alerts saved with the past 24 hours filter, alert emails daily; email, inbox message, and invitation notifications on individual; every other notification off. The system reads that mail to discover jobs and hear about new messages. Details: docs/linkedin-notifications.md.
-- Jobright, on a paid plan. One of the two main sources of new postings.
-- Indeed. The second source. Indeed is used for finding and screening only; applications always go in on the employer's own site.
+- Jobright, on a paid plan. One of the main sources of new postings.
+- Indeed. Another source. Indeed is used for finding and screening only; applications always go in on the employer's own site.
+- The career-ops scanner (free, open source). A third source: it reads the public ATS boards (Greenhouse, Lever, Ashby, Workday, iCIMS, and more) directly, on the same past-24-hours window. Its finds are candidates only — the program screens and stocks them like every other source.
 - Gmail, with Google Calendar and Google Tasks connected. Confirmations and recruiter mail land in Gmail. Interviews go on the calendar. Interview requests and assessments become tasks.
 
 ## Your two daily windows

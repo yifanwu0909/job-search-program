@@ -182,13 +182,14 @@ class Spine:
         2026: "when LinkedIn stopped stocking, use jobright").
 
         Returns None (no flag), "linkedin" (LinkedIn lane only —
-        Jobright discovery and Jobright-sourced orders continue), or
+        external discovery (Jobright + Indeed + the CareerOps scan)
+        and external-sourced orders continue), or
         "all" (full stop). The scope is data the flag carries from
         record() time: the triggering item's source. A flag with no
         recorded scope — every flag set before Nov 7, 2026, whose file
         holds only set_at/signal/item_id — reads as "linkedin" when
         the item's source is LINKEDIN and as "all" when the item is
-        unknown (not in the log) or Jobright-sourced: never widen a
+        unknown (not in the log) or external-sourced: never widen a
         stop on a guess, and never narrow one either."""
         fric = fric if fric is not None else self.friction_active()
         if not fric:
@@ -437,13 +438,18 @@ class Spine:
         # the SAME window total. Jobright and Indeed each carry the
         # full split figure and the configured total stays binding,
         # so the total is read from config — never summed across
-        # sources (summing would triple-count the shared 60).
+        # sources (summing would multiply-count the shared 60).
         # LINKEDIN ALERTS (the user, Nov 12, 2026): a fourth figure on the
         # same terms — LinkedIn job alerts via the daily alert emails
         # feed the SAME total; the total binds, never a sum.
+        # CAREEROPS (the user, Nov 16, 2026): the career-ops scan is a
+        # fifth figure on the exact same terms — an ADDITIONAL worker
+        # source alongside Jobright and Indeed (her replacement idea
+        # was reversed the same day); the total still binds.
         total = base.get("total", linkedin + base["jobright"])
         return {"linkedin": linkedin, "jobright": base["jobright"],
                 "indeed": base.get("indeed", 0),
+                "careerops": base.get("careerops", 0),
                 "linkedin_alert": base.get("linkedin_alert", 0),
                 "total": total,
                 "ladder_step": step, "configured": base,
@@ -700,13 +706,17 @@ class Spine:
             # for the entire LinkedIn share, total still binding.
             # Since Nov 12, 2026 the fallback covers BOTH external
             # sources: Indeed carries on the exact Jobright rules, so
-            # its target becomes the total too. LinkedIn alerts ride
+            # its target becomes the total too. Since Nov 16, 2026 it
+            # covers the CareerOps scan as well — a third external
+            # worker source on the same terms, so its target becomes
+            # the total too. LinkedIn alerts ride
             # the same fallback (their lane is not the stopped one),
             # so the alert target becomes the total as well.
             targets = {**targets,
                        "linkedin": counts.get("LINKEDIN", 0),
                        "jobright": targets["total"],
                        "indeed": targets["total"],
+                       "careerops": targets["total"],
                        "linkedin_alert": targets["total"]}
         slots = set(ws["company_slots_used"])
         # Diversification ORDER in code (audit fix, Nov 4, 2026): companies
@@ -790,16 +800,18 @@ class Spine:
                 else:
                     checks.append({
                         "check": "linkedin_lane_stopped",
-                        "ok": src in ("JOBRIGHT", "INDEED"),
+                        "ok": src in ("JOBRIGHT", "INDEED", "CAREEROPS"),
                         "detail": "LinkedIn friction — LinkedIn lane "
                                   "stopped; external sources only — "
-                                  "Jobright + Indeed (the user, Nov 7, 2026; "
-                                  "Indeed added Nov 12, 2026); the "
+                                  "Jobright + Indeed + the CareerOps "
+                                  "scan (the user, Nov 7, 2026; "
+                                  "Indeed added Nov 12, 2026; CareerOps "
+                                  "scan added Nov 16, 2026); the "
                                   "LinkedIn-alert lane runs separately"})
             tgt = targets.get(src.lower())
             src_open = tgt is not None and counts.get(src, 0) < tgt
             flex_note = ""
-            if (not src_open and src in ("JOBRIGHT", "INDEED", "LINKEDIN_ALERT")
+            if (not src_open and src in ("JOBRIGHT", "INDEED", "CAREEROPS", "LINKEDIN_ALERT")
                     and targets.get("jobright_flex_cover")
                     and counts.get("LINKEDIN", 0) < (targets.get("linkedin")
                                                      or 0)
@@ -807,7 +819,8 @@ class Spine:
                 # SOURCE FLEX (the user, Nov 4, 2026): Jobright covers a
                 # LinkedIn shortfall past its 20 split; total binding.
                 # Indeed rides the same flex on the same terms (the user,
-                # Nov 12, 2026 — "exact same rule" as Jobright).
+                # Nov 12, 2026 — "exact same rule" as Jobright), and the
+                # CareerOps scan rides it too (added Nov 16, 2026).
                 src_open = True
                 flex_note = " (flex cover: LinkedIn short)"
             checks.append({"check": "source_target_open",
@@ -918,11 +931,13 @@ class Spine:
                     "jobright_only_mode": jobright_only,
                     "lane_restriction": (
                         "LINKEDIN LANE STOPPED (friction) — external "
-                        "sources (Jobright + Indeed) plus the "
+                        "sources (Jobright + Indeed + the CareerOps "
+                        "scan) plus the "
                         "LinkedIn-alert lane carry the window: "
                         "no LinkedIn discovery or search, no LinkedIn "
                         "SSO (use Google SSO), no LinkedIn People gate "
-                        "checks; stock and fly Jobright-, Indeed- and "
+                        "checks; stock and fly Jobright-, Indeed-, "
+                        "CareerOps- and "
                         "LinkedIn-alert-sourced items; Easy Apply is "
                         "allowed ONLY for alert-sourced items reached "
                         "via the daily alert email (the user, Nov 12, 2026: "
@@ -949,8 +964,8 @@ class Spine:
                     "claimed_unfinished": [it.id for it in ws["claimed"]],
                     "jobright_only_mode": jobright_only,
                     "discovery_sources": (
-                        ["JOBRIGHT", "INDEED", "LINKEDIN_ALERT"] if jobright_only
-                        else ["LINKEDIN", "JOBRIGHT", "INDEED", "LINKEDIN_ALERT"])}
+                        ["JOBRIGHT", "INDEED", "CAREEROPS", "LINKEDIN_ALERT"] if jobright_only
+                        else ["LINKEDIN", "JOBRIGHT", "INDEED", "CAREEROPS", "LINKEDIN_ALERT"])}
         return {"status": "empty", "reason": "no bench item passes preconditions",
                 "skipped": skipped,
                 "stocking": self.rules.get("stocking"),
@@ -962,8 +977,8 @@ class Spine:
                 "claimed_unfinished": [it.id for it in ws["claimed"]],
                 "jobright_only_mode": jobright_only,
                 "discovery_sources": (
-                    ["JOBRIGHT", "INDEED", "LINKEDIN_ALERT"] if jobright_only
-                    else ["LINKEDIN", "JOBRIGHT", "INDEED", "LINKEDIN_ALERT"])}
+                    ["JOBRIGHT", "INDEED", "CAREEROPS", "LINKEDIN_ALERT"] if jobright_only
+                    else ["LINKEDIN", "JOBRIGHT", "INDEED", "CAREEROPS", "LINKEDIN_ALERT"])}
 
     # --------------------------------------------------------------- record
     def _enqueue_verify(self, item_id: int, company: str):

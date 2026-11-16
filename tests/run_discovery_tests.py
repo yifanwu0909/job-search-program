@@ -1,18 +1,29 @@
 #!/usr/bin/env python3
-"""Discovery-management tests (the user, Nov 13, 2026 — sources in code).
+"""Discovery-management tests (the user, Nov 13, 2026 — sources in
+code; Nov 16, 2026 — the career-ops scan is a THIRD worker source,
+added alongside Jobright and Indeed at the user's direction: "Use
+career ops as additional resources to stock the bench").
 
-ISOLATED BY CONSTRUCTION: the discovery state file lives in a fresh
-temp dir; nothing here reads or writes the live program state. The
-plan is built from the LIVE rules.yaml on purpose — these checks pin
-the user's source rules (three sources, the four-search matrices, the
-sites' own filters, the alert lane's manager) to the config the code
-actually reads, so a config edit that breaks a rule fails loudly.
+ISOLATED BY CONSTRUCTION: the discovery state file and the stock
+log live in fresh temp dirs; nothing here reads or writes the live
+program state. The plan is built from the LIVE rules.yaml on
+purpose — these checks pin the user's source rules (JOBRIGHT +
+INDEED + CAREEROPS + LINKEDIN_ALERT, the four-search matrices, the
+sites' own filters, the scan steps, the past-24-hours window, the
+alert lane's manager) to the config the code actually reads, so a
+config edit that breaks a rule fails loudly.
 
-Covered: plan shape for all three sources; pass recording; the
-one-pass-per-source-per-run refusal (the user's one-pass rule enforced in
-code); matrix coverage refusal (missing or extra searches); the
-alert source refusing worker-pass recording; bad-count refusal;
-code-computed coverage.
+Covered: plan shape for all four sources; pass recording (search
+matrices for Jobright/Indeed, steps_done for the scan); the
+one-pass-per-source-per-run refusal (the user's one-pass rule
+enforced in code); matrix/step coverage refusal (missing or extra
+entries); the alert source refusing worker-pass recording;
+bad-count refusal; code-computed coverage; and the DUPLICATE
+screen proofs for the scan source (the user, Nov 16, 2026: "Still
+verify for duplicate"): a CAREEROPS candidate whose company is in
+the all-time applied record is dropped by the duplication screen,
+and a CAREEROPS candidate carrying the same ATS posting id as an
+earlier JOBRIGHT find is caught cross-platform.
 
 Run: python3 tests/run_discovery_tests.py
 """
@@ -30,6 +41,7 @@ sys.path.insert(0, str(BASE / "engine"))
 sys.path.insert(0, str(BASE / "checks"))
 
 import discovery as disc  # noqa: E402
+import stock  # noqa: E402
 
 FAILS = []
 
@@ -50,8 +62,9 @@ def main() -> int:
           "program/state" not in str(state))
 
     plans = disc.build_plan(rules)
-    check("p: plan covers exactly the three sources",
-          set(plans) == {"JOBRIGHT", "INDEED", "LINKEDIN_ALERT"})
+    check("p: plan covers exactly the four sources",
+          set(plans) == {"JOBRIGHT", "INDEED", "CAREEROPS",
+                         "LINKEDIN_ALERT"})
     check("p: Jobright plan carries the 4-search matrix and both "
           "site filters",
           len(plans["JOBRIGHT"]["searches"]) == 4
@@ -68,12 +81,35 @@ def main() -> int:
           "work_model_filter"
           and plans["INDEED"]["searches"][2]["remote_via"] ==
           "location_field")
-    check("p: both worker sources are one pass per run, screening "
-          "only, employer-site applications",
+    check("p: both browser worker sources are one pass per run, "
+          "screening only, employer-site applications",
           all(plans[s]["passes_per_run"] == 1
               and plans[s]["screening_only"] is True
               and "employer/ATS" in plans[s]["apply_route"]
               for s in ("JOBRIGHT", "INDEED")))
+    co = plans["CAREEROPS"]
+    check("p: CareerOps plan is the ATS scan from the install root",
+          co["kind"] == "worker_pass"
+          and co["method"] == "career_ops_scan"
+          and co["install_root"].endswith("career-ops")
+          and "portals.yml" in co["portals_config"])
+    check("p: scan steps are scan-ats-full then scan, both --since 1 "
+          "(the past-24-hours window, never widened)",
+          [s["scanner"] for s in co["scan_steps"]] ==
+          ["scan-ats-full", "scan"]
+          and all("--since 1" in s["command"]
+                  for s in co["scan_steps"]))
+    check("p: scan titles are the job-search titles (plain 'Data "
+          "Scientist' is not a scan title)",
+          co["titles"] == ["Senior Data Scientist",
+                           "Machine Learning Engineer"],
+          str(co["titles"]))
+    check("p: CareerOps pass is one per run, full-time, employer/ATS "
+          "applications",
+          co["passes_per_run"] == 1
+          and co["job_type"] == "full_time"
+          and "employer/ATS" in co["apply_route"]
+          and co["max_posting_age_hours"] == 24)
     check("p: alert plan is an email flow managed by the inbox "
           "job-alert flow, max 5 pages",
           plans["LINKEDIN_ALERT"]["kind"] == "email_flow"
@@ -139,6 +175,119 @@ def main() -> int:
           {"passes": 2, "cards_seen": 59, "candidates": 4,
            "last_run_id": "run-B"}
           and cov["sources"]["INDEED"]["passes"] == 0)
+
+    steps = [s["scanner"] for s in co["scan_steps"]]
+    co_packet = {"source": "CAREEROPS", "run_id": "run-A",
+                 "steps_done": steps, "cards_seen": 49,
+                 "candidates": [{"company": "Example Co",
+                                 "title": "Senior Data Scientist",
+                                 "url": "https://example.com/1"},
+                                {"company": "Other Co",
+                                 "title": "Machine Learning Engineer",
+                                 "url": "https://example.com/2"}]}
+    co_row = disc.record_pass(state, co_packet, rules)
+    check("r: a full-steps CareerOps pass records (candidates "
+          "counted from the list)",
+          co_row["source"] == "CAREEROPS"
+          and co_row["cards_seen"] == 49
+          and co_row["candidates"] == 2)
+    try:
+        disc.record_pass(state, co_packet, rules)
+        check("r: second CareerOps pass for same run REFUSED "
+              "(one-pass rule in code)", False)
+    except ValueError:
+        check("r: second CareerOps pass for same run REFUSED "
+              "(one-pass rule in code)", True)
+    try:
+        disc.record_pass(state, {**co_packet, "run_id": "run-B",
+                                 "steps_done": steps[:1]}, rules)
+        check("r: incomplete scan-step set refused", False)
+    except ValueError:
+        check("r: incomplete scan-step set refused", True)
+    try:
+        disc.record_pass(state, {**co_packet, "run_id": "run-B",
+                                 "steps_done": steps + ["scan-x"]},
+                         rules)
+        check("r: extra scan step outside the plan refused", False)
+    except ValueError:
+        check("r: extra scan step outside the plan refused", True)
+    try:
+        disc.record_pass(state, {**co_packet, "run_id": "run-B",
+                                 "candidates": [{"company": "NoUrl Co",
+                                                 "title": "Senior Data "
+                                                          "Scientist"}]},
+                         rules)
+        check("r: scan candidate without a posting url refused",
+              False)
+    except ValueError:
+        check("r: scan candidate without a posting url refused", True)
+
+    disc.record_pass(state, {**co_packet, "run_id": "run-B",
+                             "cards_seen": 10, "candidates": 1}, rules)
+    cov = disc.coverage(state, day=co_row["day"])
+    check("s: CareerOps coverage is code-computed across runs",
+          cov["sources"]["CAREEROPS"] ==
+          {"passes": 2, "cards_seen": 59, "candidates": 3,
+           "last_run_id": "run-B"})
+
+    # --- DUPLICATE SCREEN PROOFS for the CAREEROPS source (the
+    # user, Nov 16, 2026: "Still verify for duplicate"). The screens
+    # are stock.py's, run against a synthetic log whose applied
+    # record holds Fixture Corp.
+    fixture = """# Outreach log (test fixture)
+
+### Blocked companies — THE DEAD-NO-GO ZONE (test fixture)
+
+- Blockedco
+
+## 2026-11-05 — LinkedIn Recommended applications batch — 2026-11-05
+
+- [3:00 PM CST, Mon Oct 26, 2026] STOCKED #100 — Fixture Corp — Data Scientist — source LINKEDIN
+- [3:05 PM CST, Mon Oct 26, 2026] SUBMITTED (page-confirmed) — #100 Fixture Corp, Data Scientist (Fixture careers). Confirmation: portal page. SOURCE TAG: LINKEDIN. (Recorded by spine program.)
+"""
+    log = tmp / "log.md"
+    log.write_text(fixture, encoding="utf-8")
+
+    out = stock.record({"items": [
+        {"company": "Fixture Corp", "role": "Senior Data Scientist",
+         "source": "CAREEROPS",
+         "url": "https://job-boards.greenhouse.io/fixturecorp/jobs/1",
+         "gate": {"screen_only": True}}]}, log_path=log)
+    rec = out["recorded"][0] if out["recorded"] else {}
+    check("d1 CAREEROPS candidate at an already-applied company is "
+          "dropped by the DUPLICATE screen",
+          rec.get("gate") == "DROPPED_DUPLICATE_COMPANY"
+          and rec.get("state") == "skipped_duplicate"
+          and rec.get("verified") is True, str(out))
+
+    def full_item(company, role, source, url):
+        return {"company": company, "role": role, "source": source,
+                "url": url,
+                "gate": {"total": 3000, "india": 100,
+                         "source": "Revelio Labs"},
+                "pay": {"figure": 250000, "basis": "city",
+                        "city": "Chicago, IL", "source": "bestplaces"}}
+
+    out = stock.record({"items": [
+        full_item("Crossplat Co", "Senior Data Scientist", "JOBRIGHT",
+                  "https://job-boards.greenhouse.io/crossplatco/jobs/"
+                  "555001?gh_jid=555001")]}, log_path=log)
+    cross_id = out["recorded"][0]["id"] if out["recorded"] else None
+    check("d2 setup: the original Jobright find stocks",
+          bool(out["recorded"])
+          and out["recorded"][0]["state"] == "bench", str(out))
+    out = stock.record({"items": [
+        full_item("Crossplat Co", "Machine Learning Engineer",
+                  "CAREEROPS",
+                  "https://boards.greenhouse.io/crossplatco/jobs/"
+                  "555001")]}, log_path=log)
+    check("d2 CAREEROPS candidate with the same ATS posting id as "
+          "an earlier JOBRIGHT find is a cross-platform duplicate "
+          "(different title, different board host)",
+          len(out["duplicates"]) == 1
+          and out["duplicates"][0]["existing_id"] == cross_id
+          and out["duplicates"][0]["source"] == "CAREEROPS"
+          and not out["recorded"], str(out))
 
     print(f"\n{'ALL PASS' if not FAILS else 'FAILURES: ' + ', '.join(FAILS)}"
           f" ({len(FAILS)} failed)")

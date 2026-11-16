@@ -308,7 +308,7 @@ Times are Central. The window for a day's **60-application target** (customizabl
 
 ### Job discovery
 
-**8:23 AM:** the daily batch starts (`linkedin-recommended-applications-daily`). Workers search **Jobright** and **Indeed** for postings from the **last 24 hours** and take in the **LinkedIn job alert emails**.
+**8:23 AM:** the daily batch starts (`linkedin-recommended-applications-daily`). Workers search **Jobright** and **Indeed** for postings from the **last 24 hours**, run the **career-ops scan** over the public ATS boards on the same window, and take in the **LinkedIn job alert emails**.
 
 ### Screening
 
@@ -342,7 +342,7 @@ The **shadow pass** (every 30 minutes) compares the written log with the program
 
 The code is organized in three folders under `program/`: the top level holds the entry points you run by name (`spine.py`, `supervisor.py`, `onboarding.py`, `install.py`); `engine/` holds the shared library modules; `checks/` holds the standalone scan scripts the scheduled jobs run; `tools/` holds one-off utilities.
 
-- Job discovery: `engine/discovery.py`, driven by the worker template (`worker_template.md`). Sources: Jobright, Indeed, and LinkedIn alert emails.
+- Job discovery: `engine/discovery.py`, driven by the worker template (`worker_template.md`). Sources: Jobright, Indeed, the career-ops scan, and LinkedIn alert emails.
 - Screening and the company gate: `spine.py` (the gate and pay commands), `engine/gate_intake.py`, `engine/gate_fallback.py`, `engine/discovery.py`. Thresholds and rules: `config/rules.yaml`.
 - Stocking the bench: `engine/stock.py`. An item enters the bench only with a verified tailored resume attached, and the resume is built before stocking, not after.
 - Application: workers follow `worker_template.md` and take one work order at a time from `engine/pipeline.py` through `spine.py next`. Outcomes are recorded with `spine.py record`, which writes both the written log and the event book (`engine/events.py`, `events.jsonl`).
@@ -360,7 +360,7 @@ The code is organized in three folders under `program/`: the top level holds the
 - Targets and floors: job titles, locations or remote, and the lowest pay accepted for onsite, hybrid, and remote roles.
 - A block list of companies, plus any standing declines, such as a state where onsite roles are refused, or consulting work.
 - Reply rules: when to accept a call, what to decline, what may be shared (phone number, work authorization), and what must come back to the user.
-- Accounts and subscriptions: LinkedIn with Premium Career, Jobright on a paid plan, Indeed, and Gmail with Google Calendar and Google Tasks connected.
+- Accounts and subscriptions: LinkedIn with Premium Career, Jobright on a paid plan, Indeed, the free career-ops scanner, and Gmail with Google Calendar and Google Tasks connected.
 - Two daily windows when the user can tap approvals and solve captchas. Here they are YOUR_AFTERNOON_TIME and YOUR_EVENING_TIME.
 
 ## Who does what: the control tower and the planes
