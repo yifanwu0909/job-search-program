@@ -7,7 +7,9 @@
 What it does, in order:
   1. Checks the machine: Python 3.10+, PyYAML importable.
   2. Creates the runtime state directories the program expects
-     (program/state/, program/state/heartbeats/).
+     (program/state/, program/state/heartbeats/), plus the outreach
+     log file config/rules.yaml points at (paths.outreach_log),
+     empty if missing — the first status call reads it.
   3. Installs the career-ops skill files bundled in this repo
      (career-ops/) into <home>/workspace/custom-skills/career-ops/,
      unless they are already there. Existing files are never
@@ -74,6 +76,30 @@ def main():
         else:
             os.makedirs(path, exist_ok=True)
             check(f"program/{rel}/ created", os.path.isdir(path))
+    # The outreach log: the path comes from config (paths.outreach_log);
+    # the file itself is runtime data, so creating it empty is setup,
+    # not a config edit. An existing log is never touched.
+    try:
+        import yaml
+        with open(os.path.join(HERE, "config", "rules.yaml"),
+                  encoding="utf-8") as fh:
+            cfg = yaml.safe_load(fh) or {}
+        log_path = os.path.expanduser(
+            (cfg.get("paths") or {}).get("outreach_log", ""))
+        if not log_path:
+            failures += not check("outreach log ready", False,
+                                  "paths.outreach_log is not set")
+        elif os.path.exists(log_path):
+            check("outreach log exists (left as is)", True)
+        elif dry:
+            check(f"outreach log would be created at {log_path}", True)
+        else:
+            os.makedirs(os.path.dirname(log_path), exist_ok=True)
+            open(log_path, "w", encoding="utf-8").close()
+            check("outreach log created empty", os.path.exists(log_path))
+    except Exception as exc:  # config unreadable: report, do not guess
+        failures += not check("outreach log ready", False,
+                              str(exc)[:120])
 
     print("\n3. career-ops skill (contacto people-finding)")
     src = os.path.join(REPO, "career-ops")
