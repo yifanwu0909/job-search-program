@@ -1,5 +1,7 @@
 # Set up your LinkedIn notification emails first
 
+Job alerts, message notifications, and invitation emails are a prerequisite: the system discovers jobs and hears about new messages by scanning that mail.
+
 This system does not browse LinkedIn looking for news. It reads three kinds of LinkedIn notification email in your Gmail:
 
 - **Job alerts.** New postings from the alerts you saved. One of the three discovery sources.

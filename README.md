@@ -103,7 +103,7 @@ A few minutes a day, in two forms:
 ## Access it needs
 
 - Your LinkedIn account, signed in, Premium Career active.
-- **LinkedIn notification emails turned on.** Job alerts, message notifications, and invitation emails are a prerequisite: the system discovers jobs and hears about new messages by scanning that mail. There is a step-by-step setup guide in <a href="docs/linkedin-notifications.md" target="_blank" rel="noopener">docs/linkedin-notifications.md</a>.
+- **LinkedIn notification emails turned on.** There is a step-by-step setup guide in <a href="docs/linkedin-notifications.md" target="_blank" rel="noopener">docs/linkedin-notifications.md</a>.
 - Your Gmail connected, plus Google Calendar and Google Tasks. Confirmations, recruiter replies, and LinkedIn notifications all land in email, so Muse has to read mail to do this job. It sends mail only under the limits below.
 - Jobright and Indeed accounts, signed in.
 - Your base resume and your standing answers (checklist in the dropdown below).
