@@ -310,7 +310,8 @@ def plugin_step(state, state_path):
     print("  yourself. Jobright's free autofill plugin fills those forms")
     print("  in for you. Install it in your browser now: search your")
     print("  browser's extension store for the Jobright AI autofill")
-    print("  plugin.")
+    print("  plugin. Tell me when it's done and we'll wrap up the")
+    print("  onboarding.")
     while True:
         raw = input('Type "done" when it is installed, or "skip" to do '
                     "it later [break = take a break]: ").strip().lower()
