@@ -1,6 +1,31 @@
 # Job search program
 
-An automated job search that runs on your own Muse, in six blocks. **<a href="docs/detailed-documentation.md#how-a-day-runs" target="_blank" rel="noopener">Job discovery</a>** finds new postings every day on Jobright, Indeed, and your LinkedIn alert emails. **<a href="docs/detailed-documentation.md#how-a-day-runs" target="_blank" rel="noopener">Screening</a>** checks each posting against your rules (block list, already applied, company gate) before it is opened. **<a href="docs/detailed-documentation.md#how-a-day-runs" target="_blank" rel="noopener">Application</a>** builds a tailored resume for each posting and applies on the employer's own website. **<a href="docs/detailed-documentation.md#the-application-email-scan-every-30-minutes" target="_blank" rel="noopener">Application follow-up</a>** proves every submission and watches your email for what comes back: interview requests and assessments become to-dos, interviews are booked, and you get a briefing an hour before each one. **<a href="docs/detailed-documentation.md#how-a-day-runs" target="_blank" rel="noopener">LinkedIn networking</a>** finds the people who can hire for each role and invites them to connect. **<a href="docs/detailed-documentation.md#watching-for-linkedin-messages-every-15-minutes" target="_blank" rel="noopener">LinkedIn inbox replies</a>** answers recruiter messages under reply rules you set, so nothing sits unanswered. And all of it is kept in an honest written record.
+An automated job search that runs on your own Muse, in six blocks. Click a block for its detailed introduction.
+
+<table>
+  <tr>
+    <td bgcolor="#dbeafe" align="center" width="33%">
+      <a href="docs/detailed-documentation.md#how-a-day-runs" target="_blank" rel="noopener"><b>🔍 Job discovery</b><br/>New postings every day: Jobright, Indeed, LinkedIn alerts</a>
+    </td>
+    <td bgcolor="#dcfce7" align="center" width="33%">
+      <a href="docs/detailed-documentation.md#how-a-day-runs" target="_blank" rel="noopener"><b>🛡️ Screening</b><br/>Block list, already applied, company gate, all before anything opens</a>
+    </td>
+    <td bgcolor="#fef9c3" align="center" width="34%">
+      <a href="docs/detailed-documentation.md#how-a-day-runs" target="_blank" rel="noopener"><b>📝 Application</b><br/>A tailored resume per posting; applies on the employer's own site</a>
+    </td>
+  </tr>
+  <tr>
+    <td bgcolor="#ffedd5" align="center">
+      <a href="docs/detailed-documentation.md#the-application-email-scan-every-30-minutes" target="_blank" rel="noopener"><b>📬 Application follow-up</b><br/>Proves submissions, books interviews, briefs you an hour before</a>
+    </td>
+    <td bgcolor="#e9d5ff" align="center">
+      <a href="docs/detailed-documentation.md#how-a-day-runs" target="_blank" rel="noopener"><b>🤝 LinkedIn networking</b><br/>Finds the people who can hire for each role; invites them to connect</a>
+    </td>
+    <td bgcolor="#fee2e2" align="center">
+      <a href="docs/detailed-documentation.md#watching-for-linkedin-messages-every-15-minutes" target="_blank" rel="noopener"><b>💬 LinkedIn inbox replies</b><br/>Answers recruiter messages under your rules; nothing sits unanswered</a>
+    </td>
+  </tr>
+</table>
 
 It was built and tuned over several months of daily use. The daily target is **60 verified applications**.
 
