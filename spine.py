@@ -45,8 +45,10 @@ Usage:
       extracted job links, the See-all-jobs URL, and the code's
       fixed runner instructions)
       (connection-invitation emails in code, the user, Nov 12, 2026 —
-      see inbox.py: pinned sender messages-noreply@linkedin.com,
-      the shared processed pool, and Accept-link extraction)
+      see inbox.py: pinned sender invitations@linkedin.com,
+      identified by SENDER ONLY since Nov 16, 2026 (the subject is
+      never consulted), the shared processed pool, and Accept-link
+      extraction)
       (the LinkedIn inbox jobs' scope in code, the user, Nov 12, 2026 —
       see inbox.py: the email watch's past-hour window, Gmail-ID
       dedupe and non-message triage, the daily check's 24-hour

@@ -53,9 +53,12 @@ Coverage:
       subject from any other address.
   (o) CONNECTION-INVITATION emails (the user, Nov 12, 2026 — "Burn this
       into code. Just like message reply through email."): finder
-      pattern pinned — From messages-noreply@linkedin.com (NOT the
-      messaging-digest address), subject containing "invitation is
-      waiting for your response". A genuine invitation passes with
+      pattern pinned — SENDER-ONLY since Nov 16, 2026 (the user's
+      verdict: incoming connection invitations come only from
+      invitations@linkedin.com, an address that sends nothing else;
+      the Nov 12 sender + subject filter is scrapped and the subject
+      is NEVER a condition — the fixture subject is the real sampled
+      "I want to connect"). A genuine invitation passes with
       the FULL person name from the sender and accept_url from an
       Accept-anchor fixture; stale is refused + marked processed
       (and a retry is refused as already processed); a candidate
@@ -65,15 +68,15 @@ Coverage:
       invite-record writes the by-name acceptance log line +
       processed state on throwaway state (verified), a replay is
       refused, and a skipped outcome marks processed with NO log
-      line. The invitation_search config block is aligned with the
-      intake pass patterns.
+      line. The invitation_search config block is sender-only and
+      carries no subject gate.
   (p) JOB-ALERT pinned sender (the user, Nov 12, 2026 — "for all email
       comes from 'jobalerts-noreply@linkedin.com' only... Burn
       this into code."): the watch list's third pinned sender. A
       candidate from that exact address is refused by BOTH intakes
       on the exact address — even when its subject would otherwise
-      pass (a "just messaged you" subject at watch-intake, the
-      invitation phrase at invite-intake) — and the refusal is
+      pass (a "just messaged you" subject at watch-intake, an
+      invitation candidate at invite-intake) — and the refusal is
       marked processed. The job_alert_sender config entry exists
       and is the exact address.
   (r) STRIPPED job-alert candidates (the user, Nov 13, 2026 — "fix
@@ -469,8 +472,8 @@ INVITE_HTML = f"""<html><body>
 <p><a href="{INVITE_ACCEPT_URL}" style="background:#0a66c2;color:#ffffff">Accept</a>
 <a href="https://www.linkedin.com/in/sara-kim/">View profile</a></p>
 </body></html>"""
-INVITE_SENDER = "Sara Kim via LinkedIn <messages-noreply@linkedin.com>"
-INVITE_SUBJECT = "Sara's invitation is waiting for your response"
+INVITE_SENDER = "Sara Kim <invitations@linkedin.com>"
+INVITE_SUBJECT = "I want to connect"
 
 
 def icand(gmail_id: str, minutes_ago: int, subject: str = INVITE_SUBJECT,
@@ -536,7 +539,7 @@ def test_invite_intake() -> None:
                subject="Houston ML Group group invitation is waiting "
                        "for your response",
                sender="Houston ML Group via LinkedIn "
-                      "<messages-noreply@linkedin.com>")],
+                      "<invitations@linkedin.com>")],
         now=NOW, **env.kw())
     check("o8 group invitation refused", len(out5["actionable"]) == 0
           and "group invitation" in out5["refused"][0]["reason"],
@@ -547,8 +550,7 @@ def test_invite_intake() -> None:
 
     out6 = ib.invite_intake(
         [icand("e0e0e0e0e0e0e0e0", 10,
-               subject="Sara's invitation is waiting for your "
-                       "response — sponsored")],
+               subject="I want to connect — sponsored")],
         now=NOW, **env.kw())
     check("o10 ad/marketing invitation refused",
           len(out6["actionable"]) == 0
@@ -613,22 +615,24 @@ def test_invite_config() -> None:
     rules = yaml.safe_load(ib.RULES_PATH.read_text(encoding="utf-8"))
     cfg = rules.get("inbox") or {}
     gs = cfg.get("invitation_search") or {}
-    check("o18 invitation_search block: pinned sender + subject + window",
-          gs.get("from_address") == "messages-noreply@linkedin.com"
-          and gs.get("subject_contains")
-          == "invitation is waiting for your response"
+    check("o18 invitation_search block: sender-only + window",
+          gs.get("from_address") == "invitations@linkedin.com"
+          and not gs.get("subject_contains")
+          and not gs.get("subject_regex")
           and gs.get("window_minutes") == 1440
-          and "messages-noreply@linkedin.com" in (gs.get("query") or "")
-          and "invitation is waiting for your response"
-          in (gs.get("query") or ""), str(gs))
-    pats = cfg.get("invitation_subject_patterns") or []
-    check("o19 intake pass patterns aligned with the search subject",
-          any(_re.search(p, INVITE_SUBJECT, _re.IGNORECASE) for p in pats)
-          and any(_re.search(p, gs.get("subject_contains") or "",
-                             _re.IGNORECASE) for p in pats), str(pats))
-    rx = _re.compile(gs.get("subject_regex") or "", _re.IGNORECASE)
-    check("o20 search subject regex matches the real subject form",
-          bool(rx.search(INVITE_SUBJECT)), str(gs))
+          and (gs.get("query") or "") == "from:invitations@linkedin.com",
+          str(gs))
+    check("o19 no invitation subject gate in config",
+          not (cfg.get("invitation_subject_patterns") or []),
+          str(cfg.get("invitation_subject_patterns")))
+    live_cfg = ib._inbox_cfg()
+    check("o20 invite triage is sender-only (any subject passes)",
+          ib._invite_triage(
+              {"subject": "Any subject at all",
+               "sender": INVITE_SENDER}, live_cfg) is None,
+          str(ib._invite_triage(
+              {"subject": "Any subject at all",
+               "sender": INVITE_SENDER}, live_cfg)))
 
 
 JOB_ALERT_SENDER = ("LinkedIn Job Alerts "
@@ -949,11 +953,12 @@ def test_jobalert_config_and_other_filters() -> None:
           and disc.get("linkedin_alert_easy_apply_allowed") is True
           and tg.get("linkedin_alert") == 60 and tg.get("total") == 60,
           str(tg))
-    # (q22) the OTHER two intakes keep BOTH filters (the user, Nov 12,
+    # (q22) the MESSAGE intake keeps BOTH filters (the user, Nov 12,
     # 2026 scope confirmation): the pinned message sender with a
-    # non-message subject is still refused on the subject, and the
-    # pinned invitation sender without the invitation subject is
-    # still refused on the missing pass pattern.
+    # non-message subject is still refused on the subject. The
+    # INVITATION intake is the opposite since Nov 16, 2026 (the
+    # user's verdict): sender-only — a pinned-sender candidate is
+    # actionable whatever its subject says (q23).
     env = Env()
     out = ib.watch_intake(
         [cand("e1e1e1e1e1e1e1e1", 10, "Your weekly summary",
@@ -967,10 +972,9 @@ def test_jobalert_config_and_other_filters() -> None:
         [icand("e2e2e2e2e2e2e2e2", 10,
                subject="Sara Kim sent you a message")],
         now=NOW, **env.kw())
-    check("q23 invitation intake still requires its subject pattern",
-          len(out["actionable"]) == 0
-          and "does not match an invitation pass pattern"
-          in out["refused"][0]["reason"], str(out))
+    check("q23 invitation intake is sender-only (subject ignored)",
+          len(out["actionable"]) == 1 and out["refused"] == [],
+          str(out))
     env.cleanup()
 
 

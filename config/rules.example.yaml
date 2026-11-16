@@ -356,28 +356,27 @@ inbox:
     subject_regex: "(just|has) messaged you"   # the exact subject is "<FirstName> just messaged you"; the "has messaged you" variant is accepted too
     window_minutes: 60           # past hour — mirrors past_hour_window_minutes; the run adds the time bound (an epoch after:, as the email scan computes it) at search time
     query: 'from:messaging-digest-noreply@linkedin.com subject:"messaged you"'   # the search string; the run appends the past-hour bound
-  invitation_search:             # CONNECTION-INVITATION EMAILS (design note): the user enabled LinkedIn email
-                                 # notifications for new connection invitations. The DAILY inbox job
-                                 # (linkedin-inbox-replies) searches Gmail for exactly this — the pinned
-                                 # invitation sender + the "invitation is waiting for your response"
-                                 # subject + the past 24 HOURS (cadence change, the user, Nov 12, 2026:
-                                 # "invitation watch you can do daily") — and hands every find
-                                 # to `spine.py inbox invite-intake`. NOTE the sender is messages-noreply@,
-                                 # a DIFFERENT address from the message notifications above.
-    from_address: messages-noreply@linkedin.com   # THE pinned invitation sender (design note) — an invitation candidate from any other address
+  invitation_search:             # CONNECTION-INVITATION EMAILS — SENDER-ONLY (design note): incoming
+                                 # connection invitations come ONLY from invitations@linkedin.com,
+                                 # and the user's LinkedIn notifications are configured so that
+                                 # address sends nothing else. Identification is the sender alone,
+                                 # exactly like job alerts — NO subject condition, ever. (An
+                                 # earlier sender + subject filter missed real invitations after
+                                 # LinkedIn changed its sending address and subject.) The DAILY
+                                 # inbox job (linkedin-inbox-replies) searches Gmail for this
+                                 # sender over the past 24 HOURS and hands every find to
+                                 # `spine.py inbox invite-intake`; everything downstream
+                                 # (Accept link, record) is unchanged.
+    from_address: invitations@linkedin.com   # THE pinned invitation sender (design note) — an invitation candidate from any other address
                                  # is refused at intake.
-    subject_contains: "invitation is waiting for your response"
-    subject_regex: "invitation is waiting for your response"   # the exact subject carries "<Name>'s invitation is waiting for your response"
-    window_minutes: 1440         # past 24 hours (CADENCE CHANGE, the user, Nov 12, 2026, 5:37 PM CT:
-                                 # "invitation watch you can do daily"): invitations are handled by the
-                                 # DAILY inbox job (linkedin-inbox-replies, 8:30 AM CT), NOT the
-                                 # every-15-minute watch — so an invitation stays actionable for
-                                 # 24 hours. The message watch window stays 60 minutes.
-    query: 'from:messages-noreply@linkedin.com subject:"invitation is waiting for your response"'   # the search string; the run appends the past-24-hours bound
+    window_minutes: 1440         # past 24 hours: invitations are handled by the DAILY inbox job
+                                 # (linkedin-inbox-replies, 8:30 AM CT), NOT the every-15-minute
+                                 # watch. The message watch window stays 60 minutes.
+    query: 'from:invitations@linkedin.com'   # SENDER-ONLY — the run appends the past-24-hours bound
   job_alert_sender:              # JOB-ALERT EMAILS — PINNED KNOWN SENDER (design note): ALL LinkedIn job-alert email comes
                                  # from this exact address only. It is the watch list's third pinned sender
                                  # (messages = messaging-digest-noreply@linkedin.com; invitations =
-                                 # messages-noreply@linkedin.com; job alerts = this one). Mail from this
+                                 # invitations@linkedin.com; job alerts = this one). Mail from this
                                  # address is classified in code as job-alert mail — NOT a message and NOT
                                  # an invitation: both INBOX intakes refuse it on the exact address. Since
                                  # Nov 12, 2026 (the user: "Add alerts alongside Jobright + Indeed") this mail is
@@ -447,18 +446,19 @@ inbox:
     - "^You have a new message from (.+?)$"
     - "^(.+?) sent you an InMail"
     - "InMail (?:message )?from (.+?)$"
-  invitation_subject_patterns:   # PASS patterns for CONNECTION-INVITATION emails (regex, case-insensitive;
-                              # The user, Nov 12, 2026): a subject matching one of these IS a genuine invitation
-                              # notification — the primary signal, aligned with invitation_search above.
-                              # A candidate whose subject matches none of these is refused at invite-intake.
-    - "invitation is waiting for your response"
+  # NO invitation_subject_patterns (design note): invitation identification is
+  # SENDER-ONLY (invitations@linkedin.com, see invitation_search above) — no subject
+  # pattern gates invite-intake. The group and ad/marketing refusal patterns below
+  # still govern who gets accepted; everything else about the flow is unchanged.
   invitation_subject_person_patterns:  # regex with ONE capture group: the inviter's name, tried in order
                               # (design note). The possessive form carries only the name as written in
                               # the subject (often a first name or a short form) — when the sender display
-                              # name ("<Full Name> via LinkedIn") carries more of the name, the program
-                              # prefers the fuller one, exactly as in message intake. Kept narrow and
-                              # config-tunable: the real invitation email's exact subject/name format has
-                              # not been sampled yet, so new subject forms get added HERE, not in code.
+                              # name carries more of the name, the program prefers the fuller one,
+                              # exactly as in message intake. The current invitation subject
+                              # ("I want to connect") carries NO name at all — the inviter's name
+                              # comes from the sender display name
+                              # ("<Full Name> <invitations@linkedin.com>"); these patterns remain
+                              # only for the old subject form if it ever recurs.
     - "^(.+?)'s invitation is waiting for your response"
     - "^(.+?)’s invitation is waiting for your response"
     - "^Invitation from (.+?) is waiting for your response"

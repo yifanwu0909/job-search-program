@@ -42,16 +42,18 @@ same ledger, never a second ledger.
 
 Connection invitations by email (the user, Nov 12, 2026 — "Burn this
 into code. Just like message reply through email."): the user enabled
-LinkedIn email notifications for new connection invitations. The
-finder pattern is pinned and DIFFERENT from the message one:
-From messages-noreply@linkedin.com, subject containing
-"invitation is waiting for your response" (rules.yaml
-inbox.invitation_search). `invite-intake` enforces, in code: the
-pinned sender (any other From address is refused), the same
-past-hour window, dedupe against the SAME processed-ID pool in
+LinkedIn email notifications for new connection invitations.
+Identification is SENDER-ONLY (the user, Nov 16, 2026 — her verdict
+after a real invitation arrived matching neither the Nov 12 sender
+nor its subject, and after she configured LinkedIn so the address
+sends invitations only): From invitations@linkedin.com, NO subject
+condition, ever (rules.yaml inbox.invitation_search) — the same
+identification shape as job alerts. `invite-intake` enforces, in
+code: the pinned sender (any other From address is refused), the
+24-hour window, dedupe against the SAME processed-ID pool in
 program/state/inbox.json (Gmail IDs are unique across both flows
-— one source of truth), the invitation pass pattern, and the
-group / ad-marketing refusal patterns. It parses the inviter's
+— one source of truth), and the group / ad-marketing refusal
+patterns. It parses the inviter's
 name (full name from the sender display, preferred) and extracts
 the Accept button/link href as accept_url — the run clicks THAT
 link, which redirects and connects the user to the person, without
@@ -266,22 +268,23 @@ Prints {"verdict": "CLAIMED", "matches": [...]} or {"verdict":
 6) INVITATION INTAKE — `spine.py inbox invite-intake
 candidates.json`
 The DAILY inbox job's invitation search (rules.yaml
-inbox.invitation_search; cadence change, the user, Nov 12, 2026 —
+inbox.invitation_search; cadence, the user, Nov 12, 2026 —
 "invitation watch you can do daily": invitations are handled
 once a day by linkedin-inbox-replies, NOT by the 15-minute watch):
-connection-invitation notifications ALWAYS come from
-messages-noreply@linkedin.com (a different address from the
-message notifications) with a subject containing "invitation is
-waiting for your response", in the past 24 hours. The run hands
-EVERY candidate to the program in the same JSON shape as
+connection-invitation notifications come ONLY from
+invitations@linkedin.com — SENDER-ONLY identification (the user,
+Nov 16, 2026: she configured her LinkedIn notifications so that
+address sends connection invitations and nothing else; the
+subject is never a condition — the current subject is
+"I want to connect"). The run searches the past 24 hours and
+hands EVERY candidate to the program in the same JSON shape as
 watch-intake (gmail_id, sender, subject, date, snippet?, body?,
 links?, html?).
 
 The program enforces, IN CODE: the From address EQUALS the pinned
 invitation sender (any other address is refused); received within
 the configured window (1440 minutes — 24 hours); not already processed (the SAME processed
-pool as the message watch — one source of truth); the subject
-matches the invitation pass pattern in config; group-invitation
+pool as the message watch — one source of truth); group-invitation
 patterns and the ad/marketing patterns refuse. Every refused
 candidate is recorded processed immediately and printed under
 "refused" with its reason (silently — a group invitation is never
@@ -957,8 +960,9 @@ def extract_accept_url(candidate: dict) -> str | None:
 def _invite_pinned_sender(candidate: dict, cfg: dict) -> bool:
     """True when the candidate's From ADDRESS is the pinned
     invitation address (rules.yaml inbox.invitation_search
-    .from_address — messages-noreply@linkedin.com, the user, Nov 12,
-    2026: "It always comes from this email")."""
+    .from_address — invitations@linkedin.com, the user, Nov 16,
+    2026: incoming connection invitations come only from this
+    address, and it sends nothing else)."""
     pinned = ((cfg.get("invitation_search") or {}).get("from_address")
               or "").strip().lower()
     return bool(pinned) and \
@@ -968,15 +972,18 @@ def _invite_pinned_sender(candidate: dict, cfg: dict) -> bool:
 def _invite_triage(candidate: dict, cfg: dict) -> str | None:
     """None when the candidate is a genuine connection-invitation
     notification, else the refusal reason (deterministic, config
-    patterns only). Order: GROUP patterns refuse first (a group
-    invitation is declined silently even when its subject carries
-    the invitation phrase); then the shared ad/marketing patterns
-    (non-message subject patterns on the subject, non-message
-    sender patterns on the sender display name — the pinned From
-    address itself is exact-matched before triage and never
-    pattern-refused); finally the invitation PASS pattern is
-    required — a pinned-sender email whose subject matches no pass
-    pattern is not an invitation notification."""
+    patterns only). Identification is SENDER-ONLY (the user,
+    Nov 16, 2026): the pinned invitations@linkedin.com address IS
+    the identification — the user's LinkedIn notifications are
+    configured so that address sends connection invitations and
+    nothing else, so NO subject pattern gates intake (the Nov 12
+    subject pass pattern is scrapped). What remains here is only
+    the standing accept-rule refusals: GROUP patterns refuse first
+    (a group invitation is declined silently); then the shared
+    ad/marketing patterns (non-message subject patterns on the
+    subject, non-message sender patterns on the sender display
+    name — the pinned From address itself is exact-matched before
+    triage and never pattern-refused)."""
     subject = candidate.get("subject") or ""
     sender = candidate.get("sender") or ""
     haystack = f"{subject} {sender}"
@@ -990,11 +997,7 @@ def _invite_triage(candidate: dict, cfg: dict) -> str | None:
     for pat in _patterns(cfg, "non_message_sender_patterns"):
         if pat.search(display):
             return f"non-message sender pattern: /{pat.pattern}/"
-    for pat in _patterns(cfg, "invitation_subject_patterns"):
-        if pat.search(subject):
-            return None
-    return ("subject does not match an invitation pass pattern "
-            "(invitation_subject_patterns)")
+    return None
 
 
 def invite_intake(candidates, now: datetime | None = None,
