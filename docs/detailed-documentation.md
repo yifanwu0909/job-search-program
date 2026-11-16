@@ -321,6 +321,8 @@ Each invitation is accepted through the **Accept link inside the email** — nev
 
 Each alert email's job list is vetted up to a hard limit of five pages, and every posting goes through the same screening as the other discovery sources before anything is stocked.
 
+**4. The sweep itself — the catch-all, and forward movement.** The sweep is the fourth scan in its own right: four times a day it re-checks the LinkedIn inbox directly, so anything the notification emails missed still gets caught within the same 12-hour window. And when a message it picks up moves an application forward — an interview request, a scheduling ask, next steps, an offer — the sweep acts on it in the same run: it checks the company's recorded gate verdict, books the interview on Google Calendar once the company and role are known (checking Google Calendar and the paired phone's calendar for conflicts first, under the user's standing availability), creates the forward-movement to-do on Google Tasks, and reports the news to the user in chat. A researched briefing then lands one hour before the meeting.
+
 ## The application email scan (every 30 minutes)
 
 Job: `job-application-email-followups`, with `email_sweep.py` doing the bookkeeping. Two kinds of mail matter:
@@ -377,6 +379,7 @@ The **message watch** (every 15 minutes) answers new LinkedIn messages under the
 - **Inbox messages** — the watch, every 15 minutes: **from messaging-digest-noreply@linkedin.com** AND **subject contains "messaged you"**, past hour only. The sweep additionally re-checks the LinkedIn inbox itself for conversations whose latest incoming message arrived within the past 12 hours and that no earlier run has claimed.
 - **Connection invitations** — the sweep, four times a day: **from invitations@linkedin.com**, **no subject test** (sender-only — under the setup above, that address sends connection invitations and nothing else), past 12 hours. Each one is accepted through the Accept link inside the email, and the acceptance is verified before it is recorded.
 - **Job alerts** — the sweep, four times a day: **from jobalerts-noreply@linkedin.com**, **no subject test** (sender-only — alert subjects are built from the first company on the list and arrive in many formats), past 12 hours. Each alert's job list is vetted up to five pages and feeds the discovery lane.
+- **The sweep itself** — the fourth scan, four times a day: it re-checks the LinkedIn inbox directly and catches anything the notification emails missed in the past 12 hours. Anything that moves a job forward — an interview request or a scheduling ask — is acted on in the same run: the interview is booked on the user's Google Calendar (once the company and role are known), a to-do is created on Google Tasks, and the news is reported to the user, with a researched briefing one hour before the meeting.
 
 The same three scans are described again, in the mail-flow order, under "The mail parts" above.
 
