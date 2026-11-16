@@ -160,7 +160,7 @@ The same goes for the pay floors, the job titles searched, the block list, the d
 
 ## Peace of mind 😌
 
-**Will this trip bot detection, hit LinkedIn rate limits, or put your account at risk? No — the program is built so LinkedIn barely feels it.** Discovery runs on public sources and job boards (Jobright, Indeed, and company career pages), and most of what LinkedIn contributes arrives as email LinkedIn sends you anyway. The direct LinkedIn activity that remains is small, spread across the day, and capped — and the moment LinkedIn shows any friction, the program stops and tells you instead of pushing through.
+**Will this put your LinkedIn account at risk? No.** Jobs are found on public sources and job boards, so LinkedIn carries almost none of the load — and the little it does there is spread out and capped. If LinkedIn ever pushes back, the program stops and tells you.
 
 ## More documentation
 
