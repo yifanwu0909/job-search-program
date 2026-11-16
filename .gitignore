@@ -1,0 +1,9 @@
+# Runtime data — never committed
+events.jsonl
+events.stocked.json
+state/
+__pycache__/
+tests/__pycache__/
+tests/*.jsonl
+tests/*.json
+tests/log_copy.md

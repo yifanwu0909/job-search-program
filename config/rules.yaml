@@ -1,0 +1,1419 @@
+# Machine-checked parameters for the application program (v1).
+# Source: application-program-design-2026-11-04.md. These are parameters the CODE
+# checks every pass — they are not prose for an agent to remember.
+
+window:
+  open_time_ct: "08:23"          # batch window opens 8:23 AM America/Chicago
+  length_hours: 24
+  no_new_starts_after_ct: "07:45"  # next morning, before close — ENFORCED by
+                                   # Spine.next_order (audit fix, Nov 4, 2026)
+  targets:
+    # ALL JOBRIGHT (the user, Nov 11, 2026 — strategy change: "Remember, we
+    # added a 40 for LinkedIn job and 20 for job right? Now switch
+    # all of that to job right."): applications NEVER touch LinkedIn
+    # now — discovery and applications run through Jobright and
+    # external employer/ATS sites only. LinkedIn is used ONLY by the
+    # daily outreach job (connection invitations). The window target
+    # is unchanged at 60 verified, now ALL Jobright-sourced:
+    # INDEED ADDED (the user, Nov 12, 2026 — "add indeed as job search
+    # source along jobright. Yes, exact same rule."): Indeed is a
+    # third discovery source under the exact Jobright rules (see the
+    # discovery block). jobright and indeed each carry the full 60
+    # figure because they feed ONE shared window total — the total
+    # stays binding at 60 and neither source raises it (the same
+    # shape Spine.next_order already uses in the Jobright fallback,
+    # where the carrying source's target becomes the total).
+    # LinkedIn is unchanged: target 0, invitations + inbox only.
+    linkedin: 0
+    jobright: 60
+    indeed: 60
+    # LINKEDIN ALERTS ADDED (the user, Nov 12, 2026 — "Add alerts
+    # alongside Jobright + Indeed."): LinkedIn job alerts via the
+    # daily alert emails are a third discovery source (see the
+    # discovery block's linkedin_alert definition and the inbox
+    # block's jobalert_search). linkedin_alert carries the full 60
+    # on the same terms as jobright/indeed — ONE shared window
+    # total of 60 binds; the figures never sum.
+    linkedin_alert: 60
+    total: 60
+  # Friction ladder applies to the NEXT window's LinkedIn-sourced target only.
+  # APPLIED IN CODE (audit fix, Nov 4, 2026): Spine.effective_targets walks
+  # past windows' friction_set events — a friction window steps down, a clean
+  # window at a dropped step steps back up. status/next use the effective
+  # targets; the numbers above are the ladder's top step and the Jobright split.
+  # Ladder retired with the LinkedIn target (Nov 11, 2026): the
+  # LinkedIn target is 0, so the ladder and floor are 0 — friction
+  # can no longer change a LinkedIn number that does not exist.
+  friction_ladder: [0]
+  friction_floor: 0
+  # SOURCE FLEX (the user, Nov 4, 2026): "Jobright you can put more in if you
+  # can't find enough LinkedIn ones. Don't sacrifice quality." The 40/20
+  # split is the plan, not a cap on Jobright: when LinkedIn is below its
+  # effective target and the window total is unmet, Jobright items stay
+  # servable past 20. The TOTAL stays binding; every quality filter
+  # (company gate, pay, role, dedupe, diversification) is unchanged.
+  # APPLIED IN CODE: Spine.next_order's source_target_open check and
+  # Spine.effective_targets (which reports jobright_flex_cover).
+  source_flex:
+    jobright_covers_linkedin_shortfall: true
+  # JOBRIGHT FALLBACK WHEN LINKEDIN IS STOPPED (the user, Nov 7, 2026: "Burn
+  # in code: when LinkedIn stopped stocking, use jobright."): the
+  # friction flag is LANE-SCOPED. A friction record whose item is
+  # LinkedIn-sourced — or whose source is unknown (every friction
+  # record before Nov 7, 2026; the flag file carries no source) —
+  # stops the LINKEDIN lane only: no LinkedIn discovery, no LinkedIn
+  # bench orders, no Easy Apply, no LinkedIn SSO. Jobright discovery
+  # and Jobright-sourced orders CONTINUE, with the source-flex total
+  # binding (Jobright covers the whole remaining need). A friction
+  # record on a JOBRIGHT-sourced item is a FULL stop, exactly as
+  # before. next_order enforces the lane; the supervisor LAUNCHes
+  # workers in jobright_only mode; bench_check reports
+  # RESTOCK_NEEDED_JOBRIGHT; recovery_check maps it to NEEDS_LAUNCH.
+  # The ladder above is unchanged: any friction_set event in a window
+  # still drops the NEXT window's LinkedIn target one step. Clearing
+  # the flag restores both lanes.
+  friction_fallback:
+    linkedin_friction_scope: linkedin_lane_only
+    fallback_source: JOBRIGHT
+
+pacing:
+  # ENFORCED by Spine.next_order (audit fix, Nov 4, 2026): same-host gap and
+  # per-window cap for the portal lane, min-gap and per-hour cap for Easy
+  # Apply; lanes never cross-apply. When every ready item is inside a gap,
+  # next_order returns status "pacing_hold" with the earliest next_at. The
+  # whole block is also stamped onto every work order.
+  # SLOWED WAY DOWN (the user, Nov 11, 2026 — after LinkedIn's "Important
+  # notice" high-volume warning and a forced re-login on the user's phone:
+  # "let's pause, let's make it a lot slower"): Easy Apply spacing
+  # widened from 45-75 min to 150-240 min, max 1 per hour. The
+  # LinkedIn lane is additionally PAUSED outright as of Nov 11, 2026
+  # (friction flag set + the LinkedIn-touching jobs disabled);
+  # these slower numbers govern when the user restarts it.
+  easy_apply:            # LinkedIn lane
+    min_gap_minutes: 150
+    max_gap_minutes: 240
+    max_per_hour: 1
+  portal_lane:
+    same_host_min_gap_minutes: 30
+    same_host_max_per_window: 10   # design band 8-10; code uses the cap
+    parallel_windows_max: 3        # different hosts only
+
+screening:
+  # SCREENING ORDER (the user, Nov 13, 2026: "Blacklist. Company
+  # duplications and Revelio check" — and "all these rules should
+  # be burned into code... it shall not be handled using agent"):
+  # every fresh posting grabbed off an aggregated list is screened
+  # WITHOUT opening it, in this exact order — (1) blacklist,
+  # (2) duplication against the all-time applied record,
+  # (3) the Revelio gate (LinkedIn fallback only when the company
+  # is not on Revelio — see gate.fallback_source). Enforced in
+  # stock.py record() for every source; inbox.py's alert
+  # instructions and the worker template only mirror it. Only a
+  # posting that passes all three is opened and vetted on its
+  # description (full-time direct, green-card eligible, technical
+  # work, not consulting); only then is it stocked to the bench.
+  order: [blacklist, duplicate_company, revelio_gate]
+  duplicate_company_action: drop
+  # The duplication screen's ONLY exemption: a the user-directed or
+  # recruiter-requested one-off, marked "wu_directed": true on
+  # the stock form. The blacklist has NO exemption.
+  duplicate_company_exemption: wu_directed
+
+diversification:
+  max_per_company_per_window: 1    # combined queue, both sources
+  fill_in_all_time_verified_threshold: 4   # 4+ all-time verified = fill-in only
+  # SUPERSEDED AT STOCKING (the user, Nov 13, 2026): a repeat company no
+  # longer stocks as fill-in at all — stock.py's duplication
+  # screen DROPS it (see screening: above). This threshold now
+  # only orders items already on the bench (legacy stock).
+  # ORDER enforced in code (audit fix, Nov 4, 2026): next_order sorts the
+  # bench new-companies first, repeat companies next, fill-in (4+) last,
+  # FIFO by stocking order inside each group.
+
+verification:
+  early_check_minutes: 10        # +10 min Gmail check: early-verify only, never a resubmit trigger
+  deciding_check_minutes: 30     # the 30-min check decides limbo
+  # A submission the site confirmed with a successful application message
+  # counts on that proof alone (see counting.verified_only, the user,
+  # Nov 15, 2026) — for it the email checks are only a backstop, and a
+  # deciding miss never uncounts it or puts it in limbo.
+  resubmit_on_missing_email: false
+  # Queue drained IN CODE (audit fix, Nov 4, 2026): `spine.py verify-queue`,
+  # run by the driver-mode watcher (Step 5) every 30 min. Found + role-safe
+  # (a generic subject defers to the hourly scan when another application
+  # exists at the same company) → records email_verified; deciding miss →
+  # verification_missed event. The hourly email scan remains the long tail.
+
+gate:
+  # GATE TIMING — REVERSED (the user, Nov 12, 2026, 4:05 PM CT: "Now that
+  # we have the company check, from Revelio, you can remove the
+  # check only when a company moves you forward. Now change it back
+  # to check the company as soon as you identified a new job posting
+  # that hasn't been applied." Then: "Burn this into code."): the
+  # company check runs AT IDENTIFICATION — as soon as a NEW job
+  # posting is identified, before stocking/applying, for postings
+  # not yet applied to. This supersedes the Nov 11, 2026 deferral
+  # (quoted in git history: the check ran only at forward movement;
+  # workers stocked with gate {"deferred": true}). Under this
+  # timing a new stock MUST carry a real gate verdict: the counts
+  # come through the gate packet (Revelio first — see the packet
+  # note below), stock.py validates the packet / counts in code and
+  # refuses {"deferred": true} for new stocks. PASS / PASS_ALERT
+  # stocks proceed; a HARD PASS is recorded skipped with the gate
+  # reason (and the company blocked when the verdict says block)
+  # and is never applied to. BACKLOG RULE (the user, Nov 12, 2026): items
+  # already submitted/stocked under the deferred rule keep their
+  # state untouched — the backlog is NOT retroactively gated; if
+  # such an item moves forward with no verdict on record, the gate
+  # still runs at that point via the gate packet before anything
+  # proceeds. The thresholds below are unchanged — only the timing
+  # moved (back).
+  timing: on_identification
+  # LINKEDIN FALLBACK (the user, Nov 13, 2026): the ONE exception to
+  # Revelio-first, carved by the user herself — a company NOT on Revelio
+  # (only a handful) is gated on LinkedIn instead: headcount
+  # first, then the India employee ratio, via a LinkedIn People
+  # packet marked "revelio_not_found": true. gate_intake refuses
+  # a LinkedIn packet without the marker; stock.py refuses a bare
+  # revelio_not_found drop lacking "linkedin_checked": true (the
+  # drop survives only when LinkedIn was checked too and gave no
+  # usable counts).
+  fallback_source: "LinkedIn People"
+  # THE CODE STEP + TRACKED STATE (the user, Nov 13, 2026, later the
+  # same day: "Between Revelio and LinkedIn company check, there
+  # should be a step of code to track and give orders"): the
+  # worker hands a not-found Revelio result to code (a stock form
+  # with gate {"revelio_not_found": true}, or spine.py gate-packet
+  # not-found); program/gate_fallback.py tracks the company as
+  # fallback-owed in program/state/gate_fallback.json and returns
+  # the ORDER (LinkedIn People page — total headcount first, then
+  # the India count — packet back to code). A fallback packet or
+  # the linkedin_checked drop records ONLY against an open order
+  # (stock.py and gate_intake.py both refuse otherwise); the
+  # record clears the order. stock.py appends an India-majority
+  # block to the log's Blocked companies section itself (bullet +
+  # bumped total line). inbox daily-finish refuses to close a day
+  # while an order opened that day is still open, or while a
+  # company named in the summary's alerts_not_on_revelio has no
+  # fallback on record in the log.
+  # THE LINKEDIN PACKET IS A DICTIONARY OF NUMBERS (the user,
+  # Nov 13, 2026, with screenshots): "total" is the FIRST
+  # number on the LinkedIn People page — the "associated
+  # members" count at the top, which LinkedIn always shows
+  # there; that is the total headcount. "locations" carries
+  # EVERY "Where they live" row as {label, count, south_asia}
+  # with the row's exact number; the worker marks each row
+  # South Asia or not by judgment (a row counts when it is in
+  # India / South Asia even when the label does not say India
+  # — "Greater Bengaluru Area", "Greater Delhi Area"). Code
+  # derives the South Asia count from the marked rows in
+  # gate_intake._counted_south_asia: a country row ("India")
+  # already includes its state/city/metro rows and is counted
+  # once, never added to them; with no country row the
+  # broadest marked rows count and narrower rows inside them
+  # are not double-counted. Code computes the ratio, applies
+  # the >50% rule, and appends BOTH the packet and the verdict
+  # to the outreach log (gate_intake verdict line; stock.py's
+  # GATE LOCATION PACKET entry). A worker-supplied india /
+  # india_pct that disagrees with the dictionary is refused.
+  # PRIMARY GATE SOURCE — REVELIO LABS, NOW REQUIRED FOR NEW
+  # APPLICATIONS (the user, Nov 12, 2026: "I found a
+  # good website for Company Gate. It has employee location
+  # distribution globally and headcount. Use this website." —
+  # https://www.reveliolabs.com/companies; and later the same day:
+  # "Add another note, if you can't find the company on Revelio,
+  # drop this application entirely."): for a NEW posting the
+  # stocking gate REQUIRES Revelio — stock.py refuses a non-Revelio
+  # gate verdict for a new item, and a company with no Revelio
+  # listing is DROPPED via gate {"revelio_not_found": true}
+  # (recorded SKIPPED with that reason; NOT a merits verdict, the
+  # company is NOT blocked, and a later posting is checked fresh).
+  # A company listed on Revelio whose counts cannot form a valid
+  # packet is dropped via gate {"revelio_insufficient": true}
+  # ("Revelio data insufficient" — a distinct reason). The fallback
+  # chain to other approved sources NO LONGER rescues a new
+  # application — and since the user's ABSOLUTE RULE later the same day
+  # (Nov 12, 2026, 5:33 PM CT: "for vetting even a LinkedIn and of
+  # course on Indeed and Jobright you need to go to that third
+  # party website that I showed you earlier for vetting no
+  # exception"), gate_intake refuses non-Revelio packets for EVERY
+  # gate use, backlog and recruiter-first included. The old
+  # approved-sources list is historical only; verdicts already on
+  # record stand (recording is not vetting). When the
+  # gate runs on a Revelio-listed company, its public pages are
+  # free, need no
+  # account, and print an exact total headcount plus an employee
+  # count by REGION. Their location split is regional, not by
+  # country: the "india" figure for `spine.py gate` is the SOUTH ASIA
+  # count. SOUTH ASIA = THE INDIA FIGURE (the user, Nov 12, 2026 — she
+  # pointed at Tata Consultancy Services on the dead list: "you will
+  # see in the company overview, the employee count in South Asia
+  # are a lot. So that's your Indian employee count."): when the
+  # source is Revelio, feed the South Asia employee count to
+  # `spine.py gate` as the india number, on its own — no second
+  # source needed to settle the verdict either way. Verified the
+  # same day on TCS (blocked list): 2,053,083 total, South Asia
+  # 1,810,203 = 88.6%, North America only 3.1% — for the companies
+  # this rule targets, the South Asia workforce is overwhelmingly
+  # India. (The earlier "fall back whenever Revelio lacks the
+  # company" rule is superseded for new applications by the
+  # Revelio-required rule above, the user, Nov 12, 2026.)
+  # The company-gate DECISION as code (Nov 4, 2026: "build everything on
+  # code"): `spine.py gate --total N --india N --source SRC` returns the
+  # verdict; the counts come from Revelio Labs ONLY (the user, Nov 12, 2026 —
+  # no exception; the command refuses any other source), and the
+  # thresholds are applied here, never eyeballed.
+  india_block_pct: 50            # India share STRICTLY greater than this → hard pass + BLOCK
+  hard_pass_total_below: 100     # total below this → hard pass (no block for size alone)
+  alert_band_max: 99             # SIZE ALERTS REMOVED (the user, Nov 12, 2026: "drop the below 100 company, anything above don't alert me") — set below the hard-pass floor so no total can land in an alert band: every total >= 100 that is not India-blocked is a plain PASS, no alert to the user. Below 100 still hard-passes.
+  # GATE PACKET INTAKE (the user, Nov 12, 2026 — "for the Revelio company
+  # gate the run should return a dictionary of values in the format
+  # the code can understand. For instance, overall headcount, and
+  # South Asia percentage."): an identification-time check (and a
+  # forward-movement check on a verdict-less backlog item) hands its
+  # counts to the program as a JSON packet via `spine.py gate-packet
+  # format|record` (program/gate_intake.py) — never as prose, never
+  # as the run's own math. Revelio packet fields: {company, source
+  # ("Revelio Labs"), total, south_asia, south_asia_pct, as_of,
+  # page, item_id (optional)}. The program validates the packet
+  # (approved source; positive total; count within total; stated
+  # percent within 1.5 points of the counts), maps south_asia to the
+  # gate's india input in code (the South Asia rule above), applies
+  # the thresholds above through the existing decision function,
+  # writes the verdict line itself (GATE PASS in stock.py's format;
+  # GATE HARD PASS for a hard pass on an already-submitted item —
+  # the application stands, only the verdict is recorded), and
+  # prints the verdict as JSON for the run to report. REVELIO-ONLY:
+  # a packet naming any other source is refused whole (the user,
+  # Nov 12, 2026 — no exception).
+
+pay_filter:
+  # PAY RULE v2 (the user, Nov 5, 2026 — "Set a universal 200k bar so you get
+  # more jobs. Remote stays the same"; supersedes the Nov 4, 2026
+  # per-city equivalent for city-based roles):
+  #   basis "city" (onsite/hybrid in a city): the bar is a UNIVERSAL
+  #     $200,000 — no per-city equivalent is computed anymore.
+  #   basis "remote_national" (US-remote priced nationally): UNCHANGED
+  #     — the bar is the home city basis, $120,000.
+  #   basis "remote_zone" (remote priced by a specific city/zone):
+  #     UNCHANGED — the bar is that city's researched equivalent
+  #     (2-person, 2BR, 30-min commute, taxes + living costs, one named
+  #     source), passed as --equivalent.
+  # `spine.py pay --attainable Y --basis city|remote_national|
+  # remote_zone [--equivalent X]` picks the bar HERE and returns PASS
+  # or SKIP_BELOW_CITY_EQUIVALENT. Legacy calls with --equivalent and
+  # no --basis keep the direct comparison.
+  base_houston_annual: 120000    # the user's current pay, home city TX
+  universal_bar: 200000
+  remote_national_bar: 120000
+
+counting:
+  verified_only: true            # confirmation email arrived, or a successful application message was shown (the user, Nov 15, 2026 — the on-screen success message is full proof on its own; supersedes the Nov 1, 2026 "portal confirmation page where no email exists" narrowing)
+  one_offs_count_toward_window: false   # one-offs count all-time only, but use the company's window slot
+  never_reapply_same_company_role_while: ["submitted", "verified", "limbo", "post_submit_pending"]
+  idempotent_records: true       # ENFORCED IN CODE (Nov 7, 2026): pipeline.record REFUSES (writing
+                                 # nothing) a record whose outcome already sits in the prose log,
+                                 # stamped at or after the event book's latest write for the item,
+                                 # with NO outcome event in the book — the half-completed write a
+                                 # replayed record call repeats (the #471 skip: the first attempt
+                                 # wrote prose only; its ~26 replays each appended both sides). An
+                                 # item whose book already holds an outcome event is never refused —
+                                 # legit sequences (staged→staged, submitted→verified) carry event
+                                 # twins; a prose outcome OLDER than the book's latest write is
+                                 # pre-book history, not a replay. Exceptions: friction (each signal
+                                 # is real) and the prose-only record outcomes (post_submit_pending /
+                                 # exception), which carry no event type.
+  # ENFORCED IN CODE (Nov 4, 2026): state.py's bench gate serves only
+  # stocked/unstaged items, and pipeline.record's unstaged branch is the
+  # guarded door back — it REFUSES (writing nothing) when the item has
+  # any submitted/verified event, and refuses a limbo-history item
+  # unless the record carries a "proof" field (what was checked, what
+  # the portal said) that the submission never landed; the proof is
+  # written into the log entry. History-based, not head-state-based:
+  # an earlier staged outranks limbo in the head, so the guard reads
+  # every event on both sides.
+
+inbox:
+  # INBOX IN CODE (the user, Nov 12, 2026 — "all of these should be handled
+  # in the code not in the run."): the scope limits, dedupe, triage
+  # and claim checks for the two LinkedIn inbox jobs are enforced by
+  # program/inbox.py (`spine.py inbox ...`) as clean packets — the
+  # stock.py / gate_intake.py pattern — never by prose judgment in a
+  # cron body. The email watch (every 15 min) hands the Gmail finds
+  # from its search to `spine.py inbox watch-intake`: code refuses
+  # anything received more than past_hour_window_minutes ago,
+  # anything already processed, and anything matching the
+  # non-message patterns below, and marks every refusal processed so
+  # it never resurfaces; only genuine new-message notifications come
+  # back as the work packet. Outcomes return through `watch-record`,
+  # which writes the claims-ledger line, the processed state, and
+  # the outreach-log skeleton itself. The daily check (8:30 AM CT)
+  # takes its scope from `spine.py inbox daily-scope`: the cutoff
+  # (now minus daily_check_window_hours) and the stand_down list
+  # (threads already claimed in the ledger or handled by the watch)
+  # are computed HERE, from this block — the window lives in config,
+  # never in a job body. `spine.py inbox check-claim` answers
+  # CLAIMED / CLEAR for a person + message timestamp before a run
+  # acts. The pattern lists below are the deterministic triage: keep
+  # them narrow — a notification that matches nothing here reaches
+  # the run, and the run's judgment (not a pattern) decides the rest.
+  past_hour_window_minutes: 60   # email watch: Gmail lookback, enforced at intake
+  daily_check_window_hours: 24   # daily LinkedIn check: latest-incoming window
+  reply_answers:                 # RULE BOOK (the user, Nov 12, 2026 — "burn this in the rule book"):
+                                 # standing answers in recruiter/company replies, all threads.
+    no_relocation_compensation_ok: true   # no relocation compensation/assistance offered = okay; answer yes/fine, do not require it
+    onsite_interview_ok: true             # asked to do an on-site interview = okay; answer yes
+  gmail_search:                  # THE WATCH'S GMAIL SEARCH, AS CONFIG (the user, Nov 12, 2026 — she confirmed the
+                                 # finder pattern from real mail: "It all says in the subject da da da has
+                                 # messaged you so grab that as a pattern to search for these inbox
+                                 # notification."): the watch searches Gmail for exactly this — LinkedIn
+                                 # senders + a "messaged you" subject + the past hour — and hands every
+                                 # find to watch-intake. The intake's pass patterns below accept the same
+                                 # subject variants, so what the search finds, the intake keeps.
+    from_address: messaging-digest-noreply@linkedin.com   # THE pinned sender (the user, Nov 12, 2026: "It will always
+                                 # come from this email") — every genuine message notification comes from this
+                                 # exact address; the display name carries the person ("<Full Name> via
+                                 # LinkedIn"). Despite the "digest" in the address name, these are the real
+                                 # per-message notifications: the intake treats this address as a trusted
+                                 # sender (a pass condition) and never lets a sender pattern refuse it.
+    subject_contains: "messaged you"
+    subject_regex: "(just|has) messaged you"   # the exact subject is "<FirstName> just messaged you"; the "has messaged you" variant is accepted too
+    window_minutes: 60           # past hour — mirrors past_hour_window_minutes; the run adds the time bound (an epoch after:, as the email scan computes it) at search time
+    query: 'from:messaging-digest-noreply@linkedin.com subject:"messaged you"'   # the search string; the run appends the past-hour bound
+  invitation_search:             # CONNECTION-INVITATION EMAILS (the user, Nov 12, 2026 — "Burn this into code.
+                                 # Just like message reply through email."): the user enabled LinkedIn email
+                                 # notifications for new connection invitations. The DAILY inbox job
+                                 # (linkedin-inbox-replies) searches Gmail for exactly this — the pinned
+                                 # invitation sender + the "invitation is waiting for your response"
+                                 # subject + the past 24 HOURS (cadence change, the user, Nov 12, 2026:
+                                 # "invitation watch you can do daily") — and hands every find
+                                 # to `spine.py inbox invite-intake`. NOTE the sender is messages-noreply@,
+                                 # a DIFFERENT address from the message notifications above.
+    from_address: messages-noreply@linkedin.com   # THE pinned invitation sender (the user, Nov 12, 2026: "It always
+                                 # comes from this email") — an invitation candidate from any other address
+                                 # is refused at intake.
+    subject_contains: "invitation is waiting for your response"
+    subject_regex: "invitation is waiting for your response"   # the exact subject carries "<Name>'s invitation is waiting for your response"
+    window_minutes: 1440         # past 24 hours (CADENCE CHANGE, the user, Nov 12, 2026, 5:37 PM CT:
+                                 # "invitation watch you can do daily"): invitations are handled by the
+                                 # DAILY inbox job (linkedin-inbox-replies, 8:30 AM CT), NOT the
+                                 # every-15-minute watch — so an invitation stays actionable for
+                                 # 24 hours. The message watch window stays 60 minutes.
+    query: 'from:messages-noreply@linkedin.com subject:"invitation is waiting for your response"'   # the search string; the run appends the past-24-hours bound
+  job_alert_sender:              # JOB-ALERT EMAILS — PINNED KNOWN SENDER (the user, Nov 12, 2026: "for all email
+                                 # comes from 'jobalerts-noreply@linkedin.com' only. This makes your watch
+                                 # list easy! Burn this into code."): ALL LinkedIn job-alert email comes
+                                 # from this exact address only. It is the watch list's third pinned sender
+                                 # (messages = messaging-digest-noreply@linkedin.com; invitations =
+                                 # messages-noreply@linkedin.com; job alerts = this one). Mail from this
+                                 # address is classified in code as job-alert mail — NOT a message and NOT
+                                 # an invitation: both INBOX intakes refuse it on the exact address. Since
+                                 # Nov 12, 2026 (the user: "Add alerts alongside Jobright + Indeed") this mail is
+                                 # ALSO a discovery source: the refusal is recorded processed under the
+                                 # INBOX consumer stamp only, and the job-alert flow below
+                                 # (jobalert_search / jobalert-intake) consumes the same IDs under its own
+                                 # stamp — neither flow starves the other. The sender <-> alerts
+                                 # correspondence is ONE-TO-ONE AND CLOSED (the user, Nov 12, 2026: "only job
+                                 # alerts will come from that job alert email, and then the job alert email
+                                 # will only be the job alert I set up — so it's one to one… very tight."):
+                                 # nothing else arrives from this address, and every email from it is
+                                 # necessarily one of the alerts the user herself set up.
+    from_address: jobalerts-noreply@linkedin.com
+    classification: job_alert
+  jobalert_search:               # JOB-ALERT DISCOVERY SEARCH (the user, Nov 12, 2026 — alerts added as a discovery
+                                 # source): the batch run searches Gmail for the day's alert emails and hands
+                                 # every find to `spine.py inbox jobalert-intake`. IDENTIFICATION IS
+                                 # SENDER-ONLY (the user, Nov 12, 2026): alert subjects arrive in MANY formats —
+                                 # LinkedIn builds the subject from the first company on the list (in a
+                                 # shape like "<role> job at <company> for you", and formats vary) — so
+                                 # this search
+                                 # carries NO subject terms, ever, and the intake never consults the subject
+                                 # for acceptance or refusal. There is deliberately NO subject field in this
+                                 # block. The message and invitation searches above keep BOTH of their
+                                 # filters (pinned sender AND subject) — sender-only is job alerts only.
+    from_address: jobalerts-noreply@linkedin.com   # tied to job_alert_sender above — the one pinned alert sender
+    window_minutes: 1440         # past 24 hours — every alert email is picked up within 24 hours of when it arrives (the user, Nov 12, 2026, 6:20 PM CT: weekly or daily makes no difference to pickup — the daily pass catches each email on its arrival day; her three WA/CA alerts are weekly and the two remote alerts daily per her 6:11 PM CT screenshot); the run adds the time bound at search time
+    max_pages: 5                 # the See-all-jobs list page cap, stamped into the packet instructions (the user,
+                                 # Nov 12, 2026: "only click until you reach five pages. Don't go beyond five pages.")
+    query: 'from:jobalerts-noreply@linkedin.com'   # FROM-ONLY — no subject: term may ever be added to this query
+  future_skew_minutes: 5         # a notification dated slightly ahead of the clock still counts as fresh
+  # Processed Gmail IDs live in ONE place: program/state/inbox.json
+  # (written only by inbox.py). On first use, if that file does not
+  # exist, inbox.py seeds it once from any IDs listed in
+  # hidden_files/linkedin-message-watch-state.md; after that the .md
+  # is documentation, not state.
+  non_message_subject_patterns:   # regex, case-insensitive, matched against the subject
+    - "digest"
+    - "weekly summary"
+    - "your profile was viewed|profile views?|people viewed your profile|appeared in \\d+ searches"
+    - "you have (\\d+ )?new notifications"
+    - "job alerts?|jobs you may be interested|new jobs? (for|matching) you|job recommendations"
+    - "upgrade to premium|try premium|% off|sponsored"
+    - "newsletter"
+  non_message_sender_patterns:    # regex, case-insensitive, matched against the sender (name + address)
+    - "digest@"
+    - "newsletter"
+    - "marketing@"
+    - "jobalerts"
+    - "job-alerts"
+  connection_accepted_subject_patterns:  # a connection-accepted notice is refused ONLY when the candidate carries no message body (see inbox.py)
+    - "accepted your invitation"
+    - "accepted your connection request"
+    - "is now your connection"
+  message_subject_patterns:   # PASS patterns (regex, case-insensitive): a subject matching one of these IS a genuine
+                              # message notification — the primary signal (the user, Nov 12, 2026, from a real sample:
+                              # subject "Pruthvi just messaged you"). A pass match wins over every refusal
+                              # pattern above; triage checks these FIRST. Aligned with gmail_search above:
+                              # both the "just messaged you" and "has messaged you" variants pass.
+    - "(just|has) messaged you"
+  inmail_subject_patterns:    # PASS patterns for InMail notifications (same rule: a match is a genuine message)
+    - "inmail"
+  message_subject_person_patterns:  # regex with ONE capture group: the sender's name, tried in order. The
+                                    # "just messaged you" pattern captures only the FIRST name — when the
+                                    # sender display name ("<Full Name> via LinkedIn") carries more of the
+                                    # name, the program prefers the fuller one (the user, Nov 12, 2026).
+    - "^([A-Za-z][A-Za-z.'-]*) just messaged you"
+    - "^([A-Za-z][A-Za-z.'-]*) has messaged you"
+    - "^(.+?) sent you a message"
+    - "^New message from (.+?)$"
+    - "^You have a new message from (.+?)$"
+    - "^(.+?) sent you an InMail"
+    - "InMail (?:message )?from (.+?)$"
+  invitation_subject_patterns:   # PASS patterns for CONNECTION-INVITATION emails (regex, case-insensitive;
+                              # The user, Nov 12, 2026): a subject matching one of these IS a genuine invitation
+                              # notification — the primary signal, aligned with invitation_search above.
+                              # A candidate whose subject matches none of these is refused at invite-intake.
+    - "invitation is waiting for your response"
+  invitation_subject_person_patterns:  # regex with ONE capture group: the inviter's name, tried in order
+                              # (the user, Nov 12, 2026). The possessive form carries only the name as written in
+                              # the subject (often a first name or a short form) — when the sender display
+                              # name ("<Full Name> via LinkedIn") carries more of the name, the program
+                              # prefers the fuller one, exactly as in message intake. Kept narrow and
+                              # config-tunable: the real invitation email's exact subject/name format has
+                              # not been sampled yet, so new subject forms get added HERE, not in code.
+    - "^(.+?)'s invitation is waiting for your response"
+    - "^(.+?)’s invitation is waiting for your response"
+    - "^Invitation from (.+?) is waiting for your response"
+  invitation_group_patterns:     # GROUP-invitation refusal patterns (regex, case-insensitive, matched
+                              # against subject + sender): group invitations are declined silently
+                              # (standing rule, the user, Oct 30, 2026) — refused at invite-intake, recorded
+                              # processed, and NEVER logged by name.
+    - "group invitation"
+    - "invited you to join (a|an|the) .*group"
+    - "invitation to join (a|an|the) .*group"
+  # Ad/marketing refusal for invitations reuses non_message_subject_patterns and
+  # non_message_sender_patterns above (newsletter / sponsored / % off / marketing@ …),
+  # applied by invite-intake after the group patterns (the user, Nov 12, 2026).
+
+invitations:
+  daily_target: 30               # RESTORED to 30/day (the user, Nov 12, 2026): was slowed to
+                                 # 10/day on Nov 11, 2026 after LinkedIn's high-volume
+                                 # profile-data warning; the user directed the return to 30
+                                 # on Nov 12, 2026 with the rate-limit tradeoff
+                                 # explained. Invitations remain the only LinkedIn
+                                 # activity besides the inbox sweep (applications
+                                 # are Jobright + external sites only).
+  tracked_in_code: true          # ENFORCED IN CODE (the user, Nov 10, 2026: "handle the tracking in the
+                                 # code"): every verified send is recorded by the outreach run via
+                                 # `spine.py invite record` into program/events.jsonl (invite_sent
+                                 # events, program/invitations.py); sent-today / all-time / remaining
+                                 # quota are COMPUTED by `spine.py invite status`, and the program
+                                 # number is ground truth — the prose log and LinkedIn's Sent-People
+                                 # counter are no longer the count of record. The run also records the
+                                 # counter's start/end readings (`spine.py invite counter`); the
+                                 # within-day discrepancy and cross-day drift are computed numbers,
+                                 # not prose mysteries (the counter is flaky: Nov 10, 2026 it opened
+                                 # 1,174 after Nov 9 closed 1,178). A duplicate person+date record is
+                                 # REFUSED by code, like counting.idempotent_records above.
+  hiring_contacts:               # HIRING-CONTACT TARGETING (the user, Nov 13, 2026 — supersedes the
+                                 # Oct 30, 2026 cap of 2 per role): the people for each applied
+                                 # role are found with the career-ops skill's CONTACTO mode
+                                 # (steps 0–3 only; people + LinkedIn profile link; its message
+                                 # drafting is never used).
+    finder: "career-ops contacto (steps 0-3, WebSearch, no LinkedIn login)"
+    contacto_only: true          # ALL OUTREACH FROM CONTACTO (the user, Nov 14, 2026): contacto is
+                                 # the ONLY source of outreach people. The original LinkedIn
+                                 # fill sources are OFF — no Premium people-hiring list, no
+                                 # My Network / "People you may know" / "Suggestions for you",
+                                 # no LinkedIn People Search, no people-viewers lists.
+    on_no_contact_found: "skip_role_move_to_next_job"
+                                 # IF CONTACTO FINDS NOBODY for a job (the user, Nov 14, 2026):
+                                 # log it for that job and GO TO THE NEXT JOB. Never fall
+                                 # back to searching LinkedIn for that job. If every job in
+                                 # the pool is worked and the day's 30 target is not reached,
+                                 # the run ends short and reports the real number — it does
+                                 # NOT fill the gap from LinkedIn.
+    linkedin_search_for_outreach: "never"
+                                 # NO LINKEDIN SEARCHING FOR OUTREACH AT ALL (the user, Nov 14,
+                                 # 2026): LinkedIn is used only to open the exact profile
+                                 # link contacto returned, verify current employment there,
+                                 # send that one invitation, and confirm it in Sent.
+    fill_sources: []             # no fill sources remain (see contacto_only above)
+    max_per_role: null           # NO PER-ROLE CAP (the user, Nov 13, 2026: "Remove the maximum two
+                                 # outreach per role limit") — use ALL the people contacto
+                                 # suggests for the role who pass the peer filter below. The
+                                 # daily_target of 30 verified sends still binds; qualifying
+                                 # people beyond the day's 30 queue for the next day.
+    peer_filter:                 # NO PEERS (the user, Nov 13, 2026): never spend a connection on
+                                 # anyone at the user's own level or below. The user's level is Senior
+                                 # Data Scientist — peers include Senior Data Scientist,
+                                 # Data Scientist, Junior Data Scientist, and mid/junior
+                                 # engineers/scientists at that company.
+      exclude_levels_at_or_below: "Senior Data Scientist"
+      allowed_above_seniority:   # anyone above her seniority WITH influence on the role:
+        - recruiter / talent acquisition covering data/ML
+        - hiring manager
+        - Director / Head / VP of DS/ML/AI
+        - VP Engineering, CTO, CEO
+        - team lead, tech lead, Lead
+        - Staff (staff-level IC)
+        - Principal (principal-level IC)
+    verify_current_employee: true
+    skip_blocked_companies: true
+    enforced_by: "program/outreach_targets.py via `spine.py invite targets` (the user, Nov 13, 2026: code dictates these rules — the worker returns a JSON packet of contacto people, code returns accepted/rejected with reasons, and the run invites ONLY code-accepted people; the agent does not judge titles itself)"
+    allow_title_keywords:        # matched against the person's title by code, in this
+                                 # order; a title matching NONE of these groups is
+                                 # rejected as a peer-or-below (the user's level is Senior
+                                 # Data Scientist, so a bare Senior/DS/ML-engineer
+                                 # title carries no allow keyword and is refused).
+      recruiting: ["recruiter", "talent acquisition", "talent partner", "sourcer"]
+      leadership: ["director", "head of", "vice president", "chief", "cto", "ceo", "president", "vp"]
+      senior_ic: ["staff", "principal", "team lead", "tech lead", "lead"]
+      manager: ["manager"]
+
+true_blockers:
+  # Park STAGED FOR TAP SESSION only at a blocker ACTUALLY reached (first-touch
+  # persistence rule, the user Nov 4, 2026) — never on a predicted card.
+  - approval_card_actually_presented
+  - captcha_on_screen
+  - code_step_awaiting_wu_beyond_blanket_code_approval
+  - wu_only_document_or_input
+
+blocked_companies:
+  # The count is READ FROM THE LOG, never maintained as a second copy here.
+  # This block only says where to read it and what it must currently equal.
+  source_file: "outreach-log.md"
+  source_pattern: "Blocked list total: (\\d+) companies"
+  expected_total: 57
+
+role_filter:
+  banned_title_keywords: ["Staff", "Lead", "Principal", "Consultant"]   # any track (Consultant added by the user, Nov 13, 2026 — a title containing "Consultant" is a dead no-go)
+  mle: "plain 'Machine Learning Engineer' title only for Jobright/Indeed (Senior MLE is out there); Senior MLE is ALLOWED on the LinkedIn-alert lane only (the user, Nov 12, 2026: 'Senior MLE is fine. If it appears in the LinkedIn list that's fine let that one through') — Staff/Lead/Principal stay out everywhere"
+  # Structured form of the Senior-MLE carve-out (the user, Nov 12, 2026):
+  # senior-titled MLE titles pass the title screen ONLY for items
+  # whose source is in this list. Every other source keeps plain
+  # MLE only.
+  senior_mle_allowed_sources: ["LINKEDIN_ALERT"]
+  ds: "Data Scientist / Senior Data Scientist only when technical (modeling, ML, building-level coding, experimentation/statistical depth); no data-analyst roles under a DS title"
+  # PLAIN DATA SCIENTIST IS ON THE BENCH TOO (the user, Nov 8, 2026: "add data
+  # scientist to the bench too but don't lower pay standard"): bench
+  # stocking is NOT Senior-only — plain "Data Scientist" (technical, per
+  # ds above) is stocked alongside Senior Data Scientist, and discovery
+  # searches must include the plain title. The pay standard does NOT
+  # move for plain DS titles: the pay_filter block applies exactly as
+  # written (universal $200,000 city bar; $120,000 remote_national bar;
+  # remote_zone equivalent) — a plain DS posting below the bar is
+  # skipped on pay, never stocked by lowering the bar.
+  bench_includes_plain_data_scientist: true
+  plain_ds_pay_standard_unchanged: true
+  # SENIOR DS FIRST, THEN PLAIN DS (the user, Nov 3, 2026; confirmed Nov 8,
+  # 2026 after the user's "Always prioritize sr" — Senior DS before plain DS,
+  # always): ENFORCED IN CODE — pipeline.next_order's bench ordering
+  # serves Senior Data Scientist items before plain Data Scientist
+  # items within the DS track (pipeline._ds_priority_order);
+  # diversification groups still govern and non-DS items keep their
+  # positions.
+  senior_ds_first: true
+
+dedupe_keys: ["company", "role", "req_id", "linkedin_job_id", "posting_url", "ats_link"]
+
+paths:
+  outreach_log: "~/workspace/goals/linkedin-ai-recruiter-outreach-weekly/hidden_files/outreach-log.md"
+  tailored_resumes_dir: "~/workspace/goals/linkedin-ai-recruiter-outreach-weekly/hidden_files/tailored-resumes"
+  gmail_cli: "/opt/hatch/bin/hatch_gws_cli"
+
+route_limits:
+  # Hosts whose controls the browser tooling cannot drive (proven in live
+  # work). A work order for one of these hosts carries wu_step_expected: the
+  # run fills every field, snapshots the form (hold_protocol), then stages the
+  # item for a tap session at once — no repeated drive attempts, no live hold
+  # spent rediscovering the limit. (the user, Nov 4, 2026 — the Fetch fixes.)
+  jobs.gem.com:
+    # GEM — MANUAL PACKET FROM THE START (the user, Nov 5, 2026: "Burn this
+    # in code"): Gem's resume upload cannot be attached in this
+    # browser by ANYONE — the drop zone exposes no file input to the
+    # tooling (proven Nov 4, 2026, #180 Fetch: repeated attempts,
+    # control never identified), and the user's OWN clicks in this browser
+    # cannot attach either (proven Nov 5, 2026, #392 Auger: during her
+    # takeover she clicked the drop zone repeatedly and no file
+    # picker ever opened; a fresh file grant changed nothing). Do NOT
+    # fill-and-stage for a tap session — there is no the user step in this
+    # browser. Hand the user the MANUAL packet immediately (apply link +
+    # tailored resume + every field value), the same treatment as the
+    # captcha_ip_block rule; she submits from her own device.
+    # ENFORCED IN CODE: pipeline.py record() REFUSES a staged outcome
+    # for a Gem item whose blocker is the resume upload.
+    limit: resume_upload_not_drivable
+    manual_packet: true
+    wu_step: "NONE in this browser — Gem upload is impossible here for Muse AND for the user's own clicks (proven #180 Fetch Nov 4, 2026 and #392 Auger Nov 5, 2026). Manual packet immediately: apply link + tailored resume + copy-friendly field values; the user submits from her own device."
+    handling: manual_packet_no_fill_no_stage
+  jobs.lever.co:
+    # THE LEVER EXCEPTION (the user, Nov 4, 2026 — the only NEVER-ATTEMPT
+    # host; the general demonstrated-IP-block rule in captcha_ip_block
+    # below covers every other host): Lever's bot check refuses this
+    # browser's data-center IP no
+    # matter who solves — proven live Nov 4, 2026 when two of the user's own
+    # solves on #227 Raya both came back with the error-verifying
+    # banner. Do not open the form, do not fill, do not click submit,
+    # do not present a solve in this browser, do not cycle. Park the
+    # item straight into the captcha pile; the handoff at session time
+    # is the PACKET — apply link, tailored resume file, and every field
+    # value copy-friendly — and the user submits from her own phone browser.
+    limit: captcha_ip_blocked_packet_handoff
+    packet_handoff: true
+    wu_step: "NONE in this browser — Lever packet rule: park as captcha without opening the form; at session time hand the user the packet (apply link + tailored resume + copy-friendly field values); she submits from her phone browser"
+    handling: park_captcha_no_flow_packet_handoff
+  ats.rippling.com:
+    # RIPPLING — MANUAL PACKET GROUP (the user, Nov 6, 2026: "Add
+    # rippling to manual packet group"): Rippling's Cloudflare
+    # "Verify you are human" check cannot pass in this browser —
+    # proven on #435 Reserv (Nov 6, 2026): the verification
+    # EXPIRED twice in this browser and then FAILED on the user's own
+    # takeover solve. Same group as Lever and Gem: do NOT hold a
+    # takeover window, do NOT park the item for a captcha session,
+    # do NOT cycle solves. The form may be filled to harvest the
+    # exact field values, then hand the user the MANUAL packet — apply
+    # link, tailored resume file, every field value
+    # copy-friendly — she submits from her own device, and the
+    # item records submitted when she reports it done (#435
+    # closed exactly this way). ENFORCED IN CODE: pipeline.py
+    # record() REFUSES a captcha outcome for a Rippling-host item
+    # unless the record carries manual_packet: true.
+    limit: captcha_ip_blocked_packet_handoff
+    manual_packet: true
+    packet_handoff: true
+    wu_step: "NONE in this browser — Rippling packet rule (the user, Nov 6, 2026): hand the user the packet (apply link + tailored resume + copy-friendly field values); she submits from her own device. Never hold a takeover window for a Rippling Cloudflare check."
+    handling: manual_packet_no_takeover
+
+captcha_ip_block:
+  # IP-BLOCKED CAPTCHA — JUMP TO MANUAL RIGHT AWAY (the user, Nov 5, 2026,
+  # live session — #366 Allied Benefit Systems / Paycom: "Captcha is
+  # stopping muse IP. Do this manually and in the future jump to
+  # manual right away."): when a portal's captcha/bot-check
+  # DEMONSTRABLY blocks this browser by IP — the check itself refuses
+  # the browser's address, so no solve by anyone in this browser can
+  # pass — the run does NOT hold a takeover window, does NOT park the
+  # item for a captcha session, and does NOT cycle solves. It hands
+  # The user a MANUAL packet immediately, in chat: apply link, tailored
+  # resume file, and every field value copy-friendly — she submits
+  # from her own device, and the item is recorded only when she
+  # reports it. Applies to ANY host where the IP block is actually
+  # demonstrated (Paycom proven Nov 5, 2026); a merely hard or
+  # unsolved captcha is NOT an IP block and keeps the normal
+  # captcha-session drive-and-hold flow. Lever stays the special
+  # case above: never attempted at all, packet at session time.
+  # ENFORCED IN CODE: this block is stamped on every work order, and
+  # pipeline.py record() REFUSES a captcha outcome flagged ip_blocked:
+  # true (the run's judgment, sent as data — never keyword-parsed
+  # from the note) unless the record carries manual_packet: true —
+  # nothing is written.
+  manual_packet_immediately: true
+  demonstrated_only: true
+  no_held_takeover_windows: true
+  packet_contents: [apply_link, tailored_resume, field_values]
+
+staging:
+  # BLOCKER CLASSIFICATION — DATA, NEVER PROSE (the user, Nov 5, 2026, late:
+  # "No you are parsing the text with hardcoded keywords again. Use
+  # LLM for this type of questions. Only give code what it can easily
+  # digest: dictionary or other data structure.") Every staged record
+  # carries blocker_kind, classified by the RUN (the LLM — it saw the
+  # screen) into exactly this closed vocabulary. pipeline.py record()
+  # checks blocker_kind plus the item's route host/ATS (data) against
+  # the sign_in / route_limits rules; it NEVER keyword-parses the
+  # step/blocker prose, which is the human record only. A staged
+  # record with a missing or unknown blocker_kind is refused.
+  #   approval_card      a platform approval card actually presented
+  #   sign_in            sign-in / password / credential dead end
+  #                      (Workday: never stages; elsewhere requires
+  #                      signin_attempted: true)
+  #   resume_upload      the resume upload itself is the blocker
+  #                      (Gem: never stages — manual packet)
+  #   identity_document  a document only the user can supply (ID/passport)
+  #   wu_input           a fact only the user can supply
+  #   code_step          an email-code step beyond the blanket
+  #                      approval
+  #   other              anything else; the prose explains
+  blocker_kinds: [approval_card, sign_in, resume_upload, identity_document, wu_input, code_step, other]
+
+fill_policy:
+  # FILL TO THE FULLEST, LEVELS MAXED (the user, Nov 6, 2026 — burned in at
+  # her order after the Apple #417 profile went in half-empty: only
+  # Python/SQL skills, no EagleView entry, descriptions left "Not
+  # specified"; she corrected it live: "You left so many fields
+  # unfilled. Go back and edit." + "Level of expertise max out" +
+  # "Fill in EV job description"). This block rides every work order;
+  # the run flies it exactly. Data for the run to digest — booleans
+  # and closed lists, never prose-parsed by code.
+  fill_every_truthful_field: true
+  # Optional fields, description fields, summaries, education and
+  # employment detail fields are filled, never left blank or
+  # "Not specified" when the resume/applicant facts support a value.
+  optional_fields_included: true
+  # Job description fields carry the resume's own bullet content for
+  # that job (shortened only when the field forces it).
+  descriptions_from_resume_bullets: true
+  # A picker/taxonomy with no exact match: take the CLOSEST truthful
+  # match instead of skipping the field. Leave a field empty only
+  # when no truthful entry exists at all, and say why in the report.
+  closest_match_over_skip: true
+  # A picker warning or an empty suggestion list is NOT proof a field
+  # cannot be filled: try name variants, then a free-text entry and
+  # Save, before declaring it impossible (proof case: EagleView on
+  # Jobs at Apple, Nov 6, 2026 — the picker never matched, the
+  # free-text entry saved).
+  picker_no_match_is_not_a_blocker: true
+  # Any field that carries a LEVEL (expertise, proficiency, fluency,
+  # years-of-experience bands): set the MAXIMUM the form offers.
+  levels_maxed: true
+  level_fields: [expertise, proficiency, fluency, skill_level]
+  # Portal profiles that stay editable after submission (Jobs at
+  # Apple and the like) are completed to this same standard as part
+  # of the application — a submitted application with a half-empty
+  # profile is not finished work.
+  editable_profiles_completed: true
+
+writing:
+  # HUMANIZER — REQUIRED FOR ALL WRITING (the user, Nov 2, 2026; this
+  # block Nov 4, 2026; email replies reinforced Nov 6, 2026): every
+  # free-text answer written for an application — open-ended form
+  # questions (e.g. Lyra's "describe your experience using AI tools" and
+  # "walk through an interesting data science project"), cover notes,
+  # and the drafted answers inside a packet handoff — is run through
+  # the humanizer skill BEFORE it is submitted, sent, or handed to the user:
+  # draft, mark the AI tells, rewrite keeping every fact, number, date
+  # and claim unchanged, use only the rewritten version. The work order
+  # stamps humanizer_required so the rule reaches the point of work.
+  # EMAIL + MESSAGE REPLIES (the user, Nov 6, 2026 — the Socure reply): the
+  # rule covers Gmail replies, LinkedIn inbox replies, and connection
+  # notes exactly the same way. The Socure draft arrived pre-written
+  # and was sent on the user's approval without the sender running the
+  # skill — the text was clean, but the pass was skipped, and this
+  # block named only application text. A draft for ANY send is not
+  # ready until it carries the attestation marker: in the
+  # inbox-action-claims ledger line for a Gmail send, and in the
+  # reply log line for a LinkedIn send.
+  humanizer_required: true
+  skill: ~/workspace/custom-skills/humanizer/SKILL.md
+  applies_to:
+    - open_ended_application_questions
+    - cover_notes_and_letters
+    - packet_drafted_answers
+    - gmail_replies
+    - linkedin_inbox_replies
+    - connection_notes
+  attestation_marker: "humanizer: passed"
+  attestation_required_for_sends: true
+
+stocking:
+  # CROSS-PLATFORM DUPLICATES (the user, Nov 13, 2026): the three sources
+  # duplicate each other by nature — the same posting arrives via
+  # Jobright, Indeed and LinkedIn at once. program/posting_identity.py
+  # decides per-posting sameness in code: a shared employer/ATS id
+  # (Greenhouse gh_jid, Lever/Ashby UUID, Workday R-number, req id,
+  # Jobright 24-hex id) mined from the candidate form and the prior
+  # item's log entries, or company + abbreviation-expanded role-title
+  # equality (Sr. = Senior, ML = Machine Learning). Both branches
+  # require the same company. stock.py refuses the copy as a
+  # duplicate and names the original item.
+  cross_platform_duplicates: "program/posting_identity.py via stock.py _is_duplicate (ATS id match or expanded role-title match, same company required)"
+  # STOCKING IS WRITTEN BY THE PROGRAM (the user, Nov 5, 2026 — the #364-367
+  # blank-name bug): stock ONLY through program/stock.py. Run
+  # `python3 stock.py format` for the return form, fill it with your
+  # researched facts, then `python3 stock.py record <file>`. Never
+  # hand-write STOCKED, SEGMENT STATE, GATE, or PREP READY log lines.
+  # The handoff is verified both ways: an item counts as stocked only
+  # when its record result says "verified": true (the program re-reads
+  # the log and echoes what landed); report anything under
+  # "unverified". Alert the user for each alert_companies entry; append each
+  # blocked_companies entry to the log's blocked-companies list.
+  via_program: stock.py
+  never_hand_write_segments: true
+  verified_only: true
+  # BENCH TITLES (the user, Nov 8, 2026): stock plain "Data Scientist" too —
+  # the bench is not Senior-only. Plain DS must be technical (see
+  # role_filter.ds) and must clear the SAME pay_filter bars as every
+  # other title; do not lower the pay standard to fill the bench.
+  bench_includes_plain_data_scientist: true
+
+sign_in:
+  # SSO BEFORE PASSWORD (the user, Nov 4, 2026: "if login w Google or login
+  # w LinkedIn available, don't use email and pswd"): when a portal
+  # offers Sign in with LinkedIn or Sign in with Google, the flow uses
+  # SSO — email + password is FORBIDDEN while either SSO option is
+  # available. Order: LinkedIn first, then Google. The saved-vault
+  # password is the fallback ONLY when the portal offers neither SSO
+  # option (Workday candidate tenants are the standing example — one
+  # vault credential covers every myworkdayjobs.com tenant). Email
+  # verification codes inside a flow still follow the blanket code
+  # approval. The work order stamps this block so the rule reaches the
+  # agent at the sign-in step itself.
+  sso_order: [linkedin, google]
+  email_password_forbidden_when_sso_available: true
+  vault_fallback_only_when_no_sso: true
+  # WORKDAY ACCOUNTS ARE PER-TENANT — CREATE FIRST, NEVER STAGE
+  # (the user, Nov 5, 2026, live session — Sony #388; corrected same night:
+  # "Everytime a workday account, you still need to create it. You
+  # can't just log in."): a Workday account exists only on the tenant
+  # where it was created — the saved credential is one PASSWORD, not
+  # a cross-tenant account. On any tenant where the user has no account
+  # yet, sign-in alone CANNOT work: the run CREATES the account,
+  # in the same run, following workday_failure_path: (1) SSO if
+  # offered (sso_order above); (2) create the account on that tenant
+  # with you@example.com + the saved Workday password (if
+  # creation says the account already exists, sign in with the same
+  # credential instead); (3) complete the account email verification
+  # in-flow from Gmail; (4) finish the application end to end. A
+  # Workday sign-in/credential failure NEVER parks the item in the
+  # tap pile. Proven on Sony (sonyglobal.wd1) Nov 5, 2026: the staged
+  # sign-in item was submitted and page-confirmed within minutes once
+  # a fresh account was created with the saved password. ENFORCED IN
+  # CODE: pipeline.py record() REFUSES a staged record whose item
+  # route is a myworkdayjobs.com host (or ATS Workday) and whose
+  # blocker_kind is sign_in — data checks only, never prose (the user,
+  # Nov 5, 2026, late). The user's words: "Since
+  # you can do it yourself. Why did you let me do it????"
+  workday_failure_never_stage: true
+  workday_failure_path: [sso, create_account_with_saved_credential, email_verification_in_flow, complete_application]
+  # SUCCESSFACTORS — SAME RULE AS WORKDAY (the user, Nov 6, 2026, live tap
+  # session, on #427 Ericsson + #433 Ascend Learning: "You need to
+  # create an account. Not just login. You didn't try to create it.
+  # I want you to do like Workday."): SuccessFactors accounts are
+  # also per-tenant (per company instance — career2.successfactors.eu,
+  # career8.successfactors.com, ...). The saved successfactors login
+  # is one PASSWORD, not a cross-tenant account: a rejected sign-in
+  # on a new tenant is EXPECTED, never a stopping point. The run
+  # follows successfactors_failure_path in the same run: (1) SSO if
+  # offered; (2) CREATE the account on that tenant with
+  # you@example.com + the saved SuccessFactors password (the user
+  # sets that password herself through the secure vault — the same
+  # one-credential pattern as Workday; if creation says the account
+  # already exists, sign in with the same credential instead);
+  # (3) complete any account email verification in-flow from Gmail;
+  # (4) finish the application end to end. A SuccessFactors sign-in /
+  # credential failure NEVER parks the item in the tap pile.
+  successfactors_failure_never_stage: true
+  successfactors_failure_path: [sso, create_account_with_saved_credential, email_verification_in_flow, complete_application]
+  # ALL ACCOUNTS — CREATE ON LOGIN FAILURE, ONE PASSWORD (the user,
+  # Nov 6, 2026, generalizing the Workday/SuccessFactors rule in the
+  # same live session: "for all future account, not just workday and
+  # success factor, as soon as you realize you can't login, go
+  # straight to create account, use my workday credential."): on
+  # EVERY portal, when sign-in cannot get in — no account yet, or
+  # the saved login is rejected — the run goes STRAIGHT to creating
+  # the account in the same flow, using the WORKDAY CREDENTIAL:
+  # The user's ONE consistent vault password, the password for every
+  # account Muse creates for her. SSO still comes first wherever
+  # it is offered (email + password stays forbidden under SSO); if
+  # creation says the account already exists, sign in with the same
+  # credential; complete any email verification in-flow from Gmail;
+  # finish the application end to end. A sign_in stage can be
+  # recorded ONLY when both sign-in AND account creation were
+  # attempted in the same run and both dead-ended — attested in
+  # DATA (signin_attempted + creation_attempted), never in prose
+  # (e.g. an SSO-only portal whose account only the user can unlock).
+  create_account_on_login_failure: true
+  account_creation_password: workday_credential
+  stage_requires_creation_attempted: true
+  # SIGN-IN STAGING — PROVE THE DEAD END IN THIS RUN (the user, Nov 5, 2026,
+  # late session — Google #365): a sign-in/password screen seen in an
+  # EARLIER run is not evidence. #365 sat staged all evening as a
+  # The user-only Google password step; when finally driven at the user's
+  # direction ("just use my Google account info") the browser profile
+  # already held a live signed-in session and NO password was ever
+  # asked — the only things that ever needed the user were two facts (her
+  # EagleView location, Bellevue WA, now saved in memory; and her
+  # preferred location, a true preference). Before ANY sign-in item
+  # is staged or presented to the user, the run re-drives the flow fresh:
+  # if the profile is already signed in, finish without the user.
+  # ENFORCED IN CODE: pipeline.py record() REFUSES a staged outcome
+  # on a sign-in/password/credential step (any portal) unless the
+  # record carries signin_attempted: true — the run's attestation
+  # that in THIS run it drove the flow to a genuine credential dead
+  # end: no live session, no working SSO, no saved login. (Workday
+  # credential stages are refused outright by the rule above.)
+  stage_requires_signin_attempted: true
+  # PASSWORD-STEP SEQUENCE (the user, Nov 6, 2026 — UKG #456 debug, her
+  # words: "you didn't even try to create a new account. You should
+  # try the password. No account. Sign up. Pop the credential card
+  # and let me fill it."): on any portal whose sign-in has a
+  # PASSWORD step, the run works this exact order and never skips a
+  # step: (1) TRY THE PASSWORD — actually submit a sign-in with the
+  # saved one consistent credential (SSO first wherever offered);
+  # holding at the form without submitting is NOT an attempt.
+  # (2) NO ACCOUNT / sign-in dead-ends → SIGN UP — create the
+  # account in the same flow (create_account_on_login_failure
+  # above). (3) When a password must be SET and the credential
+  # service cannot fill the saved password on that host, POP THE
+  # SECURE VAULT CREDENTIAL CARD and let the user fill it — that saves
+  # the login for the host — then the run finishes the creation
+  # itself. Never invent a password; never park before the card.
+  # ENFORCED IN CODE: a staged sign_in record carrying
+  # password_step: true (the run's judgment, as data) is REFUSED
+  # unless it also carries password_tried: true AND
+  # (saved_credential_filled: true OR credential_card_offered:
+  # true), on top of the signin_attempted + creation_attempted
+  # attestations above.
+  password_step_sequence: [try_password, sign_up_create_account, credential_card_when_password_must_be_set, email_verification_in_flow, complete_application]
+  stage_requires_sequence_on_password_step: true
+
+presentation:
+  # POP THE BROWSER IN WU'S CHAT (the user, Nov 4, 2026 — the #250 lesson):
+  # whenever an item needs the user at a live page, the alert to the user and a live
+  # browser window SHE CAN SEE are ONE action in the same turn. A window
+  # held inside a scheduled job's own task space does not surface in her
+  # main chat and does NOT count as presented; whoever relays a
+  # presentation (a session handoff, the main agent) re-pops the page
+  # in her chat in the same turn as the alert. An alert without a
+  # visible window is a failed presentation. The tower prints this rule
+  # with every status whose tap or captcha pile is non-empty, so it
+  # reaches the agent at the moment of presentation. (Origin: #250
+  # Workday, Nov 4, 2026 — the evening tap session held the sign-in
+  # dialog in its own space; the user answered "I don't see #250"; the main
+  # agent had to open the page again in chat. Lever packets are exempt:
+  # a packet is a message, not a window.)
+  pop_in_chat_required: true
+  rule: "PRESENTATION: alert + live window in the user's main chat are ONE action, same turn. A window held in a scheduled job's own space does not reach her and does not count as presented — re-pop the page in her chat when relaying. (rules.yaml presentation block; Lever packets exempt.)"
+
+hold_protocol:
+  # Before ANY hold for the user (a takeover wait or a session presentation), the
+  # run writes every filled field value into the item's log prep record (the
+  # form snapshot), so a fresh window can refill in minutes if the held
+  # window dies. (the user, Nov 4, 2026 — the Fetch fixes.)
+  snapshot_fields_before_hold: true
+  # A takeover hand-back where the user clicked a submit/apply control but the
+  # post-click state could NOT be observed: record LIMBO automatically —
+  # never staged, never re-apply; the 30-minute check decides and the hourly
+  # scan keeps watching for the confirmation email.
+  unconfirmed_takeover_click: limbo
+
+discovery:
+  # MANAGED IN CODE (the user, Nov 13, 2026: "manage these in code"):
+  # program/discovery.py is the sources' manager — `spine.py
+  # discovery plan` issues each source's work order FROM THIS BLOCK
+  # (no second copy of the rules), `spine.py discovery record`
+  # accepts the worker's JSON pass packet and REFUSES an incomplete
+  # search matrix or a second pass for the same run+source, and
+  # `spine.py discovery status` computes per-source coverage.
+  # LINKEDIN_ALERT's manager is the inbox job-alert flow (inbox.py);
+  # its plan names that and it records no worker passes here.
+  managed_by: "program/discovery.py (plan/record/status via spine.py discovery)"
+  # IN EVERY WORKER PACKET (the user, Nov 13, 2026): pipeline.next_order
+  # stamps build_plan(rules) as `discovery_plan` into all three
+  # packet shapes (work order, pacing hold, empty) — the code tells
+  # the agent the Jobright/Indeed search rules every time it
+  # initiates a worker, not only when the worker asks for a plan.
+  in_worker_packet: "discovery_plan (pipeline.py next_order, all packet shapes)"
+  sources: ["JOBRIGHT", "INDEED", "LINKEDIN_ALERT"]
+  # NEWEST POSTINGS FIRST (the user, Nov 8, 2026: "picks up the newest posted
+  # position rather than digging into piles and piles of old jobs"):
+  # discovery screens BOTH sources newest-first — on LinkedIn Jobs use
+  # the most-recent sort / date-posted ordering, on Jobright use the
+  # newest sort — and works the results in that order. Do not page deep
+  # into old inventory while newer postings remain unscreened; older
+  # postings are reached only after the newest supply is screened
+  # through. This governs the screening order only; every other filter
+  # (role, gate, pay, dedupe) is unchanged.
+  newest_first: true
+  order: newest_posted_first
+  # PAST-24-HOURS SCAN WINDOW — JOBRIGHT + INDEED ONLY (the user,
+  # Nov 12, 2026, 5:22 PM CT: "For indeed and jobright, also only
+  # scan the past 24 hours."): each keyword pass on Jobright and
+  # Indeed works newest-first and STOPS at the 24-hour boundary —
+  # postings older than 24 hours are not scanned, screened, or
+  # stocked in the pass. This REINSTATES the Nov 10, 2026 design
+  # (max_posting_age_hours: 24) for these two sources and
+  # SUPERSEDES the Nov 11, 2026 no-age-filter rule ("Remove the
+  # last 24 hours filter") for them. ENFORCEMENT IS IN CODE: this
+  # value rides every discovery packet via pipeline.py, and
+  # stock.py REFUSES a Jobright/Indeed stock whose KNOWN posting
+  # age exceeds it (the stock form carries posted_age_hours, or
+  # posted_text the code parses — "2 days ago" and the like). An
+  # age the source does not show is ALLOWED — the scan boundary is
+  # the control; the Nov 10 "undeterminable age is not stocked"
+  # clause is NOT reinstated (the user did not restate it). LINKEDIN_ALERT
+  # is EXEMPT: the daily alert email is itself the window.
+  max_posting_age_hours: 24
+  max_posting_age_sources: ["JOBRIGHT", "INDEED"]
+  # ONE PASS PER SOURCE PER RUN (the user, Nov 12, 2026, 5:26 PM CT: "Do
+  # the indeed and jobright one pass only."): per worker run,
+  # discovery is ONE Jobright pass and ONE Indeed pass — each pass
+  # covers that source's three keyword titles, newest-first, to the
+  # past-24-hours boundary (bounded browser calls as usual). NO
+  # repeated discovery passes within a run: after the single round
+  # the worker asks spine.py next ONCE more and, if there is still
+  # no application order, finishes — a pacing hold after the single
+  # round ends the run's discovery too. Later guardian-launched
+  # workers re-cover the rolling 24-hour window; dedupe in code
+  # handles the overlap. Enforcement home: this value rides every
+  # discovery packet via pipeline.py (packet-level enforcement —
+  # pass-counting is run behavior the code issues but cannot
+  # refuse after the fact).
+  passes_per_source_per_run: 1
+  passes_per_source_scope: ["JOBRIGHT", "INDEED"]
+  # LINKEDIN KEYWORD SEARCH (the user, Nov 11, 2026 — asked how to not be
+  # limited by the "More jobs for you" feed, then approved the switch):
+  # LinkedIn discovery uses Jobs SEARCH, not the personalized feed.
+  # Run one search per title in linkedin_search_titles with the
+  # Most-recent sort set (ranked by date posted, newest first; NO
+  # date-posted filter — the 24-hour filter was removed Nov 11, 2026),
+  # Full-time, the user's standing locations (US remote / CA / WA; no Texas
+  # onsite or hybrid), and page through ALL results — a title's
+  # search is done only when its results are screened through. The
+  # feed may still be glanced at, but it is no longer the discovery
+  # source. Jobright works the same way (its newest-ranked search
+  # results, no age limit).
+  linkedin_method: keyword_search
+  linkedin_search_titles:
+    - "Senior Data Scientist"
+    - "Data Scientist"
+    - "Machine Learning Engineer"
+  # JOBRIGHT KEYWORD SEARCH (the user, Nov 11, 2026 — "Do the same for
+  # jobright", minutes after the LinkedIn switch): Jobright discovery
+  # uses its SEARCH the same way — one search per title in
+  # the search matrix below, newest sort (ranked by date posted),
+  # paged newest-first per title and STOPPING at the past-24-hours
+  # boundary (max_posting_age_hours above — removed Nov 11, 2026,
+  # reinstated Nov 12, 2026) — not the Jobright recommendations
+  # feed. All standing Jobright rules are unchanged (never apply
+  # through Jobright itself; screening only).
+  jobright_method: keyword_search
+  # SITE FILTERS FIRST (the user, Nov 12, 2026: "Jobright has filter
+  # posted 24 hours ago use it. Indeed also have date posted last
+  # 24 hours in filter. Use them." — and minutes later: "Both of
+  # these: full time only."): every Jobright title search SETS THE
+  # SITE'S OWN FILTERS before screening — its posted-within-24-
+  # hours date filter and the Full-time job-type filter. The
+  # filtered result set IS the scan (the manual boundary stop and
+  # the stock.py age refusal are backstops, not the mechanism).
+  jobright_date_filter: last_24_hours
+  jobright_job_type_filter: full_time
+  # SEARCH MATRIX (the user, Nov 12, 2026, 5:30 PM CT: "These two same
+  # filters apply for senior data scientist at California or
+  # Washington. Machine learning engineer at California and
+  # Washington. Senior data scientist remote and machine learning
+  # engineer remote."): each pass runs exactly FOUR searches, each
+  # with BOTH site filters set (date posted = last 24 hours; job
+  # type = Full-time). This REPLACES the blanket three-title list —
+  # plain "Data Scientist" is NOT in the matrix for these two
+  # sources (the role filter and already-stocked plain-DS items are
+  # untouched; the LinkedIn alerts keep the user's own saved definitions).
+  # CA/WA is ONE location scope (run it as the site allows — a
+  # state-scoped search or one search per state; the scope, not
+  # the click count, is the rule).
+  # REMOTE MECHANICS (the user, Nov 12, 2026, 5:32 PM CT — dictation
+  # reading: "Jobright['s filter] is called Work model. On
+  # indeed.com, put in the location as Remote."): the REMOTE rows
+  # set Jobright's "Work model" filter to Remote (remote_via:
+  # work_model_filter — NOT the location box); the CA/WA rows use
+  # the site's location input.
+  jobright_searches:
+    - {title: "Senior Data Scientist", location_scope: "California/Washington", location_via: location_field}
+    - {title: "Machine Learning Engineer", location_scope: "California/Washington", location_via: location_field}
+    - {title: "Senior Data Scientist", location_scope: "Remote", remote_via: work_model_filter}
+    - {title: "Machine Learning Engineer", location_scope: "Remote", remote_via: work_model_filter}
+  # INDEED KEYWORD SEARCH (the user, Nov 12, 2026 — "add indeed as job
+  # search source along jobright. Yes, exact same rule."): Indeed
+  # discovery works EXACTLY like Jobright discovery — its SEARCH,
+  # never the recommendations/home feed: one search per title in
+  # the search matrix below, Date sort (ranked by date posted, newest
+  # first), paged newest-first per title and STOPPING at the
+  # past-24-hours boundary (max_posting_age_hours above).
+  # Screening only — NEVER apply through Indeed itself; follow the
+  # posting to the employer/ATS site and apply there, exactly as
+  # with Jobright. Indeed is already signed in in the browser
+  # (Google sign-in, you@example.com). Every standing filter
+  # is unchanged: role filter, pay bars, dedupe in code, the
+  # company gate AT IDENTIFICATION via the Revelio packet (timing
+  # reversed Nov 12, 2026), and the blocked-companies list applied
+  # on sight. Indeed finds are
+  # stocked with source INDEED and feed the same window total.
+  indeed_method: keyword_search
+  # SITE FILTERS FIRST (the user, Nov 12, 2026 — same direction as
+  # Jobright above): every Indeed title search SETS THE SITE'S OWN
+  # FILTERS before screening — "Date posted: Last 24 hours" and
+  # job type Full-time. The filtered result set IS the scan.
+  indeed_date_filter: last_24_hours
+  indeed_job_type_filter: full_time
+  # SEARCH MATRIX (the user, Nov 12, 2026, 5:30 PM CT: "These two same
+  # filters apply for senior data scientist at California or
+  # Washington. Machine learning engineer at California and
+  # Washington. Senior data scientist remote and machine learning
+  # engineer remote."): each pass runs exactly FOUR searches, each
+  # with BOTH site filters set (date posted = last 24 hours; job
+  # type = Full-time). This REPLACES the blanket three-title list —
+  # plain "Data Scientist" is NOT in the matrix for these two
+  # sources (the role filter and already-stocked plain-DS items are
+  # untouched; the LinkedIn alerts keep the user's own saved definitions).
+  # CA/WA is ONE location scope (run it as the site allows — a
+  # state-scoped search or one search per state; the scope, not
+  # the click count, is the rule).
+  # REMOTE MECHANICS (the user, Nov 12, 2026, 5:32 PM CT — same
+  # dictation): the REMOTE rows type "Remote" into Indeed's
+  # location (Where) field (remote_via: location_field); the CA/WA
+  # rows use the location input for California / Washington.
+  indeed_searches:
+    - {title: "Senior Data Scientist", location_scope: "California/Washington", location_via: location_field}
+    - {title: "Machine Learning Engineer", location_scope: "California/Washington", location_via: location_field}
+    - {title: "Senior Data Scientist", location_scope: "Remote", remote_via: location_field}
+    - {title: "Machine Learning Engineer", location_scope: "Remote", remote_via: location_field}
+  # LINKEDIN JOB ALERTS (the user, Nov 12, 2026 — "Add alerts alongside
+  # Jobright + Indeed."): a THIRD discovery source, reached ONLY
+  # through the daily alert emails (inbox.jobalert_search /
+  # jobalert-intake in code). The user has 4 saved alerts, all "Daily via
+  # email and notification"; "Top job picks for you" is OFF — these
+  # are her saved searches, not recommendations. The alert
+  # definitions below are DATA / human context — the intake never
+  # matches an email against them (sender-only identification,
+  # one-to-one closed set; see the inbox block). Rules for the
+  # source: use THOSE EMAILS ONLY; open the email's job links and
+  # its "See all jobs" link; stay on that page/list; NEVER initiate
+  # a new discovery run — no LinkedIn job searches, no LinkedIn
+  # Jobs home, no recommendations feed (this email-link route is
+  # the ONLY LinkedIn job-page use allowed anywhere in the
+  # program). Vetting: LinkedIn identifies postings ONLY (title,
+  # company, location, link) — NO company checking on LinkedIn;
+  # click into the job, go to the EXTERNAL source (company/ATS
+  # posting), pay check from the external posting; the company
+  # gate runs AT IDENTIFICATION via the Revelio gate packet
+  # (external approved sources only — never LinkedIn numbers).
+  # Same role filter, pay bars, blocked list, diversification and
+  # dedupe as every source. Finds stock with source LINKEDIN_ALERT
+  # and feed the same window total. Rotation: Jobright passes stay
+  # prioritized; Indeed passes as usual; ONE alert pass per day
+  # covers all unprocessed alert emails.
+  linkedin_alert_method: email_alerts_only
+  linkedin_alert_source_tag: LINKEDIN_ALERT
+  linkedin_alert_max_pages: 5    # PAGE CAP (the user, Nov 12, 2026, latest: "After you click into see all jobs and
+                                 # if there are multiple pages only click until you reach five pages. Don't go
+                                 # beyond five pages.") — vet every job on pages 1-5 of the See-all list, STOP at
+                                 # page 5, never open page 6. This supersedes both the user's earlier 1-3 page note
+                                 # and the brief all-pages wording from the same day.
+  linkedin_alert_easy_apply_allowed: true   # EASY APPLY IS OKAY FOR ALERT JOBS (the user, Nov 12, 2026: "EZ applies
+                                 # are okay. There aren't that many of them anyway."): an alert posting whose
+                                 # only route is Easy Apply is applied to via Easy Apply, end to end, under all
+                                 # standing application rules — it is NOT skipped. Alert jobs with an
+                                 # external/company route still go to the external ATS; the posting's own route
+                                 # decides. LINKEDIN_ALERT is its own lane for this: the LinkedIn friction flag
+                                 # does not block alert Easy Apply and need not clear for it (discovery/search
+                                 # on LinkedIn stays banned — the email link is the only entry). A fresh
+                                 # LinkedIn warning/checkpoint DURING alert work still stops the worker, which
+                                 # alerts the user as usual. Jobright/Indeed finds are unchanged: employer/ATS site only.
+  linkedin_alerts:
+    - {title: "Senior Data Scientist", location: "United States", work_type: "Remote"}
+    - {title: "Machine Learning Engineer", location: "United States", work_type: "Remote", job_type: "Full-time"}
+    - {title: "Machine Learning Engineer", location: "Washington, California, United States (within 50 miles)", job_type: "Full-time"}
+    - {title: "senior data scientist", location: "Washington, California, United States (within 50 miles)", job_type: "Full-time"}
+  # SUPPLEMENTARY SOURCE — LINKEDIN PREMIUM "HEAR BACK" LIST (the user,
+  # Nov 11, 2026, with a screenshot of the list: "add this to the
+  # search but don't dominate the search and don't chase this till
+  # the end of the world. if this list seems to be dried out, leave
+  # it"): LinkedIn's Premium "Jobs where you're more likely to hear
+  # back" list is a SUPPLEMENTARY discovery source — screened only
+  # AFTER a pass's LinkedIn keyword searches, capped at
+  # supplementary_max_cards per pass so it can never dominate
+  # discovery. Its items go through the same screening (role filter,
+  # gate, pay, dedupe) and are tagged source LINKEDIN. DRY RULE: a
+  # pass over the list that yields zero NEW stockable items is a dry
+  # pass; hear_back_dry_passes_to_retire consecutive dry passes
+  # retire the source (the worker reports each pass's yield; the
+  # retirement is logged and hear_back_list_active set false) — do
+  # not keep chasing a dried-out list. First-pass seeds from the user's
+  # Nov 11 screenshot: Storm2 — Senior Machine Learning Scientist,
+  # San Francisco on-site, $200K/yr; Shields Group Search — Machine
+  # Learning Engineer, SF Bay Area hybrid, $220K-$300K/yr; Nebius —
+  # Senior Machine Learning Engineer, Model Training and
+  # Reinforcement Learning, Palo Alto.
+  supplementary_sources:
+    - linkedin_hear_back_list
+  supplementary_max_cards: 10
+  hear_back_list_active: false   # RETIRED the same day it was added (Nov 11, 2026):
+                                 # the strategy change moved applications fully off
+                                 # LinkedIn (Jobright only; LinkedIn = invitations
+                                 # only), so this LinkedIn list is never screened.
+  hear_back_dry_passes_to_retire: 2
+  # Before staging an item whose route hits a route_limits host, check
+  # whether the same posting is available on a drivable portal and prefer
+  # that route. The same posting on two sources stays ONE queue entry
+  # (cross-source dedupe unchanged). (the user, Nov 4, 2026 — the Fetch fixes.)
+  second_door_check_for_limited_routes: true
+
+bench:
+  # BENCH-LOW RESTOCK TRIGGER (the user, Nov 4, 2026: "Add in code: bench low,
+  # trigger restock. Only do this in code."): program/bench_check.py
+  # computes the verdict — RESTOCK_NEEDED when the ready bench is at or
+  # below low_watermark AND below the window's remaining need, window
+  # open, target unmet, friction clear. The driver-mode watcher runs it
+  # every 30 min (Step 6) and triggers a guardian pass on RESTOCK_NEEDED;
+  # the guardian's Step 0 verdict then governs the launch (a fresh
+  # recovery stocks AND applies; a run already in flight is the restock
+  # in progress). The threshold lives here, never in a job body.
+  low_watermark: 5
+
+guardian:
+  # Stall policy (the user, Nov 4, 2026: "Always stop it. Burn this into code."):
+  # when an in-flight batch/recovery run shows NO advancement (dispositions
+  # and verified counts frozen, no progress entries) across the 60-minute
+  # stall span, the guardian STOPS the stuck run via cron.stop and relaunches
+  # a fresh recovery in the same pass, then alerts the user. This supersedes the
+  # old alert-only rule. Duplicate safety is unchanged: the fresh run
+  # re-reads the log before any submit, an interrupted item is rescued per
+  # the rescue-before-replacing rule (portal state checked first; a portal
+  # 'already applied' signal is an absolute stop), and no company+role with
+  # an unresolved or confirmed outcome is ever re-applied.
+  stall_span_minutes: 60
+  stall_action: stop_and_relaunch
+  # The detector is CODE: program/stall_check.py computes the verdict from
+  # the log + event book (frozen verified / events / progress entries). The
+  # driver-mode watcher (cron linkedin-spine-shadow, every 30 min) runs it
+  # as its Step 4 and carries out a STALL verdict: stop the in-flight run,
+  # trigger the guardian to relaunch, alert the user. (the user, Nov 4, 2026.)
+  detector: "program/stall_check.py — verdict consumed by cron linkedin-spine-shadow Step 4"
+
+supervisor:
+  # WORKER SUPERVISION (the user, Nov 6, 2026 — the clean fix for the
+  # stall/recovery relay noise): program/supervisor.py owns the
+  # hand-off between worker legs. Workers prove liveness with a
+  # HEARTBEAT (program/state/heartbeat.json, touched on every work-order
+  # pull and every recorded outcome via `supervisor.py heartbeat`), not
+  # with outcome counts — a worker busy inside long browser tasks or
+  # pacing gaps is SLOW, not stuck, and earns no alarm and no stop.
+  # The supervisor computes ONE launch verdict from the spine status +
+  # heartbeat + its own launch lock (program/state/supervisor.json):
+  #   LAUNCH        work remains, no live worker, no unexpired launch
+  #                 claim — the guardian claims the launch
+  #                 (`supervisor.py claim`), creates ONE worker from
+  #                 program/worker_template.md, then confirms with
+  #                 `supervisor.py launched`. The claim is the
+  #                 idempotency lock: two passes can never double-start.
+  #   WORKER_ALIVE  heartbeat fresh — start nothing.
+  #   CLAIM_PENDING a launch was claimed but the worker has not
+  #                 heartbeat yet and the claim is unexpired — wait.
+  #   COMPLETE / CLOSED / FRICTION_STOP — the recovery_check verdicts,
+  #                 passed through; start nothing.
+  # Workers NEVER create their own continuation/recovery jobs; when a
+  # worker leg ends, the supervisor starts the next one. "Recovery" as
+  # a named event is retired. stall_check.py reads the heartbeat too:
+  # a fresh heartbeat is an ALIVE verdict regardless of frozen counts;
+  # the count-freeze logic remains only as the fallback for workers
+  # that predate the heartbeat (no heartbeat file for the window).
+  # STALE THRESHOLD RAISED 20 -> 45 (the user, Nov 9, 2026 — freeze
+  # investigation): a worker can only heartbeat BETWEEN browser
+  # calls, and a normal browser pass (discovery screening or a
+  # Workday application) runs 17-30 minutes, so the 20-minute line
+  # declared healthy workers dead, the guardian then refused to
+  # launch (Step 2a: run in flight but not live), and the batch
+  # deadlocked until stopped by hand — repeatedly on Nov 8-9.
+  # 45 minutes clears the longest normal pass with margin; the
+  # stall_check span (guardian.stall_span_minutes, 60) still sits
+  # above it, so a truly silent worker is caught there.
+  heartbeat_stale_minutes: 45
+  launch_claim_ttl_minutes: 15
+  # PROGRESS-BASED LIVENESS (the user, Nov 10, 2026 — freeze investigation
+  # fixes 1+2+4): a worker waiting on a browser task CANNOT heartbeat
+  # (delegating via browser.browse ends its turn), so the heartbeat
+  # alone can never see a healthy waiting worker. The worker now
+  # records its in-flight browser task id in its heartbeat
+  # (`supervisor.py heartbeat --browser-task <id>`, right after
+  # delegating); the guardian and watcher bridge the task's progress
+  # from muse.db (runtime.browser_tasks) into
+  # program/state/browser_progress.json via
+  # program/browser_progress.py, because supervisor.py (plain Python)
+  # cannot query muse.db itself. A non-ended worker whose browser
+  # task is still "running" and progressed within
+  # browser_progress_stale_minutes OF THE LAST BRIDGE CHECK counts
+  # LIVE alongside a heartbeat-fresh worker — in the supervisor
+  # verdict (it fills its slot; guardian Step 2a no longer deadlocks
+  # on it) and in stall_check (no STALL while any worker is live by
+  # either signal). A bridge check older than
+  # browser_progress_check_fresh_minutes proves nothing and is
+  # ignored, so a dead bridge degrades to the pre-fix heartbeat-only
+  # judgment, never to a false "alive". A worker whose browser task
+  # has ALSO stopped progressing (or ended without the worker
+  # waking) falls back to the existing 45-min stale / 60-min stall
+  # span rules exactly as before.
+  browser_progress_stale_minutes: 15
+  browser_progress_check_fresh_minutes: 40
+  # BROWSER TASK BOUND (the user, Nov 10, 2026 — freeze fix 1): no
+  # agent-facing lever sets runtime.browser_tasks.deadline_at (NULL
+  # on every task ever run; browser.browse exposes no deadline
+  # parameter in ~/docs/browser.md), so the bound is enforced by
+  # scoping + task text, paired with progress-based liveness above:
+  # the worker template caps every browser call at ~15 minutes of
+  # work, ONE source or ONE application stage per call, with an
+  # explicit wall-clock return-by time in the task text and partial
+  # results REQUIRED at the cap. browser_task_bound_minutes is the
+  # number the template states; it is a stated bound, not a
+  # mechanical cutoff — the honest limit, recorded here so nobody
+  # later claims a hard deadline exists.
+  browser_task_bound_minutes: 15
+  # HARD CEILING ON PROGRESS-BASED LIVENESS (the user, Nov 10, 2026,
+  # later same evening): progress-alive applies only while the
+  # browser task itself is younger than this — no worker rides one
+  # browser task past ~2 hours regardless of progress. Past the
+  # ceiling the worker falls back to the heartbeat rules above (and
+  # can be judged stale/stalled and replaced like any silent
+  # worker). The task's age is measured from its start as bridged
+  # from runtime.browser_tasks (created_at) into the bridge file's
+  # started_at; a bridge entry with no recorded start cannot be
+  # ceiling-judged, so progress rules apply to it unchanged.
+  browser_task_hard_ceiling_minutes: 120
+  # WORKERS RUN BACK TO BACK (the user, Nov 6, 2026 — REVERSAL, late
+  # evening: "Reverse the one application per worker. Allow worker
+  # to work through applications one next to another. That's
+  # faster."): a worker keeps flying applications one after
+  # another, following the next order spine.py record hands back
+  # after every outcome (the keep-going loop in flow:), and ends
+  # ONLY when the program says complete/closed, a friction outcome
+  # stops all work, or the window's no-new-starts cutoff passes.
+  # The tombstone (`supervisor.py done` — heartbeat ended: true)
+  # is written ONCE, when the run ends; an ended heartbeat still
+  # means "no live worker" at any age (the supervisor launches the
+  # replacement on the next pass with no staleness wait), and
+  # stall_check still reads ENDED, never STALL. The
+  # one-application rule this reverses was live only a few hours
+  # the same day — two legs flew (Glean #461, Blue Shield #462) —
+  # and was reversed on pace: 35/60 at ~12:21 AM CT against 61/60
+  # the previous window. The supervisor machinery (heartbeat,
+  # claim lock, verdict in code) is unchanged.
+  one_application_per_worker: false
+  worker_runs_back_to_back: true
+  # PARALLEL WORKERS (the user, Nov 6, 2026: "Run 3 workers in
+  # parallel"): up to 3 workers fly at once. Each worker
+  # heartbeats into its OWN file (state/heartbeats/<run>.json) so
+  # liveness is per worker; the verdict counts live workers +
+  # unexpired launch claims against this cap and returns
+  # launch_slots — the guardian tops up to the cap on every pass.
+  # Item safety is the standing claim discipline: a worker writes
+  # its claim line in the log before browser work and re-reads the
+  # log before the submit click; two-lane pacing (incl. same-host
+  # gaps and caps) is computed by the program from the shared
+  # event book, so parallel workers pace against each other's
+  # submissions too.
+  max_parallel_workers: 3
+  detector: "program/supervisor.py — verdict consumed by cron linkedin-batch-guardian"
+
+flow:
+  # KEEP-GOING LOOP (the user, Nov 4, 2026: "if anything stick, keep going down
+  # the list"): spine.py record returns the NEXT work order in the same
+  # output after every recorded outcome. A stuck item is parked by
+  # recording it (staged / captcha / limbo) and the program immediately
+  # serves the next item — no run ever idles on a stuck item or decides
+  # on its own whether to continue. The loop ends only when the program
+  # says complete / closed / empty, or a friction outcome stops all work.
+  on_any_outcome: record_it_then_take_the_next_order_from_the_same_output
+  on_stuck: park_by_recording_then_continue_with_the_next_order
+  idle_on_a_stuck_item: never
+  # Recording outcome "unstaged" returns a staged / captcha item to the
+  # bench (write path added Nov 4, 2026 — the event type already existed).
+  unstage_outcome: unstaged

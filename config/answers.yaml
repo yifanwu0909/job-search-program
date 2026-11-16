@@ -1,0 +1,94 @@
+# Standing answer set for job applications — SINGLE COPY (application program v1).
+# Source: application-program-design-2026-11-04.md + MEMORY.md standing facts.
+# HARD RULE: applications must NEVER name ***REMOVED***. Application employer history is
+# the base resume exactly (CenterPoint Energy latest). ***REMOVED*** appears below ONLY
+# as a replies-only fact, fenced off under replies_only.
+
+applicant:
+  full_name: "YOUR_FULL_NAME"
+  legal_name_native: "YOUR_LEGAL_NAME_IN_NATIVE_LANGUAGE"   # use exactly, only when a form asks for legal name in native language
+  first_name: "YOUR_FIRST_NAME"
+  last_name: "YOUR_LAST_NAME"
+  email: "you@example.com"
+  phone: "(000) 000-0000"
+  linkedin_url: "https://www.linkedin.com/in/your-profile/"
+  address:
+    street: "123 Main St Apt 000"
+    city: "Your City"
+    state: "ST"
+    zip: "00000"
+    country: "US"
+    line: "123 Main St Apt 000, Your City, ST 00000"
+
+applications:
+  # Employer history EXACTLY as the base resume (~/workspace/user/files/
+  # ***REMOVED***_Senior_Software_Engineer__ML_Platform_20260827.pdf). Never add ***REMOVED***.
+  current_employer: "CenterPoint Energy"
+  current_title: "Senior Data Scientist"
+  employer_history:
+    - employer: "CenterPoint Energy"
+      title: "Senior Data Scientist"
+      location: "Houston, TX"
+      start: "2024-06"
+      end: "2026-06"
+    - employer: "BDO Digital USA"
+      title: "AI/Machine Learning Engineer"
+      location: null        # resume states no location; Workday fallback: "Remote"
+      start: "2023-02"
+      end: "2024-06"
+    - employer: "EagleView Technologies"
+      title: "Data Scientist"
+      location: null        # resume states no location; Workday fallback: "Remote"
+      start: "2019-07"
+      end: "2022-07"
+  never_name: ["***REMOVED***"]
+  education:
+    - school: "Georgetown University"
+      degree: "MS Analytics (Data Science Concentration)"
+      start: "2017"
+      end: "2019"
+      gpa: "3.7"
+    - school: "University of Washington"
+      degree: "BS Mathematics"
+      start: "2013"
+      end: "2017"
+      gpa: "3.5"
+  eeo:
+    race: "Asian (Chinese)"       # if the form offers only "Asian", use "Asian"
+    gender: "female"
+    disability: "none"            # "No, I do not have a disability and have not had one in the past"
+    veteran: "not a veteran"      # never select any veteran option
+  work_authorization:
+    status: "US permanent resident (green card)"
+    authorized_to_work_us: true
+    sponsorship_required: false
+  citizenship:
+    china: "citizen since birth"
+    united_states: "legal permanent resident (green card) since MM/DD/YYYY"
+  notice_period:
+    weeks: 2
+    months: 0.5
+    ca_roles_note: "CA-based roles need additional time to move before starting (timing note only, not a relocation-assistance item)"
+  ai_notetaker_interview_consent: "yes"   # standing YES (the user, Oct 31, 2026)
+  salary_rule: "top of the published range; when no range is published, the researched above-market figure for the role in that city (figure logged with the submission)"
+  resume_header:
+    contact_line: "Your City, ST | (000) 000-0000 | you@example.com | LinkedIn"
+    status_line: "U.S. Green Card Holder"
+  fun_facts: "invent a plausible, lively one; never ask (personal-color items only — professional facts are never invented)"
+  how_did_you_hear_default: "LinkedIn"   # when the item was stocked from LinkedIn discovery; else the stocking source
+
+replies_only:
+  # For LinkedIn/Gmail replies ONLY. Never on any application form, resume, or portal profile.
+  current_role: "Senior Data Scientist at ***REMOVED*** since August 24, 2026"
+  availability: "free for calls after 2:00 PM CT (standing); no calls Nov 2-6, 2026 (vacation week)"
+
+# Screening answers confirmed live with the user on the Workday (JR-0108977) form, Nov 4, 2026 (the user said "Go"):
+screening_answers:
+  consider_relocating_for_role: true   # CA roles: yes, with extra move time before starting
+  non_compete_or_non_solicitation_restrictions: false
+  uses_workday_system_in_current_job: false
+  current_or_former_us_government_employee: false
+  citizen_national_resident_of: {iran: false, cuba: false, north_korea: false, syria: false, crimea_dnr_lnr: false}
+  related_to_current_workday_employee: false
+  related_to_customer_employee_or_gov_official_with_workday_business: false
+  ernst_young_employee_or_partner_current_or_recent: false
