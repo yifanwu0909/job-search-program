@@ -11,8 +11,8 @@ and the equal-opportunity answers forms ask for).
 
 The flow:
   1. A welcome message.
-  2. Permissions: the four accounts the system runs on (Google,
-     LinkedIn, Jobright, Indeed), asked for first. Each one is set up
+  2. Permissions: LinkedIn and Google, asked for first. Each one is
+     set up
      now or skipped with "I'll do this later when it comes up"; a skip
      is a complete answer, and the access is asked for again when it
      first comes up. Choices are recorded with timestamps in
@@ -56,50 +56,24 @@ I'll set this up with you, step by step. It takes about 6 minutes
 in total. You answer questions, and I write everything down.
 
 Here's what we'll cover: permissions, your resume, a few standing
-questions, and the Jobright plugin.
-
-First, the access. I'll ask for each account access the system may
-need, one at a time, and for each one I'll explain why it is needed
-before asking. Set it up now, or skip it and I'll ask again when it
-comes up."""
+questions, and the Jobright plugin."""
 
 # ---------------------------------------------------------------- permissions
-# Asked for first, all of them, so there are fewer stops later. Every
+# Asked for first, both of them, so there are fewer stops later. Every
 # item can be skipped: a skip is recorded, and the access is asked for
 # again when it first comes up. Any grant can be taken back later by
 # telling Muse, disconnecting the account, or removing the saved login.
-PERMISSIONS_INTRO = """The system works across your accounts. Setting each of these up now
-means fewer stops later. Every one can be skipped: skip it, and your
-Muse will ask again when that access first comes up. You can also
-take any of them back later: tell your Muse, disconnect the account,
-or remove the saved login, and it stops being used."""
-
 PERMISSIONS = [
-    ("google_account", "Google: Gmail, Calendar, and Tasks",
-     "Why it is needed: your Gmail is where application confirmations, "
-     "recruiter replies, and LinkedIn notification emails land; "
-     "Calendar holds your interviews, and Tasks holds your to-dos. "
-     "Connecting Google lets your Muse read that mail, book "
-     "interviews, and keep the to-do list. It sends email only with "
-     "your approval tap."),
-    ("linkedin_signin", "LinkedIn sign-in",
-     "Why it is needed: the connection invitations, invitation "
-     "accepts, and inbox replies all happen inside your LinkedIn "
-     "account, so your Muse signs in as you in its browser to send "
-     "them and to verify profiles. You enter the login on the secure "
-     "vault form; your Muse never sees the password. Premium Career "
-     "is what the outreach runs on."),
-    ("jobright_signin", "Jobright sign-in",
-     "Why it is needed: Jobright is one of the discovery sources, and "
-     "its searches run signed in. Your Muse signs in as you to run "
-     "the morning searches. You enter the login on the secure vault "
-     "form; your Muse never sees the password. A paid plan is what "
-     "covers this volume."),
-    ("indeed_signin", "Indeed sign-in",
-     "Why it is needed: Indeed is the second discovery source, used "
-     "for screening, and its searches run signed in. Your Muse "
-     "signs in as you to run them. You enter the login on the secure "
-     "vault form; your Muse never sees the password."),
+    ("linkedin_signin", "LinkedIn sign-in or register",
+     "Why: invitations, accepts, and inbox replies all happen inside "
+     "your LinkedIn account, so Muse signs in as you. Sign in, or "
+     "register if you do not have an account. You enter the login on "
+     "the secure form; Muse never sees the password."),
+    ("google_account", "Gmail: connect Google",
+     "Why: connect your Google account and give Muse access to "
+     "Gmail, Calendar, and Tasks. Confirmations and recruiter replies "
+     "land in Gmail, interviews go on Calendar, to-dos go in Tasks. "
+     "Muse sends email only with your approval."),
 ]
 
 PLACEHOLDER_BITS = (
@@ -228,9 +202,7 @@ def permissions_step(state, state_path):
         pass  # all decided in an earlier run; fall through to summary
     else:
         print()
-        print("=== Permissions: set up access now, or skip for later "
-              "[~2 minutes] ===")
-        print(PERMISSIONS_INTRO)
+        print("=== Permissions [~2 minutes] ===")
     for key, title, text in PERMISSIONS:
         if key in perms:
             continue
@@ -238,8 +210,8 @@ def permissions_step(state, state_path):
         print(f"--- {title} ---")
         print(text)
         while True:
-            raw = input('Type "grant" to set this up now, or "skip" to '
-                        "do it later when it comes up "
+            raw = input('Type "grant" to set this up now, or "skip" '
+                        "for later "
                         '[break = take a break]: ').strip().lower()
             if raw == "break":
                 raise BreakPrompt
