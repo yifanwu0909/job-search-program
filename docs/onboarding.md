@@ -51,16 +51,18 @@ The system works across your accounts, so onboarding asks for all of the access 
 
 Every choice is recorded in `program/state/onboarding.json`. Any grant can be taken back later: tell Muse to disconnect it, disconnect the account yourself, or remove the saved login, and it stops being used.
 
+For every item, Muse explains why it is needed before asking for anything. Passwords are never typed into the chat: you enter them on a secure vault form, and Muse never sees them.
+
 The eight items:
 
-1. **Google: Gmail, Calendar, and Tasks.** Gmail is the system's inbox (confirmations, recruiter replies, LinkedIn notification emails). Calendar holds interviews, Tasks holds to-dos. Sending email always needs your approval tap.
-2. **LinkedIn sign-in.** Muse signs in as you in its browser to verify profiles, send and accept invitations, and reply in your inbox under your reply rules. Login saved in the secure vault. Premium Career is what outreach runs on.
-3. **LinkedIn notification emails.** Job alerts, message notifications, and invitation emails. A short settings pass on LinkedIn itself, following docs/linkedin-notifications.md, which Muse walks you through.
-4. **Jobright sign-in.** One of the discovery sources. Login saved in the secure vault.
-5. **Indeed sign-in.** The second discovery source, used for screening. Login saved in the secure vault.
-6. **Employer portal accounts.** Workday, Greenhouse, SuccessFactors, iCIMS, Lever, Ashby, Dayforce, UKG, and others. Sign-in with Google where offered; Greenhouse needs only an email code; for the rest you set one portal password yourself in the secure vault and Muse reuses it without ever seeing it. Lever, Gem, Rippling, and Paycom are never signed into at all; those come as manual packets.
-7. **Reading sign-in codes from your email.** With this, Muse may fetch the first emailed code for a sign-in step from your Gmail and use it. If a code expires, is rejected, or a second one is needed, it stops and asks you.
-8. **Asking for your taps.** Phone approvals, captchas, and email send approvals stay yours. With this, Muse brings them to you in your two daily sessions (see docs/tap-sessions/README.md and docs/captcha-sessions/README.md). Without it, Muse never asks, and those steps simply wait.
+1. **Google: Gmail, Calendar, and Tasks.** Why: Gmail is where confirmations, recruiter replies, and LinkedIn notification emails land; Calendar holds interviews, Tasks holds to-dos. Sending email always needs your approval tap.
+2. **LinkedIn sign-in.** Why: invitations, invitation accepts, and inbox replies happen inside your LinkedIn account, so Muse signs in as you in its browser to send them and to verify profiles. You enter the login on the secure vault form; Muse never sees the password. Premium Career is what outreach runs on.
+3. **LinkedIn notification emails.** Why: job alerts, message notifications, and invitation emails are how the system hears about new jobs and messages without browsing LinkedIn. A short settings pass on LinkedIn itself, following docs/linkedin-notifications.md, which Muse walks you through. No credential is involved.
+4. **Jobright sign-in.** Why: Jobright is a discovery source and its searches run signed in, so Muse signs in as you to run the morning searches. You enter the login on the secure vault form; Muse never sees the password.
+5. **Indeed sign-in.** Why: Indeed is the second discovery source, used for screening, and its searches run signed in. You enter the login on the secure vault form; Muse never sees the password.
+6. **Employer portal accounts.** Why: applications are submitted on employer portals (Workday, Greenhouse, SuccessFactors, iCIMS, Lever, Ashby, Dayforce, UKG, and others), and submitting means signing in. Sign-in with Google where offered; Greenhouse needs only an email code; for the rest you set one portal password yourself on the secure vault form and Muse reuses it without ever seeing it. Lever, Gem, Rippling, and Paycom are never signed into at all; those come as manual packets.
+7. **Reading sign-in codes from your email.** Why: portal sign-ins often email a one-time code, and the sign-in stalls without it. With this, Muse may fetch the first emailed code for a sign-in step from your Gmail and use it. If a code expires, is rejected, or a second one is needed, it stops and asks you.
+8. **Asking for your taps.** Why: phone approvals, captchas, and email send approvals can only be done by you. With this, Muse brings them to you in your two daily sessions (see docs/tap-sessions/README.md and docs/captcha-sessions/README.md). Without it, Muse never asks, and those steps simply wait.
 
 One part needs no access at all: the contacto contact-finding runs on public web search, and the company pages it checks are public.
 

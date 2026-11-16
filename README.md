@@ -4,7 +4,7 @@ An automated job search that runs on your own Muse. It finds new postings every 
 
 It was built and tuned over several months of daily use. The daily target is **60 verified applications**.
 
-## How it fits together
+## What it does
 
 Here is one day, top to bottom:
 
@@ -28,12 +28,10 @@ flowchart TD
 
 You are not a step in the chain. The day runs on its own, and you get called in from the side, only at the moments a step genuinely needs a person. The pattern underneath: the code decides, Muse does the legwork. Screening, counting, and record keeping live in plain program code, so the rules are followed the same way every time. Muse handles the parts that need eyes: reading postings, filling forms, writing notes.
 
-## What it does
-
 - 🔎 Searches <a href="https://jobright.ai" target="_blank" rel="noopener">Jobright</a> and Indeed each morning for **postings from the last 24 hours**, and takes in your LinkedIn job alert emails.
 - 🚪 Screens every posting before opening it: your **block list**, companies you **already applied to**, and a **company gate** (more on that below).
 - 📄 Builds a **tailored resume** for each posting from your base resume, then applies on the employer's own site.
-- ✅ Verifies each submission against the **confirmation email** in your Gmail.
+- ✅ Verifies each submission: the **confirmation email** in your Gmail, or the success message the site shows.
 - 🤝 Finds hiring contacts for the roles you applied to and sends up to **30 LinkedIn invitations a day**, each with a short note written for that role.
 - 📬 **Replies to your LinkedIn inbox for you.** A watch checks for new recruiter messages every 15 minutes and answers under your standing reply rules. Interview requests and assessments become to-dos. Rejections are logged and left alone.
 - 🌅 Sends you a **short report every morning**: what went out, what moved, what needs you.

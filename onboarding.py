@@ -135,59 +135,70 @@ Muse will ask again when that access first comes up. You can also
 take any of them back later: tell your Muse, disconnect the account,
 or remove the saved login, and it stops being used.
 
+For every item, Muse explains why it is needed before asking for
+anything. Passwords are never typed into this chat: you enter them on
+a secure vault form, and your Muse never sees them.
+
 One part needs no access at all: the contacto contact-finding runs on
 public web search, and the company pages it checks are public."""
 
 PERMISSIONS = [
     ("google_account", "Google: Gmail, Calendar, and Tasks",
-     "Your Gmail is the system's inbox: application confirmations, "
-     "recruiter replies, and LinkedIn notification emails all land "
-     "there. Calendar holds your interviews, and Tasks holds your "
-     "to-dos. Connecting Google lets your Muse read that mail, book "
+     "Why it is needed: your Gmail is where application confirmations, "
+     "recruiter replies, and LinkedIn notification emails land; "
+     "Calendar holds your interviews, and Tasks holds your to-dos. "
+     "Connecting Google lets your Muse read that mail, book "
      "interviews, and keep the to-do list. It sends email only with "
      "your approval tap."),
     ("linkedin_signin", "LinkedIn sign-in",
-     "Your Muse signs in to LinkedIn as you in its browser: verifying "
-     "profiles, sending the connection invitations, accepting "
-     "invitations, and replying in your inbox under your reply rules. "
-     "The login is saved in the secure vault. Premium Career is what "
-     "the outreach runs on."),
+     "Why it is needed: the connection invitations, invitation "
+     "accepts, and inbox replies all happen inside your LinkedIn "
+     "account, so your Muse signs in as you in its browser to send "
+     "them and to verify profiles. You enter the login on the secure "
+     "vault form; your Muse never sees the password. Premium Career "
+     "is what the outreach runs on."),
     ("linkedin_notifications", "LinkedIn notification emails",
-     "Job alerts, message notifications, and invitation emails are how "
-     "the system hears about new jobs and new messages without "
-     "browsing LinkedIn. Turning them on is a short settings pass on "
-     "LinkedIn itself. The steps are written out in "
+     "Why it is needed: job alerts, message notifications, and "
+     "invitation emails are how the system hears about new jobs and "
+     "new messages without browsing LinkedIn. Turning them on is a "
+     "short settings pass on LinkedIn itself, and no credential is "
+     "involved. The steps are written out in "
      "docs/linkedin-notifications.md."),
     ("jobright_signin", "Jobright sign-in",
-     "Jobright is one of the discovery sources. Your Muse signs in as "
-     "you to run the morning searches, and the login is saved in the "
-     "secure vault. A paid plan is what covers this volume."),
+     "Why it is needed: Jobright is one of the discovery sources, and "
+     "its searches run signed in. Your Muse signs in as you to run "
+     "the morning searches. You enter the login on the secure vault "
+     "form; your Muse never sees the password. A paid plan is what "
+     "covers this volume."),
     ("indeed_signin", "Indeed sign-in",
-     "Indeed is the second discovery source, used for screening. Your "
-     "Muse signs in as you to run its searches, and the login is "
-     "saved in the secure vault."),
+     "Why it is needed: Indeed is the second discovery source, used "
+     "for screening, and its searches run signed in. Your Muse "
+     "signs in as you to run them. You enter the login on the secure "
+     "vault form; your Muse never sees the password."),
     ("portal_accounts", "Employer portal accounts",
-     "Applications live on employer portals: Workday, Greenhouse, "
-     "SuccessFactors, iCIMS, Lever, Ashby, Dayforce, UKG, and others. "
-     "Where a portal offers sign-in with Google, your Muse uses "
+     "Why it is needed: applications are submitted on employer "
+     "portals (Workday, Greenhouse, SuccessFactors, iCIMS, Lever, "
+     "Ashby, Dayforce, UKG, and others), and submitting means signing "
+     "in. Where a portal offers sign-in with Google, your Muse uses "
      "that. Greenhouse needs no password at all, just an email code. "
-     "For the rest, you set one portal password yourself in the secure "
-     "vault and your Muse reuses it; it never sees the password. A "
-     "few hosts (Lever, Gem, Rippling, Paycom) are never signed into "
-     "at all: those applications come to you as manual packets."),
+     "For the rest, you set one portal password yourself on the "
+     "secure vault form and your Muse reuses it without ever seeing "
+     "it. A few hosts (Lever, Gem, Rippling, Paycom) are never signed "
+     "into at all: those applications come to you as manual packets."),
     ("email_codes", "Reading sign-in codes from your email",
-     "Portal sign-ins often email you a one-time code. With this "
-     "permission, your Muse may fetch the first code for a sign-in "
-     "step from your Gmail and use it. If a code expires, is rejected, "
-     "or a second code is needed, it stops and asks you. It never "
-     "goes looking for codes for anything else."),
+     "Why it is needed: portal sign-ins often email you a one-time "
+     "code, and the sign-in stalls without it. With this permission, "
+     "your Muse may fetch the first code for a sign-in step from "
+     "your Gmail and use it. If a code expires, is rejected, or a "
+     "second code is needed, it stops and asks you. It never goes "
+     "looking for codes for anything else."),
     ("tap_approvals", "Asking for your taps",
-     "Some steps can only be done by you: approving a sign-in on your "
-     "phone, solving a captcha, approving an email before it sends. "
-     "With this permission, your Muse brings those to you in the two "
-     "daily sessions you picked, plus the odd single tap in between. "
-     "Without it, your Muse never asks, and those steps simply "
-     "wait."),
+     "Why it is needed: some steps can only be done by you: approving "
+     "a sign-in on your phone, solving a captcha, approving an email "
+     "before it sends. With this permission, your Muse brings those "
+     "to you in the two daily sessions you picked, plus the odd single "
+     "tap in between. Without it, your Muse never asks, and those "
+     "steps simply wait."),
 ]
 
 PLACEHOLDER_BITS = (
