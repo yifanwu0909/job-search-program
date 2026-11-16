@@ -275,7 +275,7 @@ python3 tests/backfill_events.py                 # seed tests/events_test.jsonl 
 
 # The mail parts
 
-Mail does four jobs in this system, all through Gmail. Three of them read LinkedIn notification email, and each scan recognizes its mail by one pinned test, written out in full under each job below. A sender address can be the whole test because of how your LinkedIn notifications are set up — that setup comes first.
+Mail does four jobs in this system, all through Gmail. Three of them read LinkedIn notification email, and each scan recognizes its mail by one pinned test — the tests are written out in full under "How a day runs" below. A sender address can be the whole test because of how your LinkedIn notifications are set up — that setup comes first.
 
 ## Your LinkedIn notification settings (set up for you at onboarding)
 
@@ -286,37 +286,6 @@ Mail does four jobs in this system, all through Gmail. Three of them read Linked
 - **Every other notification category off completely** — in-app and email.
 
 Every other category is off completely. Because nothing else is on, each LinkedIn sender address carries one kind of mail and nothing else — which is what makes the sender-only tests below safe. If you ever change these settings, tell your Muse — the scans' tests assume them. The click-by-click reference for checking the settings yourself is [linkedin-notifications.md](linkedin-notifications.md).
-
-## Watching for LinkedIn messages (every 15 minutes)
-
-Job: `linkedin-message-email-watch`. It replies to new LinkedIn messages in near-real time, driven by the notification emails — it never browses LinkedIn looking for news.
-
-**What it scans for** (Gmail, rolling window):
-
-- **From:** messaging-digest-noreply@linkedin.com — the only sender LinkedIn uses for message notifications.
-- **Subject:** contains "messaged you".
-- **Window:** the past hour only, every 15 minutes.
-
-When a notification matches, the job opens that one person's conversation — never any other — and replies under the standing reply rules. It never sweeps the whole inbox. Before acting, it claims the item in a shared ledger (`hidden_files/inbox-action-claims.md`) so the sweep below never answers the same person twice.
-
-## The inbox sweep (four times a day, past 12 hours)
-
-Jobs: `linkedin-inbox-replies` (8:30 AM), `linkedin-inbox-replies-midday` (12:30 PM), `linkedin-inbox-replies-afternoon` (4:30 PM), `linkedin-inbox-replies-evening` (8:30 PM) — one body, four runs a day. Each run is a backstop, so anything that arrives or is accepted during the day is picked up by the next run. It has four parts:
-
-**1. Inbox messages the watch missed.** The program computes the scope in code: LinkedIn conversations whose latest incoming message has not been claimed — every thread the watch or an earlier run already claimed in the shared ledger is excluded. The run works only those conversations, under the same reply rules as the watch.
-
-**2. Connection invitations** — this pass is the backstop for the invitation scan documented under "LinkedIn networking" (the hourly invitation sweep takes them first). The test here is the same: **from invitations@linkedin.com**, sender-only, no subject condition. Each invitation is accepted through the **Accept link inside the email** — never through LinkedIn's invitations page — and the acceptance is verified on the landing page before it is recorded. The code refuses anything stale, already processed, or matching the ad/marketing and group-invitation patterns.
-
-**3. Job alert emails** — these feed the discovery lane; the scan itself is documented under "Job discovery". The test is the sender alone: **from jobalerts-noreply@linkedin.com**, no subject condition. Each alert email's job list is vetted up to a hard limit of five pages, and every posting goes through the same screening as the other discovery sources before anything is stocked.
-
-**4. The sweep itself — the catch-all, and forward movement.** The sweep is the fourth scan in its own right: four times a day it re-checks the LinkedIn inbox directly, so anything the notification emails missed still gets caught within the same 12-hour window. And when a message it picks up moves an application forward — an interview request, a scheduling ask, next steps, an offer — the sweep acts on it in the same run: it checks the company's recorded gate verdict, books the interview on Google Calendar once the company and role are known (checking Google Calendar and the paired phone's calendar for conflicts first, under the user's standing availability), creates the forward-movement to-do on Google Tasks, and reports the news to the user in chat. A researched briefing then lands one hour before the meeting.
-
-## The application email scan (every 30 minutes)
-
-Job: `job-application-email-followups`, with `email_sweep.py` doing the bookkeeping. Two kinds of mail matter:
-
-- Confirmation emails from employers and application systems. These are the proof behind the verified count. Each submission is also checked at +10 minutes and again at +30 minutes by the verification queue, which the shadow pass drains.
-- Follow-up emails about jobs already applied to: interview requests, assessments, next steps. Forward movement is reported to the user in chat and turned into a Google Tasks to-do with its deadline. Rejections are written to the log only. The scan never replies to this mail on its own.
 
 ## Sending mail
 
@@ -352,13 +321,13 @@ Applying: up to **three workers** run in parallel. The **guardian** (`linkedin-b
 
 Verification: a submission counts toward the 60 when the employer's **confirmation email** arrives, or when the site showed a **successful application message** at submit time. If a submission cannot be proved, it is **not counted**. The confirmation email is checked at **+10 and +30 minutes** after each submission as a backstop. Submissions with neither proof sit in **limbo** and are **never re-applied**.
 
-The **application email scan** (every 30 minutes) watches for what comes back. Interview requests and assessments become **to-dos**, interviews are **booked** on the user's calendar, and a researched **briefing lands one hour before** each one. **Rejections are logged and left alone.**
+The **application email scan** (`job-application-email-followups`, every 30 minutes) watches for what comes back. Interview requests and assessments become **to-dos**, interviews are **booked** on the user's calendar, and a researched **briefing lands one hour before** each one. **Rejections are logged and left alone.** Before an interview is booked, the company's recorded gate verdict is checked, and Google Calendar and the paired phone's calendar are checked for conflicts, under the user's standing availability. The scan never replies to this mail on its own.
 
 ### LinkedIn networking
 
 **10:23 AM:** networking (`linkedin-recruiter-outreach-weekly`). For the most recent applications, **contacto** finds the hiring contacts, the program checks them against the rules (**seniority above the user's**, real influence on the role, still at the company), and invitations go out on LinkedIn: up to **30 a day** (customizable), inside LinkedIn's **weekly cap of roughly 100**.
 
-**Incoming connection invitations** run on their own cadence: an **hourly invitation sweep** (24 times a day) searches Gmail over the past 2 hours for **from invitations@linkedin.com** — **sender-only, no subject test** (under the notification setup described in The mail parts, that address sends connection invitations and nothing else) — and the four-times-daily inbox sweep re-checks over the past 12 hours as the backstop. Each invitation is accepted through the **Accept link inside the email**, and the acceptance is verified before it is recorded.
+**Incoming connection invitations** run on their own cadence: an **hourly invitation sweep** (24 times a day) searches Gmail over the past 2 hours for **from invitations@linkedin.com** — **sender-only, no subject test** (under the notification setup described in The mail parts, that address sends connection invitations and nothing else) — and the four-times-daily inbox sweep re-checks over the past 12 hours as the backstop. Each invitation is accepted through the **Accept link inside the email**, and the acceptance is verified before it is recorded. The code refuses anything stale, already processed, or matching the ad/marketing and group-invitation patterns.
 
 ### LinkedIn inbox replies
 
@@ -372,7 +341,7 @@ The message watch answers LinkedIn messages.
 - **Inbox messages** — the watch, every 15 minutes: **from messaging-digest-noreply@linkedin.com** AND **subject contains "messaged you"**, past hour only. The sweep additionally re-checks the LinkedIn inbox itself for conversations whose latest incoming message no earlier run has claimed.
 - **Connection invitations** — documented under **LinkedIn networking** above: an hourly sweep takes them first, and this sweep re-checks as the backstop.
 
-The mail-flow view of the inbox work is under "The mail parts" above.
+The watch (`linkedin-message-email-watch`) opens only that one person's conversation, never any other, and claims it in a shared ledger (`hidden_files/inbox-action-claims.md`) before acting, so no run answers the same person twice. The sweep (`linkedin-inbox-replies` — one body, four runs a day at **8:30 AM, 12:30 PM, 4:30 PM, 8:30 PM**) re-checks everything the watch and the hourly invitation sweep may have missed. The notification setup behind the sender-only tests is under "The mail parts" above.
 
 ### Checks that run all day
 
