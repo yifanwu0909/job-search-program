@@ -1,6 +1,6 @@
 # Getting started
 
-What a new user hands over before the system can run, and why each item is needed. The guided way to provide all of it is [onboarding](onboarding.md): your Muse asks for each item in order and records your "I understand" on the must-read items first. This page is the reference list behind that conversation.
+What a new user hands over before the system can run, and why each item is needed. The guided way to provide all of it is [onboarding](onboarding.md): your Muse asks for each item in order. This page is the reference list behind that conversation.
 
 ## Your resume
 

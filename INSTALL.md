@@ -32,7 +32,7 @@ Every suite must pass before you continue. A failure here means the install is w
 
 ## Step 4: Onboarding, with your user
 
-This step is a conversation, and it is mandatory. Run it as written in [docs/onboarding.md](docs/onboarding.md): the welcome, the **eight must-read items** (costs, access, the vault, captchas), each one acknowledged by your user with "I understand" before you move on, then the eight interview steps, then the FYI items and the read-back. It fills `config/answers.yaml` (the user's personal facts; the copy in this repo is placeholders) and the user's choices in `config/rules.yaml`.
+This step is a conversation, and it is mandatory. Run it as written in [docs/onboarding.md](docs/onboarding.md): the welcome, the **permissions** first (the four accounts: Google, LinkedIn, Jobright, Indeed; each one set up now or skipped for later), then the user's **resume**, then a few **standing questions** (work authorization and the equal-opportunity answers), and a prompt to install the **Jobright autofill plugin** in the user's browser. It records the account decisions in `program/state/onboarding.json` and the resume path and standing answers in `config/answers.yaml` (the copy in this repo is placeholders).
 
 Verify when you finish:
 
@@ -48,7 +48,7 @@ It must say **"Onboarding complete."** If it lists anything missing or unacknowl
 - In the browser, sign your user in to **LinkedIn**, **Jobright**, and **Indeed**. When a site asks to save a login, save it to the secure vault. Passwords are never typed into chat, and you never see them.
 - On LinkedIn, set up **job alert emails** like the originals: daily alerts for the user's main titles (US Remote, Full-time) and weekly alerts for their locations. The daily inbox job reads these alerts as one of its three discovery sources.
 - Walk the user through **docs/linkedin-notifications.md**: job alerts created with email delivery, message emails on (Push and Email; InMail by email), and invitation emails on. These notification emails are a hard prerequisite: without them there is no alert discovery, no message watch, and no invitation handling. Confirm the first alert email has landed in Gmail before the first full run.
-- Work from the **permissions recorded in onboarding** (`program/state/onboarding.json`): set up every item the user granted (Google connectors, LinkedIn / Jobright / Indeed sign-ins saved in the vault, the portal-password pattern, email-code reading). Leave skipped items alone; the workflow surfaces the need when it first comes up, and you ask then. Never set up a skipped item in the background.
+- Work from the **permissions recorded in onboarding** (`program/state/onboarding.json`): set up every item the user granted (Google connectors, LinkedIn / Jobright / Indeed sign-ins saved in the vault). Leave skipped items alone; the workflow surfaces the need when it first comes up, and you ask then. Never set up a skipped item in the background.
 - Confirm LinkedIn **Premium Career** is active on the account. Outreach does not work without it.
 
 ## Step 6: Create the scheduled jobs
