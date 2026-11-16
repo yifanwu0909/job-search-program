@@ -2,13 +2,6 @@
 
 Onboarding asks for the account access the system needs, your resume, and a few standing questions, and it prompts you to install the Jobright plugin. It takes about 6 minutes. You can stop at any point and always come back and finish the onboarding later; nothing you finished is asked again.
 
-There are two ways to run it. They are the same flow, with the same words, in the same order:
-
-- In chat: tell your Muse "run onboarding." It follows this page.
-- In a terminal: run `python3 program/onboarding.py`. The script asks the same questions and records the same decisions.
-
-Every prompt ends with two buttons: **Skip this now** and **Take a break**. Skip this now moves on; the item is asked again later. Take a break ends the session; everything is saved, and you pick up where you left off. In a terminal, type `skip` or `break` instead of pressing a button.
-
 ## How it goes
 
 1. **Welcome.** Muse explains what setup involves: permissions, your resume, a few standing questions, and the Jobright plugin.
