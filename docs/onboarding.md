@@ -16,3 +16,5 @@ Welcome to your job search program. I'll set this up with you, step by step. It 
 Muse can tell when a step is done: the vault card is finished, the connection shows connected, the resume arrives. The user never has to say "done." The plugin is the exception: the user tells Muse when it's installed.
 
 Anything you skipped, your Muse will ask you about when it comes up.
+
+**Your first run starts tomorrow.**

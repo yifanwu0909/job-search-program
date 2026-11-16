@@ -533,6 +533,7 @@ def main():
     if plugin_decision == "skipped":
         print("Jobright plugin: skipped for now. Install it before "
               "your first manual application.")
+    print("Your first run starts tomorrow.")
     print("Next: your Muse connects the accounts you set up, then "
           "starts with a small first run so you can watch the "
           "screening decisions before the volume goes up.")
