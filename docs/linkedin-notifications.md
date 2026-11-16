@@ -10,7 +10,7 @@ Job alerts, message notifications, and invitation emails are a prerequisite: the
 
 - **Job alerts.** New postings from your saved alerts. One of the three discovery sources.
 - **Message notifications.** "Someone messaged you" emails. These drive the inbox replies.
-- **Invitation emails.** Connection invitations you received. These are handled once a day.
+- **Invitation emails.** Connection invitations you received. These are handled by the inbox sweep, four times a day.
 
 If these are off, none of that mail exists, and those parts of the system have nothing to work with. The steps below are only a reference, if you ever want to check the settings yourself.
 
@@ -21,7 +21,7 @@ Job alerts are saved searches. Each alert emails you the new postings that match
 1. Go to linkedin.com and click **Jobs** at the top.
 2. Search for a job title and a location (or choose a remote filter), set **Date posted** to **Past 24 hours**, and run the search.
 3. At the top of the results, click **Set alert** (the bell icon).
-4. Set the alert frequency: **Daily** is the better fit for this system. The alert emails are picked up within 24 hours either way.
+4. Set the alert frequency: **Daily** is the better fit for this system. The inbox sweep runs four times a day over the past 12 hours, so alert emails are picked up within hours either way.
 5. Make sure the alert's delivery includes **Email**, then save.
 6. Repeat for every title and location combination you want covered.
 
@@ -41,7 +41,7 @@ With this on, every new LinkedIn message produces an email from messaging-digest
 1. Still in **Settings & Privacy → Notifications**, open **Invitations to connect**. Set **In-app notifications** to **Off** and **Email** to **On**, with email frequency **Individual**.
 2. Open **Job alerts**. Set **In-app notifications** to **Off** and **Email** to **On**.
 
-Invitation emails are picked up by the once-daily inbox check, which accepts them through the link in the email.
+Invitation emails are picked up by the inbox sweep (four times a day, past 12 hours), which accepts them through the link in the email. The sweep finds them by sender alone — invitations@linkedin.com — with no subject test, which works because the settings on this page make that address send invitations and nothing else.
 
 ## Step 4: Turn everything else off
 

@@ -275,15 +275,51 @@ python3 tests/backfill_events.py                 # seed tests/events_test.jsonl 
 
 # The mail parts
 
-Mail does four jobs in this system, all through Gmail.
+Mail does four jobs in this system, all through Gmail. Three of them read LinkedIn notification email, and each scan recognizes its mail by one pinned test, written out in full under each job below. A sender address can be the whole test because of how your LinkedIn notifications are set up — that setup comes first.
+
+## Your LinkedIn notification settings (set up for you at onboarding)
+
+You do not set these up yourself. During onboarding, Muse sets your LinkedIn notifications to exactly this, and the mail scans below depend on it:
+
+- **Exactly four categories on: InMail, Messages, Invitations to connect, and Job alerts.**
+- On each of the four: **in-app notifications OFF**, **email ON**, and email frequency **Individual** (one email per event) where LinkedIn offers a frequency choice. The Job alerts page offers no frequency choice; email on is the whole setting there.
+- **Every other notification category off completely** — in-app and email.
+
+This is why the scans can be simple. With every other category off, each LinkedIn sender address carries one kind of mail and nothing else: invitations@linkedin.com sends you connection invitations only, so the invitation scan never has to test the subject line at all. If you ever change these settings, tell your Muse — the scans' tests assume them. The click-by-click reference for checking the settings yourself is [linkedin-notifications.md](linkedin-notifications.md).
 
 ## Watching for LinkedIn messages (every 15 minutes)
 
-Job: `linkedin-message-email-watch`. It searches the last hour of Gmail for LinkedIn message notifications (from messaging-digest-noreply@linkedin.com, subject contains "messaged you"). When one arrives, it opens that one conversation and replies under the standing reply rules. It never sweeps the whole inbox. Before acting, it claims the item in a shared ledger (`hidden_files/inbox-action-claims.md`) so the daily check below does not answer the same person twice.
+Job: `linkedin-message-email-watch`. It replies to new LinkedIn messages in near-real time, driven by the notification emails — it never browses LinkedIn looking for news.
 
-## The daily inbox check (8:30 AM)
+**What it scans for** (Gmail, rolling window):
 
-Job: `linkedin-inbox-replies`. A backstop over the past 24 hours. It covers LinkedIn messages the watch missed, connection invitations the user received (accepted through the link in the invitation email, not through LinkedIn's invitations page), and job alert emails from jobalerts-noreply@linkedin.com, which feed the discovery lane.
+- **From:** messaging-digest-noreply@linkedin.com — the only sender LinkedIn uses for message notifications.
+- **Subject:** contains "messaged you".
+- **Window:** the past hour only, every 15 minutes.
+
+When a notification matches, the job opens that one person's conversation — never any other — and replies under the standing reply rules. It never sweeps the whole inbox. Before acting, it claims the item in a shared ledger (`hidden_files/inbox-action-claims.md`) so the sweep below never answers the same person twice.
+
+## The inbox sweep (four times a day, past 12 hours)
+
+Jobs: `linkedin-inbox-replies` (8:30 AM), `linkedin-inbox-replies-midday` (12:30 PM), `linkedin-inbox-replies-afternoon` (4:30 PM), `linkedin-inbox-replies-evening` (8:30 PM) — one body, four runs a day. Each run is a backstop covering **only the past 12 hours**, so anything that arrives or is accepted during the day is picked up by the next run. It has three parts:
+
+**1. Inbox messages the watch missed.** The program computes the scope in code: LinkedIn conversations whose latest incoming message arrived within the past 12 hours, minus every thread the watch or an earlier run already claimed in the shared ledger. The run works only those conversations, under the same reply rules as the watch.
+
+**2. Connection invitations.**
+
+- **From:** invitations@linkedin.com.
+- **Subject:** no condition — **sender-only**, exactly like job alerts. Under the notification settings above, that address sends connection invitations and nothing else, so the sender alone identifies the mail. (An earlier filter also tested the subject; it missed a real invitation after LinkedIn changed its sender and subject, and was scrapped.)
+- **Window:** the past 12 hours of Gmail.
+
+Each invitation is accepted through the **Accept link inside the email** — never through LinkedIn's invitations page — and the acceptance is verified on the landing page before it is recorded. The code refuses anything stale, already processed, or matching the ad/marketing and group-invitation patterns.
+
+**3. Job alert emails** (these feed the discovery lane).
+
+- **From:** jobalerts-noreply@linkedin.com.
+- **Subject:** no condition, ever — **sender-only**. Alert subjects are built from the first company on the list and arrive in many formats, so the subject is never consulted.
+- **Window:** the past 12 hours of Gmail.
+
+Each alert email's job list is vetted up to a hard limit of five pages, and every posting goes through the same screening as the other discovery sources before anything is stocked.
 
 ## The application email scan (every 30 minutes)
 
@@ -332,7 +368,7 @@ The **application email scan** (every 30 minutes) watches for what comes back. I
 
 ### LinkedIn inbox replies
 
-The **message watch** (every 15 minutes) answers new LinkedIn messages under the user's standing **reply rules** (customizable), one person at a time. A **daily check at 8:30 AM** picks up anything the watch missed, plus **connection invitations**.
+The **message watch** (every 15 minutes) answers new LinkedIn messages under the user's standing **reply rules** (customizable), one person at a time. A **sweep four times a day** (8:30 AM, 12:30 PM, 4:30 PM, 8:30 PM) picks up anything the watch missed over the past 12 hours, plus **connection invitations** and **job alerts**. The exact scan tests for all three kinds of mail are written out under "The mail parts" above.
 
 ### Checks that run all day
 
@@ -360,6 +396,8 @@ The code is organized in three folders under `program/`: the top level holds the
 - Targets and floors: job titles, locations or remote, and the lowest pay accepted for onsite, hybrid, and remote roles.
 - A block list of companies, plus any standing declines, such as a state where onsite roles are refused, or consulting work.
 - Reply rules: when to accept a call, what to decline, what may be shared (phone number, work authorization), and what must come back to the user.
+- A short "getting to know you" pass (optional, recommended): their superpower, what excites them, what drains them, deal-breakers, proudest achievement, and any published proof. This is context for Muse only — it never goes on an application form and never overrides the rules.
+- Nothing to configure in LinkedIn by hand: during onboarding, Muse creates the job alerts and sets the LinkedIn notification settings (see "Your LinkedIn notification settings" above) from these answers.
 - Accounts and subscriptions: LinkedIn with Premium Career, Jobright on a paid plan, Indeed, the free career-ops scanner, and Gmail with Google Calendar and Google Tasks connected.
 - Two daily windows when the user can tap approvals and solve captchas. Here they are YOUR_AFTERNOON_TIME and YOUR_EVENING_TIME.
 

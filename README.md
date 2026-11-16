@@ -41,13 +41,13 @@ Here is one day, top to bottom:
 
 ```mermaid
 flowchart TD
-    A["🌐 Morning search"] --> B["🔍 Screening"]
-    B --> C["📄 Tailored resume"]
+    A["🌐 Morning<br/>search"] --> B["🔍 Screening"]
+    B --> C["📄 Tailored<br/>resume"]
     C --> D["📝 Apply"]
     D --> E["✅ Verify"]
     E --> F["🤝 Outreach"]
-    F --> G["💬 Inbox + report"]
-    G --> H["🗣️ Interview schedule + prep"]
+    F --> G["💬 Inbox +<br/>report"]
+    G --> H["🗣️ Interview<br/>schedule + prep"]
     Y["🧑 User input<br/>+ permission"] -.-> D
     Y -.-> G
 
