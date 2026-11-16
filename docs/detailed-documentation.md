@@ -320,14 +320,14 @@ Times are Central. The window for a day's 60-application target opens at 8:23 AM
 
 The code is organized in three folders under `program/`: the top level holds the entry points you run by name (`spine.py`, `supervisor.py`, `onboarding.py`, `install.py`); `engine/` holds the shared library modules; `checks/` holds the standalone scan scripts the scheduled jobs run; `tools/` holds one-off utilities.
 
-- Discovery: `engine/discovery.py`, driven by the worker template (`worker_template.md`). Sources: Jobright, Indeed, and LinkedIn alert emails.
+- Job discovery: `engine/discovery.py`, driven by the worker template (`worker_template.md`). Sources: Jobright, Indeed, and LinkedIn alert emails.
 - Screening and the company gate: `spine.py` (the gate and pay commands), `engine/gate_intake.py`, `engine/gate_fallback.py`, `engine/discovery.py`. Thresholds and rules: `config/rules.yaml`.
 - Stocking the bench: `engine/stock.py`. An item enters the bench only with a verified tailored resume attached, and the resume is built before stocking, not after.
-- Applying: workers follow `worker_template.md` and take one work order at a time from `engine/pipeline.py` through `spine.py next`. Outcomes are recorded with `spine.py record`, which writes both the written log and the event book (`engine/events.py`, `events.jsonl`).
+- Application: workers follow `worker_template.md` and take one work order at a time from `engine/pipeline.py` through `spine.py next`. Outcomes are recorded with `spine.py record`, which writes both the written log and the event book (`engine/events.py`, `events.jsonl`).
 - Resumes: built per posting from the base resume. The prep sweep job keeps the bench supplied.
-- Verification: `engine/verify.py`, plus the verification queue drained by the shadow pass (`checks/shadow_pass.py`).
-- Invitations: `engine/invitations.py` and `engine/outreach_targets.py`. Contact finding: `career-ops/modes/contacto.md`, with the house rules in `career-ops/modes/_custom.md`.
-- Inbox and mail: `engine/inbox.py`, `checks/email_sweep.py`, and the mail jobs listed above.
+- Application follow-up: verification (`engine/verify.py`, plus the verification queue drained by the shadow pass, `checks/shadow_pass.py`); the application email scan (`checks/email_sweep.py`) watches for forward movement; interviews are booked on Google Calendar with a researched briefing one hour before, and forward moves become Google Tasks to-dos.
+- LinkedIn networking: `engine/invitations.py` and `engine/outreach_targets.py`. Contact finding: `career-ops/modes/contacto.md`, with the house rules in `career-ops/modes/_custom.md`.
+- LinkedIn inbox replies: `engine/inbox.py` and the mail jobs listed above.
 - Supervision: `supervisor.py` (worker liveness and launches), `checks/stall_check.py`, `checks/bench_check.py`, `checks/browser_progress.py`, `checks/recovery_check.py`, and the guardian job.
 - Standing answers: `config/answers.yaml`. In this repository the personal values in that file are placeholders. The live system keeps the real file on its own machine and never commits it.
 
