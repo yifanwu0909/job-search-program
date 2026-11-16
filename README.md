@@ -1,6 +1,6 @@
 # Job search program
 
-An automated job search that runs on your own Muse. It finds new postings every day, checks each one against your rules, applies on the employer's website, and keeps an honest record of all of it. It also finds the people who can hire for each role and invites them to connect on LinkedIn. And it **replies to your LinkedIn inbox for you**, under reply rules you set, so recruiter messages never sit unanswered.
+An automated job search that runs on your own Muse, in seven blocks. **<a href="docs/detailed-documentation.md#how-a-day-runs" target="_blank" rel="noopener">Job discovery</a>** finds new postings every day on Jobright, Indeed, and your LinkedIn alert emails. **<a href="docs/detailed-documentation.md#how-a-day-runs" target="_blank" rel="noopener">Screening</a>** checks each posting against your rules (block list, already applied, company gate) before it is opened. **<a href="docs/detailed-documentation.md#how-a-day-runs" target="_blank" rel="noopener">Application</a>** builds a tailored resume for each posting and applies on the employer's own website. **<a href="docs/detailed-documentation.md#the-application-email-scan-every-30-minutes" target="_blank" rel="noopener">Application follow-up</a>** proves every submission and watches your email for replies, turning interview requests and assessments into to-dos. **<a href="docs/detailed-documentation.md#how-a-day-runs" target="_blank" rel="noopener">LinkedIn outreach</a>** finds the people who can hire for each role and invites them to connect. **<a href="docs/detailed-documentation.md#watching-for-linkedin-messages-every-15-minutes" target="_blank" rel="noopener">LinkedIn inbox replies</a>** answers recruiter messages under reply rules you set, so nothing sits unanswered. **<a href="docs/detailed-documentation.md#the-mail-parts" target="_blank" rel="noopener">Interview scheduling and prep</a>** books your interviews and briefs you an hour before each one. And all of it is kept in an honest written record.
 
 It was built and tuned over several months of daily use. The daily target is **60 verified applications**.
 
@@ -26,7 +26,7 @@ flowchart TD
     class Y person;
 ```
 
-You are not a step in the chain. The day runs on its own, and you get called in from the side, only at the moments a step genuinely needs a person. The pattern underneath: the code decides, Muse does the legwork. Screening, counting, and record keeping live in plain program code, so the rules are followed the same way every time. Muse handles the parts that need eyes: reading postings, filling forms, writing notes.
+The pattern underneath: **code decides, Muse does the legwork.** The code is the air traffic control tower, and each Muse agent is an individual aircraft: the tower assigns every mission and keeps the record, and each plane flies only the mission it was given.
 
 - 🔎 Searches <a href="https://jobright.ai" target="_blank" rel="noopener">Jobright</a> and Indeed each morning for **postings from the last 24 hours**, and takes in your LinkedIn job alert emails.
 - 🚪 Screens every posting before opening it: your **block list**, companies you **already applied to**, and a **company gate** (more on that below).
