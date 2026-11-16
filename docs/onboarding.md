@@ -12,12 +12,7 @@ Onboarding asks for the account access the system needs, your resume, and a few 
 
 ## Permissions: set up now, or skip for later [~2 minutes]
 
-The system works across your accounts, so onboarding asks for the access it needs up front, one item at a time. For each item you choose:
-
-- **Set up now.** Muse does the connecting or signing in with you, right there in the onboarding session.
-- **Skip now, I'll do this later when it comes up.** A complete answer. The skip is recorded, and Muse asks again the first time that access is actually needed. Nothing is set up in the background.
-
-Every choice is recorded in `program/state/onboarding.json`. Any grant can be taken back later: tell Muse to disconnect it, disconnect the account yourself, or remove the saved login, and it stops being used.
+The system works across your accounts, so onboarding asks for the access it needs up front, one item at a time.
 
 The four accounts:
 
