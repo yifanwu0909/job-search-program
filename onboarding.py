@@ -58,15 +58,13 @@ I'll set this up with you, step by step. It takes about 15 minutes
 in total. You answer questions, I write everything down, and at the
 end I read it all back so you can check it.
 
-Here's what we'll cover:
-- Must-read items: costs, access, the vault, and captchas [~2 minutes]
-- The interview: your resume, the facts forms ask for, work
-  authorization, education and employers, standing choices, what
-  you're looking for, companies, and your reply rules and daily
-  windows [~10 minutes]
-- Permissions: the account access I may need, set up now or skipped
-  for later [~2 minutes]
-- Good-to-know items and the final read-back [~1 minute]
+Here's what we'll cover: must-read items (costs, access, the vault,
+and captchas) [~2 minutes], the interview (your resume, the facts
+forms ask for, work authorization, education and employers, standing
+choices, what you're looking for, companies, and your reply rules and
+daily windows) [~10 minutes], permissions (the account access I may
+need, set up now or skipped for later) [~2 minutes], and the
+good-to-know items and the final read-back [~1 minute].
 
 You do not have to finish in one sitting. You can stop at any point
 and always come back and finish the onboarding later: your progress
