@@ -11,9 +11,9 @@ schedule:
   every: 30m
 timeout_secs: 1800
 delivery:
-  - chat_id: 48d41ee3-3ef0-4df2-b23b-dd30c3b929fa
+  - chat_id: YOUR-MAIN-CHAT-ID
 metadata:
-  originating_chat_context_json: '{"chat_id":"48d41ee3-3ef0-4df2-b23b-dd30c3b929fa","origin_provider":"main","chat_kind":"direct","event_kind":"message","require_mention":false,"device_id":"8b62e88c-9a8a-0c7b-ef2b-308ea1ee43bc"}'
+  originating_chat_context_json: '{"chat_id":"YOUR-MAIN-CHAT-ID","origin_provider":"main","chat_kind":"direct","event_kind":"message","require_mention":false,"device_id":"YOUR-DEVICE-ID"}'
   presentation_locale: en-US
 ---
 APPLICATION-EMAIL SCAN — every 30 minutes (:00/:30 Central). The script (~/workspace/goals/YOUR-GOAL/program/checks/email_sweep.py) does all bookkeeping: watch list, past-hour search, dedupe, recording, delivery timing, to-do records. You do the reading and judging — the language work. Never hand-run searches, never hand-write scan records.

@@ -11,10 +11,10 @@ schedule:
   every: 30m
 timeout_secs: 3600
 delivery:
-  - chat_id: 48d41ee3-3ef0-4df2-b23b-dd30c3b929fa
+  - chat_id: YOUR-MAIN-CHAT-ID
 metadata:
   tags: [cron:automatic-interval-anchor]
-  originating_chat_context_json: '{"chat_id":"48d41ee3-3ef0-4df2-b23b-dd30c3b929fa","origin_provider":"main","chat_kind":"direct","event_kind":"message","require_mention":false,"device_id":"5ac11a8e-9761-4273-8a82-e352148c5f7d"}'
+  originating_chat_context_json: '{"chat_id":"YOUR-MAIN-CHAT-ID","origin_provider":"main","chat_kind":"direct","event_kind":"message","require_mention":false,"device_id":"YOUR-DEVICE-ID"}'
   presentation_locale: en-US
 ---
 BENCH PREP SWEEP — goal YOUR-GOAL. Purpose (the user fix pass, Nov 15, 2026, closing nightly-audit finding NA-2026-11-15-1): the Nov 14 window closed at 0 verified of 60 because gate-passed bench items sat all day with no tailored resume and spine.py next could not serve them. Workers now prep at stocking (worker_template.md PREP AT STOCKING), and this sweep is the backstop: any bench item in the CURRENT window that still lacks its tailored resume gets one built by you, so it becomes servable the same window.

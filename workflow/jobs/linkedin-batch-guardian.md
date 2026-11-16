@@ -11,9 +11,9 @@ schedule:
   every: 30m
 timeout_secs: 1800
 delivery:
-  - chat_id: 48d41ee3-3ef0-4df2-b23b-dd30c3b929fa
+  - chat_id: YOUR-MAIN-CHAT-ID
 metadata:
-  originating_chat_context_json: '{"chat_id":"48d41ee3-3ef0-4df2-b23b-dd30c3b929fa","origin_provider":"main","chat_kind":"direct","event_kind":"message","require_mention":false,"device_id":"8b62e88c-9a8a-0c7b-ef2b-308ea1ee43bc"}'
+  originating_chat_context_json: '{"chat_id":"YOUR-MAIN-CHAT-ID","origin_provider":"main","chat_kind":"direct","event_kind":"message","require_mention":false,"device_id":"YOUR-DEVICE-ID"}'
   presentation_locale: en-US
 ---
 LinkedIn batch guardian for the user — set up Oct 31, 2026 after the Oct 31 batch run died silently mid-batch (audit #2 finding F2; the user: "F2 is super critical. PREVENT!" — a dead batch must never pass silently again). REBUILT Nov 6, 2026 around the worker supervisor (the user's clean code fix): program/supervisor.py owns the hand-off between worker legs IN CODE — workers prove liveness with a heartbeat, and the launch decision plus its idempotency lock live in the program. This guardian carries out the supervisor's verdict and watches what code cannot see (cron state, the user-facing stale takeovers, cleared blockers). It NEVER applies to anything itself. It runs every 30 minutes. PARALLEL WORKERS (the user, Nov 6, 2026: "Run 3 workers in parallel"): the supervisor verdict counts live workers against max_parallel_workers (3) — each worker heartbeats into its own file (program/state/heartbeats/<run>.json) — and a LAUNCH verdict carries launch_slots, the number of workers to start this pass; Step 2 tops up to the cap. Workers also run back to back (the user, Nov 6, 2026 reversal): each worker flies application after application until the program stops it.

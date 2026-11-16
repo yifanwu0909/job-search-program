@@ -10,10 +10,10 @@ schedule:
   at: 2026-11-04T18:20:30
   every: 30m
 delivery:
-  - chat_id: 48d41ee3-3ef0-4df2-b23b-dd30c3b929fa
+  - chat_id: YOUR-MAIN-CHAT-ID
 metadata:
   tags: [cron:automatic-interval-anchor]
-  originating_chat_context_json: '{"chat_id":"48d41ee3-3ef0-4df2-b23b-dd30c3b929fa","origin_provider":"main","chat_kind":"direct","event_kind":"message","require_mention":false,"device_id":"8b62e88c-9a8a-0c7b-ef2b-308ea1ee43bc"}'
+  originating_chat_context_json: '{"chat_id":"YOUR-MAIN-CHAT-ID","origin_provider":"main","chat_kind":"direct","event_kind":"message","require_mention":false,"device_id":"YOUR-DEVICE-ID"}'
   presentation_locale: en-US
 ---
 DRIVER-MODE WATCHER for the user's application program (rebuilt fresh Nov 4, 2026). The program is LIVE in driver mode (since 5:44 PM CT Nov 4, 2026): application outcomes are written by `spine.py record` into `program/events.jsonl`. This job watches that the tower's two views — the prose outreach log and the live event stream — stay in agreement. It never applies to anything. (One exception, added Nov 4, 2026: Step 5's verification drain records email confirmations and nothing else.)

@@ -11,10 +11,10 @@ schedule:
   every: 15m
 timeout_secs: 3600
 delivery:
-  - chat_id: 48d41ee3-3ef0-4df2-b23b-dd30c3b929fa
+  - chat_id: YOUR-MAIN-CHAT-ID
 metadata:
   tags: [cron:automatic-interval-anchor]
-  originating_chat_context_json: '{"chat_id":"48d41ee3-3ef0-4df2-b23b-dd30c3b929fa","origin_provider":"main","chat_kind":"direct","event_kind":"message","require_mention":false,"device_id":"5ac11a8e-9761-4273-8a82-e352148c5f7d"}'
+  originating_chat_context_json: '{"chat_id":"YOUR-MAIN-CHAT-ID","origin_provider":"main","chat_kind":"direct","event_kind":"message","require_mention":false,"device_id":"YOUR-DEVICE-ID"}'
   presentation_locale: en-US
 ---
 LinkedIn email watch for the user (YOUR_FULL_NAME) — set up Nov 12, 2026 at the user's direction; MESSAGES ONLY since Nov 12, 2026 (cadence change, the user, 5:37 PM CT: "invitation watch you can do daily" — connection invitations moved to the linkedin-inbox-replies sweep (four times daily since Nov 16, 2026)). The user turned ON LinkedIn email notifications (Messages: Push and Email; InMail: Email), so new LinkedIn inbox messages produce a notification email in her Gmail. THIS JOB'S RULE (the user, Nov 12, 2026): a message notification → reply to THAT ONE PERSON ONLY, opening only that person's thread; NEVER sweep the LinkedIn inbox, never touch any other conversation. Invitation emails are NOT this job's work anymore — leave them for the sweep. GMAIL SCOPE (the user, Nov 12, 2026): do not sweep the whole Gmail either — each run looks ONLY at the PAST HOUR of mail (rolling window), every 15 minutes.

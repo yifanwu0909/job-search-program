@@ -11,10 +11,10 @@ schedule:
   dow: [Sun]
 timeout_secs: 1800
 delivery:
-  - chat_id: 48d41ee3-3ef0-4df2-b23b-dd30c3b929fa
+  - chat_id: YOUR-MAIN-CHAT-ID
 metadata:
   tags: [cron:flexible-time]
-  originating_chat_context_json: '{"chat_id":"48d41ee3-3ef0-4df2-b23b-dd30c3b929fa","origin_provider":"main","chat_kind":"direct","event_kind":"message","require_mention":false,"device_id":"5ac11a8e-9761-4273-8a82-e352148c5f7d"}'
+  originating_chat_context_json: '{"chat_id":"YOUR-MAIN-CHAT-ID","origin_provider":"main","chat_kind":"direct","event_kind":"message","require_mention":false,"device_id":"YOUR-DEVICE-ID"}'
   presentation_locale: en-US
 ---
 REPORTING TIMEZONE: report times in the user's current timezone. Keep all actual work, schedules, and availability in the user's home timezone exactly as set — convert for display only.

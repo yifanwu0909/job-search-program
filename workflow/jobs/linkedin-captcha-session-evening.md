@@ -10,9 +10,9 @@ schedule:
   time: 19:30:00
 timeout_secs: 7200
 delivery:
-  - chat_id: 48d41ee3-3ef0-4df2-b23b-dd30c3b929fa
+  - chat_id: YOUR-MAIN-CHAT-ID
 metadata:
-  originating_chat_context_json: '{"chat_id":"48d41ee3-3ef0-4df2-b23b-dd30c3b929fa","origin_provider":"main","chat_kind":"direct","event_kind":"message","require_mention":false}'
+  originating_chat_context_json: '{"chat_id":"YOUR-MAIN-CHAT-ID","origin_provider":"main","chat_kind":"direct","event_kind":"message","require_mention":false}'
   presentation_locale: en-US
 ---
 CAPTCHA SESSION for the user's LinkedIn job-application workflow (created Nov 4, 2026 at the user's direction: "Separate the tap situations and captcha"). Twice a day — this job and its sibling (linkedin-captcha-session-afternoon at YOUR_AFTERNOON_TIME, both in the user's current local timezone) — a CAPTCHA-ONLY session works every application blocked on a CAPTCHA / bot-check, holding a live browser window at the bot-check for the user's takeover. This is the counterpart to the TAP-ONLY sessions (linkedin-tap-session-afternoon / linkedin-tap-session-evening): the two session types have DISJOINT scopes. This session works ONLY captcha items; it never works approval-card, email-code, or document/input items — those belong to the tap sessions.

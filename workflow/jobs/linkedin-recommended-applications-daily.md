@@ -10,9 +10,9 @@ schedule:
   time: 08:23:00
 timeout_secs: 86400
 delivery:
-  - chat_id: 48d41ee3-3ef0-4df2-b23b-dd30c3b929fa
+  - chat_id: YOUR-MAIN-CHAT-ID
 metadata:
-  originating_chat_context_json: '{"chat_id":"48d41ee3-3ef0-4df2-b23b-dd30c3b929fa","origin_provider":"main","chat_kind":"direct","event_kind":"message","require_mention":false,"device_id":"5ac11a8e-9761-4273-8a82-e352148c5f7d"}'
+  originating_chat_context_json: '{"chat_id":"YOUR-MAIN-CHAT-ID","origin_provider":"main","chat_kind":"direct","event_kind":"message","require_mention":false,"device_id":"YOUR-DEVICE-ID"}'
   presentation_locale: en-US
 ---
 LinkedIn Recommended applications — DAILY KICKOFF ONLY (rebuilt Nov 6, 2026 around the worker supervisor, program/supervisor.py). The batch itself is run by template workers (program/worker_template.md) launched by the batch guardian under the supervisor's code verdict. This job's whole job is to open the window on time — it is an alarm clock, not a worker.

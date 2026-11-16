@@ -8,7 +8,7 @@ Your user needs the accounts and subscriptions in the [README](README.md): a Mus
 
 ## Step 1: Place the repo
 
-Clone or copy the repo to a stable home and keep it there; the scheduled jobs will point at this path. A good home is a goal workspace, for example `~/workspace/goals/<your-goal-slug>/`, with this repo's `program/` folder inside it. Everything below calls that folder **the program folder**. Runtime data (the event book, state files, the outreach log) lives alongside the code and is gitignored, so the repo stays clean as it runs.
+Clone or copy the repo to a stable home and keep it there; the scheduled jobs will point at this path. If you forked the repo on GitHub, also add the author's original repo as a remote named `upstream` — the auto-sync job pulls the author's updates from there. A direct clone needs nothing extra: its `origin` is the update source. A good home is a goal workspace, for example `~/workspace/goals/<your-goal-slug>/`, with this repo's `program/` folder inside it. Everything below calls that folder **the program folder**. Runtime data (the event book, state files, the outreach log) lives alongside the code and is gitignored, so the repo stays clean as it runs.
 
 ## Step 2: Run the installer
 
@@ -21,7 +21,7 @@ It checks the machine, creates the state directories, installs the bundled caree
 
 ## Step 3: Run the test suites
 
-The program ships with 11 test suites in `program/tests/`. Run them **one at a time, in sequence, never in parallel** (they share fixtures; parallel runs produce false failures):
+The program ships with 12 test suites in `program/tests/`. Run them **one at a time, in sequence, never in parallel** (they share fixtures; parallel runs produce false failures):
 
 ```bash
 cd <program folder>
@@ -52,7 +52,7 @@ It must say **"Onboarding complete."** If it lists anything missing or unacknowl
 
 ## Step 6: Create the scheduled jobs
 
-The program has no scheduler of its own. Its whole daily rhythm lives in **21 scheduled jobs**, snapshotted in `workflow/jobs/`, one file per job. Each file's frontmatter carries the job's id, schedule, timezone, and owner; the body below the frontmatter is the job's instructions. One job family has four files: the LinkedIn inbox sweep runs **four times a day** (`linkedin-inbox-replies` at 8:30 AM, `-midday` at 12:30 PM, `-afternoon` at 4:30 PM, `-evening` at 8:30 PM, all America/Chicago), each run scanning the past 12 hours — create all four.
+The program has no scheduler of its own. Its whole daily rhythm lives in **21 scheduled jobs**, snapshotted in `workflow/jobs/`, one file per job. Each file's frontmatter carries the job's id, schedule, timezone, and owner; the body below the frontmatter is the job's instructions. One job family has four files: the LinkedIn inbox sweep runs **four times a day** (`linkedin-inbox-replies` at 8:30 AM, `-midday` at 12:30 PM, `-afternoon` at 4:30 PM, `-evening` at 8:30 PM, all America/Chicago), each run scanning the past 12 hours — create all four. One of the 21, `github-auto-sync`, keeps the install current: every 4 hours it pulls the author's published updates and merges them in without touching local changes, then pushes the user's own program changes (see "Staying up to date" in docs/customization.md).
 
 Create one job per file with your cron tools, with two adjustments:
 

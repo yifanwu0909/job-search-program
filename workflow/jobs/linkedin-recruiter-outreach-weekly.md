@@ -10,10 +10,10 @@ schedule:
   time: 10:23:00
 timeout_secs: 7200
 delivery:
-  - chat_id: 48d41ee3-3ef0-4df2-b23b-dd30c3b929fa
+  - chat_id: YOUR-MAIN-CHAT-ID
 metadata:
   tags: [cron:flexible-time]
-  originating_chat_context_json: '{"chat_id":"48d41ee3-3ef0-4df2-b23b-dd30c3b929fa","origin_provider":"main","chat_kind":"direct","event_kind":"message","require_mention":false,"device_id":"5ac11a8e-9761-4273-8a82-e352148c5f7d"}'
+  originating_chat_context_json: '{"chat_id":"YOUR-MAIN-CHAT-ID","origin_provider":"main","chat_kind":"direct","event_kind":"message","require_mention":false,"device_id":"YOUR-DEVICE-ID"}'
   presentation_locale: en-US
 ---
 Daily LinkedIn connection outreach for the user (YOUR_FULL_NAME, Your Job Title). Target: **30 connection invitations ACTUALLY SENT** (RESTORED Nov 12, 2026 at the user's direction — was slowed to 10/day on Nov 11, 2026 after LinkedIn's high-volume profile-data warning; the user restored 30 on Nov 12, 2026 with the rate-limit tradeoff explained. STRATEGY, the user, Nov 11–12, 2026: LinkedIn is used ONLY for invitation sending and for inbox replies driven by the email watch (linkedin-message-email-watch — the twice-daily inbox sweep was retired Nov 12, 2026) — job search and applications run entirely through Jobright, Indeed, the CareerOps scan, and external employer sites and never touch LinkedIn. Spread the 30 out at a human pace; do not bunch them.) — a send is only complete when the invitation is verified as sent (it appears in the Sent invitations view as Pending). Count only verified sends toward the 30; failed or unconfirmed attempts never count. Premium connection credits: any weekly or monthly credit limit is a LinkedIn control; stop immediately if the credit limit is reached, log it, and alert the user the same day.

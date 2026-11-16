@@ -10,9 +10,9 @@ schedule:
   time: 13:30:00
 timeout_secs: 7200
 delivery:
-  - chat_id: 48d41ee3-3ef0-4df2-b23b-dd30c3b929fa
+  - chat_id: YOUR-MAIN-CHAT-ID
 metadata:
-  originating_chat_context_json: '{"chat_id":"48d41ee3-3ef0-4df2-b23b-dd30c3b929fa","origin_provider":"main","chat_kind":"direct","event_kind":"message","require_mention":false,"device_id":"5ac11a8e-9761-4273-8a82-e352148c5f7d"}'
+  originating_chat_context_json: '{"chat_id":"YOUR-MAIN-CHAT-ID","origin_provider":"main","chat_kind":"direct","event_kind":"message","require_mention":false,"device_id":"YOUR-DEVICE-ID"}'
   presentation_locale: en-US
 ---
 TAP SESSION for the user's LinkedIn job-application workflow (set up Nov 1, 2026 at the user's direction). Twice a day — this job and its sibling (linkedin-tap-session-afternoon at YOUR_AFTERNOON_TIME, linkedin-tap-session-evening at YOUR_EVENING_TIME, both in the user's current local timezone) — a TAP-ONLY session collects every application step that needs the user's tap (an approval she grants) and works them ALL in one sitting with the user present, instead of interrupting her ad hoc through the day.

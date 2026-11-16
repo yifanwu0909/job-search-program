@@ -10,9 +10,9 @@ schedule:
   time: 20:30:00
 timeout_secs: 3600
 delivery:
-  - chat_id: 48d41ee3-3ef0-4df2-b23b-dd30c3b929fa
+  - chat_id: YOUR-MAIN-CHAT-ID
 metadata:
-  originating_chat_context_json: '{"chat_id":"48d41ee3-3ef0-4df2-b23b-dd30c3b929fa","origin_provider":"main","chat_kind":"direct","event_kind":"message","require_mention":false,"device_id":"5ac11a8e-9761-4273-8a82-e352148c5f7d"}'
+  originating_chat_context_json: '{"chat_id":"YOUR-MAIN-CHAT-ID","origin_provider":"main","chat_kind":"direct","event_kind":"message","require_mention":false,"device_id":"YOUR-DEVICE-ID"}'
   presentation_locale: en-US
 ---
 LinkedIn inbox check + invitation accepts + job alerts for the user (YOUR_FULL_NAME) — REVISED Nov 12, 2026 at the user's direction; invitations added Nov 12, 2026 (cadence change, the user, 5:37 PM CT: "invitation watch you can do daily" — invitations moved here from the every-15-minute watch); CADENCE CHANGED Nov 16, 2026 (the user): the sweep now runs FOUR TIMES A DAY — 8:30 AM, 12:30 PM, 4:30 PM, 8:30 PM CT — and each run scans ONLY the past 12 hours, so anything accepted or booked during the day is reflected by the next run. Do NOT page deeper into the inbox and do NOT work older threads — stop scanning the conversation list as soon as its threads are older than 12 hours. Context: the every-15-minute linkedin-message-email-watch already replies to new messages in near-real time from Gmail notifications; this check is the backstop for anything those notifications missed. It also works the past 12 hours of LinkedIn job-alert emails (Step 7). The same body runs under four job ids (linkedin-inbox-replies at 8:30 AM, linkedin-inbox-replies-midday at 12:30 PM, linkedin-inbox-replies-afternoon at 4:30 PM, linkedin-inbox-replies-evening at 8:30 PM); the shared claims ledger keeps the runs from ever double-handling an item.

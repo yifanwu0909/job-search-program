@@ -8,6 +8,20 @@ Ask your Muse to change any of them. It will update the setting everywhere it is
 
 Just tell Muse to change it. Say what you want different, in plain words. Muse updates the setting everywhere it is written and reads the change back to you. You never edit these files by hand.
 
+## Staying up to date
+
+The author keeps improving this program — documentation tweaks, fixes, new capabilities — and your install picks those changes up on its own. The `github-auto-sync` job runs every 4 hours: first it pulls the author's published updates (from the `upstream` remote if you forked, otherwise from `origin`), then it pushes your own program changes as before.
+
+The pull is built to protect everything you have customized:
+
+- **Your config is never touched.** Your real `answers.yaml`, `rules.yaml`, and `worker_template.md` are gitignored — they are not part of the repo, so no update can reach them.
+- **Your edits to program files are preserved.** Uncommitted edits are set aside before the merge and put back after. If an edit and an update truly collide on the same lines, your edit is kept safe in a git stash and you are told — it is never overwritten or deleted.
+- **Your own committed changes are never rewritten.** The update merges in alongside them. If a merge conflict is unavoidable, the pull stops, leaves your version exactly as it was, and tells you which files collided.
+- **A backup is kept.** Every pull that changes anything first records a `refs/backup/pre-pull-*` ref pointing at your pre-update state, so the update can always be undone.
+- **Local-only files are never deleted.** The pull only merges committed changes; files that exist only on your machine stay put.
+
+Routine updates are silent (one line in the daily log). You only hear about a pull when it stopped and needs you.
+
 ## Who you are (answers.yaml)
 
 - Legal name, including your name in your native language if forms ask for it.
