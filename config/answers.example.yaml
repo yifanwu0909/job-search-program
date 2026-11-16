@@ -94,3 +94,15 @@ screening_answers:
   related_to_current_workday_employee: false
   related_to_customer_employee_or_gov_official_with_workday_business: false
   ernst_young_employee_or_partner_current_or_recent: false
+
+about_you:
+  # Context for Muse, collected in onboarding's getting-to-know-you
+  # step. Used when tailoring resumes, writing connection notes, and
+  # judging fit. NEVER put on an application form, and never an
+  # override: the enforced filters live in config/rules.yaml.
+  superpower: "YOUR SUPERPOWER — what makes you unique as a candidate"
+  excites: "YOUR ANSWER — the work that excites you"
+  drains: "YOUR ANSWER — the work that drains you"
+  deal_breakers: "YOUR DEAL-BREAKERS, in your own words"
+  proudest_achievement: "YOUR PROUDEST ACHIEVEMENT"
+  published_work: "YOUR PROJECTS, ARTICLES, OR CASE STUDIES, if any"

@@ -1,38 +1,48 @@
 #!/usr/bin/env python3
 """Interactive onboarding for the job search program.
 
-Onboarding asks for three things only: the account access the system
-needs, your resume, and a few standing questions (work authorization
-and the equal-opportunity answers forms ask for).
-
     python3 onboarding.py            # run onboarding (resumes where it left off)
     python3 onboarding.py welcome    # print the welcome message only
     python3 onboarding.py status     # what is still missing
 
-The flow:
-  1. A welcome message.
-  2. Permissions: LinkedIn and Google, asked for first. Each one is
-     set up
-     now or skipped with "I'll do this later when it comes up"; a skip
-     is a complete answer, and the access is asked for again when it
+The structure follows a doctor check, the way career-ops onboards:
+before anything is asked, the program checks what is already in
+place, and only the steps still missing are walked. A step whose
+answers are already saved is skipped, never re-asked. The check is
+one function (doctor) shared by the run and by `status`, so the two
+can never disagree about what is missing.
+
+The steps:
+  1. Permissions: LinkedIn and Google, asked for first, each with
+     the reason why before the ask. Each one is set up now or
+     skipped with "I'll do this later when it comes up"; a skip is
+     a complete answer, and the access is asked for again when it
      first comes up. Choices are recorded with timestamps in
      state/onboarding.json, and any of them can be taken back later.
-  3. Your resume (PDF). Every tailored resume is built from this file.
-     Its path is written into config/answers.yaml (with a .bak of the
-     previous file).
-  4. A few standing questions: work authorization, and the
+  2. Your resume (PDF). Every tailored resume is built from this
+     file. Its path is written into config/answers.yaml (with a .bak
+     of the previous file).
+  3. A few standing questions: work authorization, and the
      equal-opportunity answers (race, gender, disability, veteran),
      written into config/answers.yaml the same way.
-  5. Your job search: what titles, locations, full time or part
+  4. Your job search: what titles, locations, full time or part
      time, and hybrid, remote, or in the office 5 days a week, plus
      anything else Muse needs to know. Written into
      config/answers.yaml under job_search.
-  6. A prompt to install the Jobright autofill plugin in the user's
+  5. A prompt to install the Jobright autofill plugin in the user's
      own browser (it fills in the manual applications). Installed or
      skipped; the decision is recorded in state/onboarding.json.
+  6. Getting to know you (recommended, never a gate): what makes
+     you unique, what work excites and drains you, deal-breakers in
+     your own words, your proudest achievement, and anything you
+     have published. Written into config/answers.yaml under
+     about_you. These answers are context for Muse when it
+     tailors resumes, writes connection notes, and judges fit. They
+     are never put on an application form, and they never override
+     config/rules.yaml, which stays the enforced filter set.
 
 LinkedIn alerts and notifications are NOT a user step. Once the user
-has given their job search (point 5), Muse itself sets them up in
+has given their job search (step 4), Muse itself sets them up in
 the user's LinkedIn, from those answers: job alerts saved for every
 title and location, the date-posted filter set to past 24 hours,
 alert emails daily; email, inbox message, and invitation
@@ -43,11 +53,13 @@ already handles the emails that result.
 Every prompt ends with two buttons, as typed options: "skip" (Skip
 this now) and "break" (Take a break). Break stops the session and
 saves everything; running onboarding again picks up where it stopped.
-Nothing already decided or saved is asked again.
+Nothing already decided or saved is asked again. The collected
+answers are held in one set and written to config/answers.yaml in
+one pass at the end (and on any stop, so a break loses nothing).
 
-The same flow, run conversationally by the user's Muse instead of in
-a terminal, is written out in docs/onboarding.md. The two stay in
-step: same welcome, same accounts, same order.
+The same flow, run conversationally by the user's Muse instead of
+in a terminal, is written out in docs/onboarding.md. The two stay
+in step: same welcome, same accounts, same order.
 """
 
 import argparse
@@ -65,11 +77,12 @@ DEFAULT_STATE = os.path.join(HERE, "state", "onboarding.json")
 
 WELCOME = """Welcome to your job search program.
 
-I'll set this up with you, step by step. It takes about 8 minutes
+I'll set this up with you, step by step. It takes about 10 minutes
 in total. You answer questions, and I write everything down.
 
 Here's what we'll cover: permissions, your resume, a few standing
-questions, your job search, and the Jobright plugin."""
+questions, your job search, the Jobright plugin, and a few
+questions about you, so I know who I'm working for."""
 
 # ---------------------------------------------------------------- permissions
 # Asked for first, both of them, so there are fewer stops later. Every
@@ -93,7 +106,7 @@ PERMISSIONS = [
 ]
 
 PLACEHOLDER_BITS = (
-    "YOUR_", "you@example.com", "(000) 000-0000", "123 Main St",
+    "YOUR_", "YOUR ", "you@example.com", "(000) 000-0000", "123 Main St",
     "Your City", "00000", "MM/DD/YYYY", "your-profile",
     "YOUR_FULL_NAME",
 )
@@ -166,6 +179,62 @@ def current(data, *keys):
     never offered as defaults)."""
     value = get_path(data, *keys)
     return None if is_placeholder(value) else value
+
+
+# -------------------------------------------------------------------- doctor
+# The one check behind both the run and `status`: what is in place,
+# what is missing, and what is still the shipped example value. The
+# run walks only the steps the doctor reports as missing.
+UNPERSONALIZED_WATCH = (
+    (("applicant", "full_name"), "your name"),
+    (("applicant", "email"), "your email"),
+    (("applicant", "phone"), "your phone"),
+    (("applicant", "linkedin_url"), "your LinkedIn profile"),
+)
+
+
+def doctor(answers, state):
+    """Return the setup state as one report:
+    {resume_ok, resume, undecided, q_missing, search_ok, notif_ok,
+     plugin_ok, about_you (done|skipped|None), unpersonalized,
+     complete}. `complete` gates on the required steps only;
+    about_you is recommended and never gates, the way career-ops
+    treats its get-to-know-you step."""
+    resume = get_path(answers, "applicant", "resume_file")
+    perms = state.get("permissions", {})
+    undecided = [title for key, title, _ in PERMISSIONS
+                 if key not in perms]
+    q_missing = []
+    if is_placeholder(get_path(answers, "applications",
+                               "work_authorization", "status")):
+        q_missing.append("work authorization")
+    for key, label in (("race", "race"), ("gender", "gender"),
+                       ("disability", "disability"),
+                       ("veteran", "veteran status")):
+        if is_placeholder(get_path(answers, "applications", "eeo", key)):
+            q_missing.append(label)
+    search_ok = bool(get_path(answers, "job_search", "titles")) and \
+        bool(get_path(answers, "job_search", "locations")) and \
+        not is_placeholder(get_path(answers, "job_search", "workplace"))
+    notif_ok = "linkedin_setup" in state or \
+        "linkedin_notifications" in state
+    about = state.get("about_you", {})
+    unpersonalized = [label for keys, label in UNPERSONALIZED_WATCH
+                      if is_placeholder(get_path(answers, *keys))]
+    report = {
+        "resume_ok": not is_placeholder(resume),
+        "resume": None if is_placeholder(resume) else resume,
+        "undecided": undecided,
+        "q_missing": q_missing,
+        "search_ok": search_ok,
+        "notif_ok": notif_ok,
+        "plugin_ok": "plugin" in state,
+        "about_you": about.get("decision"),
+        "unpersonalized": unpersonalized,
+    }
+    report["complete"] = report["resume_ok"] and not undecided and \
+        not q_missing and search_ok and notif_ok and report["plugin_ok"]
+    return report
 
 
 # ------------------------------------------------------------ prompt helpers
@@ -395,55 +464,97 @@ def plugin_step(state, state_path):
     return state["plugin"]["decision"]
 
 
+# (prompt, answers.yaml key under about_you). Blank is a complete
+# answer for every one of these; only non-blank answers are written.
+ABOUT_YOU_PROMPTS = [
+    ("What makes you unique as a candidate — your superpower?",
+     "superpower"),
+    ("What kind of work excites you?", "excites"),
+    ("What kind of work drains you?", "drains"),
+    ("Any deal-breakers, in your own words?",
+     "deal_breakers"),
+    ("Your proudest professional achievement — the one you'd lead "
+     "with?", "proudest_achievement"),
+    ("Any projects, articles, or case studies you've published?",
+     "published_work"),
+]
+
+
+def about_you_step(answers, state, state_path):
+    """Getting to know the user (recommended, never a gate).
+
+    The answers are context for Muse — tailoring, connection
+    notes, fit judgment — stored under about_you in the answers.
+    They are never put on an application form and never override
+    config/rules.yaml. Done or skipped, the decision is recorded
+    once, like the plugin, and never asked again; the user can add
+    or change any of it later just by telling Muse.
+    """
+    if "about_you" in state:
+        return state["about_you"].get("decision")
+    # A fresh install seeds about_you with the example placeholders;
+    # drop them, so only real answers are ever left in the file (the
+    # example person must never read as the user's own context).
+    seeded = answers.get("about_you")
+    if isinstance(seeded, dict):
+        for key in [k for k, v in seeded.items() if is_placeholder(v)]:
+            del seeded[key]
+    print()
+    print("=== Getting to know you [~2 minutes] ===")
+    print("  The basics are in. The system works much better when it")
+    print("  knows you well — think of it as onboarding a recruiter:")
+    print("  the first week I need to learn about you, then I become")
+    print("  invaluable. Blank is fine for any of these.")
+    try:
+        for prompt, key in ABOUT_YOU_PROMPTS:
+            value = ask(prompt, allow_blank=True)
+            if value:
+                set_path(answers, value, "about_you", key)
+    except SkipPrompt:
+        state["about_you"] = {"decision": "skipped", "at": now_iso()}
+        save_state(state_path, state)
+        print("  Skipped for now. You can tell me about yourself "
+              "anytime, and I'll write it down.")
+        return "skipped"
+    state["about_you"] = {"decision": "done", "at": now_iso()}
+    save_state(state_path, state)
+    return "done"
+
+
 # -------------------------------------------------------------------- status
 def cmd_status(args):
     answers = load_yaml(args.answers)
     state = load_state(args.state)
-    resume = get_path(answers, "applicant", "resume_file")
-    resume_ok = not is_placeholder(resume)
-    perms = state.get("permissions", {})
-    undecided = [title for key, title, _ in PERMISSIONS
-                 if key not in perms]
-    q_missing = []
-    if is_placeholder(get_path(answers, "applications",
-                               "work_authorization", "status")):
-        q_missing.append("work authorization")
-    for key, label in (("race", "race"), ("gender", "gender"),
-                       ("disability", "disability"),
-                       ("veteran", "veteran status")):
-        if is_placeholder(get_path(answers, "applications", "eeo", key)):
-            q_missing.append(label)
+    report = doctor(answers, state)
     print(f"Answers file: {args.answers}")
-    if resume_ok:
-        print(f"Resume: {resume}")
+    if report["resume_ok"]:
+        print(f"Resume: {report['resume']}")
     else:
         print("Still missing: your resume (PDF).")
-    if undecided:
+    if report["undecided"]:
         print("No decision yet for:")
-        for title in undecided:
+        for title in report["undecided"]:
             print(f"  - {title}")
     else:
         print("All account access is decided.")
-    if q_missing:
-        print("Still missing: " + ", ".join(q_missing) + ".")
-    search_ok = bool(get_path(answers, "job_search", "titles")) and \
-        bool(get_path(answers, "job_search", "locations")) and \
-        not is_placeholder(get_path(answers, "job_search", "workplace"))
-    if not search_ok:
+    if report["q_missing"]:
+        print("Still missing: " + ", ".join(report["q_missing"]) + ".")
+    if not report["search_ok"]:
         print("Still missing: your job search answers.")
-    notif_ok = "linkedin_setup" in state or \
-        "linkedin_notifications" in state
-    if not notif_ok:
+    if not report["notif_ok"]:
         print("LinkedIn alerts and notifications setup not recorded "
               "yet.")
-    plugin_ok = "plugin" in state
-    if not plugin_ok:
+    if not report["plugin_ok"]:
         print("No decision yet for: the Jobright plugin.")
-    complete = resume_ok and not undecided and not q_missing and \
-        search_ok and notif_ok and plugin_ok
-    print("Onboarding complete." if complete else
+    if report["about_you"] is None:
+        print("Getting to know you: not done yet (recommended — it "
+              "improves tailoring and fit judgment).")
+    if report["unpersonalized"]:
+        print("Still the example value: "
+              + ", ".join(report["unpersonalized"]) + ".")
+    print("Onboarding complete." if report["complete"] else
           "Onboarding not finished yet. Run: python3 onboarding.py")
-    return 0 if complete else 3
+    return 0 if report["complete"] else 3
 
 
 ANSWERS_HEADER = ("# Standing answer set for job applications, filled in "
@@ -473,29 +584,50 @@ def main():
             print(WELCOME)
             state["welcomed"] = now_iso()
             save_state(args.state, state)
+        # The doctor check: walk only the steps still missing. A step
+        # whose answers are already saved is reported and skipped.
+        report = doctor(answers, state)
         perm_granted, perm_skipped = permissions_step(state, args.state)
-        try:
-            resume_step(answers)
+        if report["resume_ok"]:
+            print()
+            print(f"Resume: already on file ({report['resume']}) — "
+                  "skipping.")
             resume_done = True
-        except SkipPrompt:
-            resume_done = False
-            print("  Resume skipped for now; I will ask again next time.")
-        try:
-            questions_step(answers)
+        else:
+            try:
+                resume_step(answers)
+                resume_done = True
+            except SkipPrompt:
+                resume_done = False
+                print("  Resume skipped for now; I will ask again "
+                      "next time.")
+        if not report["q_missing"]:
+            print()
+            print("Standing questions: already answered — skipping.")
             questions_done = True
-        except SkipPrompt:
-            questions_done = False
-            print("  Standing questions skipped for now; I will ask "
-                  "again next time.")
-        try:
-            search_step(answers)
+        else:
+            try:
+                questions_step(answers)
+                questions_done = True
+            except SkipPrompt:
+                questions_done = False
+                print("  Standing questions skipped for now; I will "
+                      "ask again next time.")
+        if report["search_ok"]:
+            print()
+            print("Job search: already answered — skipping.")
             search_done = True
-        except SkipPrompt:
-            search_done = False
-            print("  Job search skipped for now; I will ask again "
-                  "next time.")
+        else:
+            try:
+                search_step(answers)
+                search_done = True
+            except SkipPrompt:
+                search_done = False
+                print("  Job search skipped for now; I will ask again "
+                      "next time.")
         record_linkedin_setup(state, args.state, answers)
         plugin_decision = plugin_step(state, args.state)
+        about_you_decision = about_you_step(answers, state, args.state)
         save_yaml(args.answers, answers, ANSWERS_HEADER)
     except BreakPrompt:
         save_yaml(args.answers, answers, ANSWERS_HEADER)
@@ -512,6 +644,9 @@ def main():
               "pick up where we left off.")
         return 0
 
+    # Ready: run the doctor check once more before confirming, so
+    # the summary below is the check's own verdict, not a guess.
+    final = doctor(answers, state)
     print()
     print("=== Done ===")
     if perm_granted:
@@ -533,6 +668,14 @@ def main():
     if plugin_decision == "skipped":
         print("Jobright plugin: skipped for now. Install it before "
               "your first manual application.")
+    if about_you_decision == "done":
+        print("Getting to know you: saved. It helps me tailor and "
+              "judge fit; tell me more anytime and I'll update it.")
+    elif about_you_decision == "skipped":
+        print("Getting to know you: skipped. Tell me about yourself "
+              "anytime and I'll write it down.")
+    if final["complete"]:
+        print("Doctor check: everything required is in place.")
     print("Your first run starts tomorrow.")
     print("Next: your Muse connects the accounts you set up, then "
           "starts with a small first run so you can watch the "
