@@ -107,22 +107,6 @@ A few minutes a day, in two forms:
 - Your Gmail connected for confirmations, recruiter replies, and LinkedIn notifications.
 - Your base resume and your standing answers (<a href="#standing-answers-checklist">checklist</a> in the dropdown below).
 
-## What it will not do
-
-- 🚫 It will not **invent experience, skills, employers, or numbers**. Everything on an application comes from your resume and your standing answers. The one exception is fun-fact style questions, where the user of this system chose to let it make up something harmless.
-- 🚫 It will not apply to a **blocked company**, a company you **already applied to**, or a job that fails your **pay or role rules**.
-- 🚫 It will not **work around LinkedIn's limits, a site's bot checks, or a login wall**. A blocked route becomes a manual packet for you instead.
-- 🚫 It will not **send an email without your approval tap**. LinkedIn replies follow the standing rules you set, and **anything outside those rules comes back to you first**.
-- It **cannot promise results**. Recruiters decide who gets interviews. The system does the searching, applying, and bookkeeping at a volume one person cannot match by hand.
-
-## Make it yours 🎛️
-
-Almost everything about this system is a setting, and the settings in this repo are one person's. Change them before you run it.
-
-One example: the **company gate**. This setup checks each company on Revelio before applying, and skips companies under 100 people or with more than half their staff in South Asia. That rule is personal. It comes from this user's own job search history, and it will not fit everyone. Your Muse can set the gate to your own numbers, use a different source, or turn it off.
-
-The same goes for the pay floors, the job titles searched, the block list, the daily targets, the reply rules, and the session times. The full list of customizable fields, and where each one lives, is in <a href="docs/customization.md" target="_blank" rel="noopener">docs/customization.md</a>.
-
 <a id="standing-answers-checklist"></a>
 <details>
 <summary>📋 <b>What you need to hand over before it can run</b></summary>
@@ -139,6 +123,21 @@ The longer version, with why each item is needed, is in <a href="docs/getting-st
 
 </details>
 
+## What it will not do
+
+- 🚫 It will not **invent experience, skills, employers, or numbers**. Everything on an application comes from your resume and your standing answers. The one exception is fun-fact style questions, where the user of this system chose to let it make up something harmless.
+- 🚫 It will not apply to a **blocked company**, a company you **already applied to**, or a job that fails your **pay or role rules**.
+- 🚫 It will not **work around LinkedIn's limits, a site's bot checks, or a login wall**. A blocked route becomes a manual packet for you instead.
+- 🚫 It will not **send an email without your approval tap**. LinkedIn replies follow the standing rules you set, and **anything outside those rules comes back to you first**.
+- It **cannot promise results**. Recruiters decide who gets interviews. The system does the searching, applying, and bookkeeping at a volume one person cannot match by hand.
+
+## Make it yours 🎛️
+
+Almost everything about this system is a setting, and the settings in this repo are one person's. Change them before you run it.
+
+One example: the **company gate**. This setup checks each company on Revelio before applying, and skips companies under 100 people or with more than half their staff in South Asia. That rule is personal. It comes from this user's own job search history, and it will not fit everyone. Your Muse can set the gate to your own numbers, use a different source, or turn it off.
+
+The same goes for the pay floors, the job titles searched, the block list, the daily targets, the reply rules, and the session times. The full list of customizable fields, and where each one lives, is in <a href="docs/customization.md" target="_blank" rel="noopener">docs/customization.md</a>.
 ## It gets better the more you use it 🌱
 
 - **This system is tuned by use.** Nearly every rule in it started as someone noticing something mid-run and telling their Muse to change it.
