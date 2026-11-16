@@ -29,6 +29,10 @@ An automated job search that runs on your own Muse, in six blocks. Click a block
 
 It was built and tuned over several months of daily use. The daily target is **60 verified applications**.
 
+## Installing it 🛠️
+
+Hand this repo to your Muse and say **"install it."** Installation instructions written for Muse live in <a href="INSTALL.md" target="_blank" rel="noopener">INSTALL.md</a>: place the repo, run `program/install.py`, pass the test suites, do onboarding, connect accounts, create the scheduled jobs. Your part is the onboarding conversation and the sign-ins.
+
 ## What it does
 
 Here is one day, top to bottom:
@@ -151,10 +155,6 @@ The same goes for the pay floors, the job titles searched, the block list, the d
 - **`checks/`:** the standalone scan scripts the scheduled jobs run (shadow pass, email scan, stall and bench checks).
 - **`tools/`:** one-off utilities.
 - **`config/`:** your answers and your rules. **`workflow/`:** the scheduled job definitions. **`career-ops/`:** the contact-finding skill. **`docs/`:** the guides. **`tests/`:** the test suites.
-
-## Installing it 🛠️
-
-Hand this repo to your Muse and say **"install it."** Installation instructions written for Muse live in <a href="INSTALL.md" target="_blank" rel="noopener">INSTALL.md</a>: place the repo, run `program/install.py`, pass the test suites, do onboarding, connect accounts, create the scheduled jobs. Your part is the onboarding conversation and the sign-ins.
 
 ## More documentation
 
