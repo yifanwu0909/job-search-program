@@ -16,7 +16,7 @@ An automated job search that runs on your own Muse, in six blocks. Click a block
   </tr>
   <tr>
     <td bgcolor="#ffedd5" align="center">
-      <a href="docs/detailed-documentation.md#application-follow-up" target="_blank" rel="noopener"><b>📬 Application follow-up</b></a>
+      <a href="docs/detailed-documentation.md#application-follow-up" target="_blank" rel="noopener"><b>📧 Application follow-up</b></a>
     </td>
     <td bgcolor="#e9d5ff" align="center">
       <a href="docs/detailed-documentation.md#linkedin-networking" target="_blank" rel="noopener"><b>🤝 LinkedIn networking</b></a>
