@@ -97,8 +97,8 @@ Indeed, LinkedIn job alerts, and Revelio are free. So are Gmail, Google Calendar
 
 A few minutes a day, in two forms:
 
-- 👆 **Tap and captcha sessions, twice a day.** The times are customizable. You give Muse permission with a tap, and when a site shows a bot-detecting puzzle, you take over the browser and finish the puzzle yourself. Guides: <a href="docs/tap-sessions/" target="_blank" rel="noopener">tap sessions</a> and <a href="docs/captcha-sessions/" target="_blank" rel="noopener">captcha sessions</a>.
-- 📦 **A few fully manual applications.** There will not be many, but they do exist. **Muse will provide everything you need to complete the application manually**: the tailored resume, and all the fields for the form. **Strongly recommended: use the <a href="https://jobright.ai" target="_blank" rel="noopener">Jobright</a> AI auto application filling plugin. It fills the application in for you.** Guide: <a href="docs/manual-packets/" target="_blank" rel="noopener">manual packets</a>.
+- 👆 **Tap and captcha sessions, twice a day.** **Un-bypassable.** Solve simple one-click tasks at a fixed daily schedule. Guides: <a href="docs/tap-sessions/" target="_blank" rel="noopener">tap sessions</a> and <a href="docs/captcha-sessions/" target="_blank" rel="noopener">captcha sessions</a>.
+- 📦 **A few fully manual applications.** **Un-bypassable.** Apply on the job site yourself, with the <a href="https://jobright.ai" target="_blank" rel="noopener">Jobright</a> AI auto application filling plugin. Tailored resume and a pre-filled application form are provided. Guide: <a href="docs/manual-packets/" target="_blank" rel="noopener">manual packets</a>.
 
 ## Access it needs
 
