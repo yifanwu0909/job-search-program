@@ -103,8 +103,8 @@ Indeed, the career-ops scan, LinkedIn job alerts, and Revelio are free. So are G
 
 A few minutes a day:
 
-- 👆 **Approvals pop up as they happen — click them right away.** [Un-bypassable] Some steps only you can do: a tap approval, or a captcha. They will pop up no matter what.
-- ✅ **Always click "Always allow."** [Un-bypassable] Vault credentials, entering a security code on a website, uploading your resume or files — "Always allow" means you are not asked again for that site.
+- 👆 **Approvals pop up as they happen — click them right away.** **[Un-bypassable]** Some steps only you can do: a tap approval, or a captcha. They will pop up no matter what.
+- ✅ **Always click "Always allow."** **[Un-bypassable]** Vault credentials, entering a security code on a website, uploading your resume or files — "Always allow" means you are not asked again for that site.
 - 🕑 **Missed one? No problem.** The program parks it, and it comes back in the **tap and captcha sessions — twice a day, on a fixed schedule**. Guides: <a href="docs/tap-sessions/" target="_blank" rel="noopener">tap sessions</a> and <a href="docs/captcha-sessions/" target="_blank" rel="noopener">captcha sessions</a>.
 - 📦 **A few fully manual applications.** Apply on the job site yourself, with <a href="https://jobright.ai" target="_blank" rel="noopener">Jobright</a>'s free autofill plugin. Tailored resume and a pre-filled application form are provided. Guide: <a href="docs/manual-packets/" target="_blank" rel="noopener">manual packets</a>.
 
