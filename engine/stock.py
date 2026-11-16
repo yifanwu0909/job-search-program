@@ -305,8 +305,8 @@ RETURN FORM — stock.py record takes a JSON file of this shape:
         "basis": "city",                         // city | remote_national |
                                                  //   remote_zone — the PROGRAM
                                                  //   picks the bar: city = the
-                                                 //   universal $200,000;
-                                                 //   remote_national = $120,000;
+                                                 //   universal $YOUR_BAR;
+                                                 //   remote_national = $YOUR_BASE;
                                                  //   remote_zone = your researched
                                                  //   equivalent (next field)
         "equivalent": 231120,                    // remote_zone ONLY: the city
@@ -342,8 +342,8 @@ researched by you; the program assigns the item numbers, decides the
 gate verdict (size <100 hard pass; India >50% hard pass + block;
 size 100 and up passes with NO alert — size alerts removed by the user,
 Nov 12, 2026) and the pay verdict (the bar
-depends on the basis YOU name: city = the universal $200,000 bar;
-remote_national = $120,000; remote_zone = your researched equivalent;
+depends on the basis YOU name: city = the universal $YOUR_BAR bar;
+remote_national = $YOUR_BASE; remote_zone = your researched equivalent;
 a figure below its bar = do not stock for application), dedupes
 against the log, and writes every log line itself. Never hand-write STOCKED,
 SEGMENT STATE, GATE, or PREP READY lines again.
@@ -1144,7 +1144,9 @@ def record(form: dict, log_path: Path = LOG_PATH,
                            f"posting top/market ${pay['figure']:,} per "
                            f"{pay['source']}")
             else:
-                bar_txt = (f"120k Houston = ${pay['equivalent']:,} in "
+                base_label = pay_cfg.get("base_label") or (
+                    f"{int(pay_cfg.get('remote_national_bar', pay_cfg.get('base_houston_annual', 120000))) // 1000}k Houston")
+                bar_txt = (f"{base_label} = ${pay['equivalent']:,} in "
                            f"{pay['city']} per {pay['source']}; posting "
                            f"top/market ${pay['figure']:,}")
             log_writer.append_entry(

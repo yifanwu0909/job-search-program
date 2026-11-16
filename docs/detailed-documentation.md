@@ -14,7 +14,7 @@ pacing parameters, log format, verification checks) is code and data here.
 
 ## Files
 - `config/answers.yaml` — the standing answer set (single copy). Applications
-  NEVER name YOUR_CURRENT_EMPLOYER; employer history is the base resume (CenterPoint Energy
+  NEVER name YOUR_CURRENT_EMPLOYER; employer history is the base resume (YOUR_LATEST_EMPLOYER
   latest). YOUR_CURRENT_EMPLOYER appears only under `replies_only`.
 - `config/rules.yaml` — machine-checked parameters (targets, pacing, spacing,
   diversification, verification timing, true-blocker list, blocked-count check
@@ -318,7 +318,7 @@ Screening runs **in code, before any posting is opened**: **blocked companies** 
 
 Prep: a **tailored resume** is built from the base resume and read back. An item is stocked to the **bench** only when its resume exists. A sweep every 30 minutes (`linkedin-bench-prep-sweep`) builds any resume the first pass missed.
 
-Applying: up to **three workers** run in parallel. The **guardian** (`linkedin-batch-guardian`, every 30 minutes) keeps them alive and restarts them if one dies. Applications go in on the **employer's own site**. When a worker reaches a step only the user can do, the item waits for the **1:30 PM or 7:30 PM tap session or captcha session** (times customizable). Sites that block this browser entirely (Lever, Gem, Rippling, Paycom) become **manual packets** the user submits herself.
+Applying: up to **three workers** run in parallel. The **guardian** (`linkedin-batch-guardian`, every 30 minutes) keeps them alive and restarts them if one dies. Applications go in on the **employer's own site**. When a worker reaches a step only the user can do, the item waits for the **YOUR_AFTERNOON_TIME or YOUR_EVENING_TIME tap session or captcha session** (times customizable). Sites that block this browser entirely (Lever, Gem, Rippling, Paycom) become **manual packets** the user submits herself.
 
 ### Application follow-up
 
@@ -361,7 +361,7 @@ The code is organized in three folders under `program/`: the top level holds the
 - A block list of companies, plus any standing declines, such as a state where onsite roles are refused, or consulting work.
 - Reply rules: when to accept a call, what to decline, what may be shared (phone number, work authorization), and what must come back to the user.
 - Accounts and subscriptions: LinkedIn with Premium Career, Jobright on a paid plan, Indeed, and Gmail with Google Calendar and Google Tasks connected.
-- Two daily windows when the user can tap approvals and solve captchas. Here they are 1:30 PM and 7:30 PM.
+- Two daily windows when the user can tap approvals and solve captchas. Here they are YOUR_AFTERNOON_TIME and YOUR_EVENING_TIME.
 
 ## Who does what: the control tower and the planes
 

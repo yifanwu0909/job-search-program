@@ -7,3 +7,9 @@ tests/__pycache__/
 tests/*.jsonl
 tests/*.json
 tests/log_copy.md
+
+# Real config files: personal values live outside this repo (the repo
+# ships only the *.example.* templates; install.py seeds these from them)
+config/answers.yaml
+config/rules.yaml
+worker_template.md

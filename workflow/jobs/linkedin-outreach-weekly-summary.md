@@ -2,7 +2,7 @@
 id: linkedin-outreach-weekly-summary
 title: LinkedIn outreach weekly summary
 enabled: true
-owner: goal:linkedin-ai-recruiter-outreach-weekly
+owner: goal:YOUR-GOAL
 mode: task
 schedule:
   kind: weekly
@@ -17,11 +17,11 @@ metadata:
   originating_chat_context_json: '{"chat_id":"48d41ee3-3ef0-4df2-b23b-dd30c3b929fa","origin_provider":"main","chat_kind":"direct","event_kind":"message","require_mention":false,"device_id":"5ac11a8e-9761-4273-8a82-e352148c5f7d"}'
   presentation_locale: en-US
 ---
-REPORTING TIMEZONE (the user, Oct 30, 2026 — dated): the user is in San Diego Fri Oct 30 – Sat Oct 31, 2026 — report times to the user in California time (America/Los_Angeles, Pacific). The user is in Hawaii Mon Nov 2 – Fri Nov 6, 2026 — report times to the user in Hawaii time (Pacific/Honolulu, HST); Sun Nov 1, 2026 is the start of her Nov 1–6 Honolulu itinerary, so use Hawaii time from Nov 1. Keep all actual work, schedules, and availability in home city Central time (America/Chicago) exactly as set — convert for display to the user only. Note: this weekly summary fires Sun Nov 1 at 7:23 PM Central, which is 3:23 PM Hawaii time — report it that way.
+REPORTING TIMEZONE: report times in the user's current timezone. Keep all actual work, schedules, and availability in the user's home timezone exactly as set — convert for display only.
 
 Weekly summary of the user's LinkedIn outreach (daily batches run under the job "LinkedIn AI recruiter outreach (daily batches)").
 
-PERIOD (Oct 31, 2026 audit fix 27c — single definition): The period covered is defined ONCE as "since the previous summary run", and that definition governs. Do NOT use any other conflicting period definition. Read the outreach log at ~/workspace/goals/linkedin-ai-recruiter-outreach-weekly/hidden_files/outreach-log.md and total the entries since the previous summary run. State the actual dates covered in the report itself.
+PERIOD (Oct 31, 2026 audit fix 27c — single definition): The period covered is defined ONCE as "since the previous summary run", and that definition governs. Do NOT use any other conflicting period definition. Read the outreach log at ~/workspace/goals/YOUR-GOAL/hidden_files/outreach-log.md and total the entries since the previous summary run. State the actual dates covered in the report itself.
 
 Send the user one concise chat summary covering:
 - Total invitations sent and verified pending in that period, with the per-day counts if the log has them.

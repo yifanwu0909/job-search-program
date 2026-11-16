@@ -450,7 +450,7 @@ def cmd_inbox(sp: Spine, args) -> int:
 def cmd_pay(sp: Spine, args) -> int:
     """The pay DECISION as code. PAY RULE v2 (the user, Nov 5, 2026): with
     --basis, the BAR is picked here from rules.yaml pay_filter —
-    city → the universal $200,000 bar; remote_national → $120,000
+    city → the universal $YOUR_BAR bar; remote_national → $YOUR_BASE
     (Houston basis, unchanged); remote_zone → the researched city
     equivalent passed as --equivalent (unchanged). Legacy calls
     (--equivalent + --attainable, no --basis) keep the direct

@@ -2,7 +2,7 @@
 id: forward-todo-reminder-10am-ct
 title: Forward-move to-do reminder (10 AM CT)
 enabled: true
-owner: goal:linkedin-ai-recruiter-outreach-weekly
+owner: goal:YOUR-GOAL
 mode: task
 schedule:
   kind: daily
@@ -18,7 +18,7 @@ FORWARD-MOVE TO-DO REMINDER — daily at 10:00 AM America/Chicago (the user, Nov
 
 WHAT THIS IS: when the application-email scan (job-application-email-followups) judges an email as forward-moving, the item goes on the user's to-do list: the program (checks/email_sweep.py) keeps the to-do record and builds the track file program/state/forward_todos.json with every forward item's important info, and a matching to-do sits in her Google Tasks default list ("My Tasks"). This job is the daily reminder for the still-open ones. It never replies to email, never books anything, and never creates or completes a to-do on its own — except the Google-Tasks completion sync in Step 2.
 
-STEP 1 — GET THE OPEN TO-DOS (code first): from ~/workspace/goals/linkedin-ai-recruiter-outreach-weekly/program run:
+STEP 1 — GET THE OPEN TO-DOS (code first): from ~/workspace/goals/YOUR-GOAL/program run:
 python3 checks/email_sweep.py --tz America/Chicago --list-todos
 It prints {"open_todos": [...]} — each entry: gmail_id, item_id, company, role, subtype, gist, deadline_iso (or null), proposed_times (or null), google_task_id (or null). This list — the same record the track file state/forward_todos.json is built from — is the source of truth for what to remind about.
 

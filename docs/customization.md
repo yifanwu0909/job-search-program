@@ -1,6 +1,6 @@
 # Customization
 
-Every setting in this repo is one person's setup. This page lists the fields you can change, what each one does, and where it lives. Most live in two files: `program/config/rules.yaml` (the machine-checked rules) and `program/config/answers.yaml` (the standing answers used on forms). The rest live in the goal file (`workflow/GOAL.md`) and in the scheduled jobs (`workflow/jobs/`).
+The examples in this repo are one sample setup. This page lists the fields you can change, what each one does, and where it lives. Most live in two files: `program/config/rules.yaml` (the machine-checked rules) and `program/config/answers.yaml` (the standing answers used on forms). The rest live in the goal file (`workflow/GOAL.md`) and in the scheduled jobs (`workflow/jobs/`).
 
 Ask your Muse to change any of them. It will update the setting everywhere it is written down and read it back to confirm.
 
@@ -22,12 +22,12 @@ Just tell Muse to change it. Say what you want different, in plain words. Muse u
 
 ## What you are looking for (rules.yaml)
 
-- Job titles searched. Here: Senior Data Scientist and Machine Learning Engineer on Jobright and Indeed, plus three more titles on the LinkedIn alert lane.
+- Job titles searched. Example: Your Job Title and Your Second Job Title on Jobright and Indeed, plus your saved titles on the LinkedIn alert lane.
 - Locations: which states or cities, and whether remote roles count.
-- Pay floors. Here: $200,000 attainable pay for any onsite or hybrid role, $120,000 for nationally priced remote roles, and a researched city equivalent for remote roles priced by city. A posting below the floor is skipped and logged.
+- Pay floors. Here: $YOUR_BAR attainable pay for any onsite or hybrid role, $YOUR_BASE for nationally priced remote roles, and a researched city equivalent for remote roles priced by city. A posting below the floor is skipped and logged.
 - Daily targets. Here: 60 verified applications a day across all sources, and 30 connection invitations a day.
 - Role filter. Here: titles containing Staff, Lead, Principal, or Consultant are out, and a data scientist job only counts if the work is technical. Reporting and dashboard work under a data science title is out. So is consulting work: roles that bill your hours to a client.
-- Standing declines. Here: onsite or hybrid roles in Texas are declined on sight, whatever the fit.
+- Standing declines. Example: onsite or hybrid roles in your excluded locations are declined on sight, whatever the fit.
 
 ## The company gate (rules.yaml)
 
@@ -50,7 +50,7 @@ Change the numbers, change the region, change the source, or switch the gate off
 
 - Invitation target: 30 verified invitations a day, inside LinkedIn's weekly cap of roughly 100. When the cap is hit, sending pauses. It never works around the cap.
 - Who gets invited: people with influence on the role at companies just applied to. Recruiters first, then the likely hiring manager, then other senior people on the team.
-- The no-peers rule: nobody at or below the user's own level gets an invitation. Here that means nobody at Senior Data Scientist level or below.
+- The no-peers rule: nobody at or below the user's own level gets an invitation. Here that means nobody at Your Current Level or below.
 - Where names come from: the career-ops contacto method only (public web searches). LinkedIn is never searched for people. If contacto finds nobody for a role, the role is skipped, not filled from another source.
 - The note: short (300 characters at most), names the role and the company, written for that person. Notes are drafted by Muse and checked against the humanizer rules before sending.
 
@@ -67,7 +67,7 @@ Change the numbers, change the region, change the source, or switch the gate off
 
 - When the day opens (here 8:23 AM) and when the morning report lands (9:23 AM).
 - The outreach run time (10:23 AM).
-- Tap sessions and captcha sessions: twice a day, here 1:30 PM and 7:30 PM, in the user's timezone.
+- Tap sessions and captcha sessions: twice a day, here YOUR_AFTERNOON_TIME and YOUR_EVENING_TIME, in the user's timezone.
 - The inbox watch interval (every 15 minutes), the mail scan interval (every 30 minutes), and the daily inbox check (8:30 AM).
 - The nightly audit (8:47 AM) and the weekly summary (Sunday evening).
 

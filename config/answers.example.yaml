@@ -1,7 +1,9 @@
+# EXAMPLE CONFIG — every value here is a sample. Onboarding and your
+# Muse replace them with your real answers in config/answers.yaml.
 # Standing answer set for job applications — SINGLE COPY (application program v1).
 # Source: application-program-design-2026-11-04.md + MEMORY.md standing facts.
 # HARD RULE: applications must NEVER name YOUR_CURRENT_EMPLOYER. Application employer history is
-# the base resume exactly (CenterPoint Energy latest). YOUR_CURRENT_EMPLOYER appears below ONLY
+# the base resume exactly (Example Energy Co latest). YOUR_CURRENT_EMPLOYER appears below ONLY
 # as a replies-only fact, fenced off under replies_only.
 
 applicant:
@@ -23,52 +25,52 @@ applicant:
 applications:
   # Employer history EXACTLY as the base resume (~/workspace/user/files/
   # YOUR_RESUME.pdf). Never add YOUR_CURRENT_EMPLOYER.
-  current_employer: "CenterPoint Energy"
-  current_title: "Senior Data Scientist"
+  current_employer: "Example Energy Co"
+  current_title: "Your Job Title"
   employer_history:
-    - employer: "CenterPoint Energy"
-      title: "Senior Data Scientist"
-      location: "Houston, TX"
+    - employer: "Example Energy Co"
+      title: "Your Job Title"
+      location: "Your City, ST"
       start: "2024-06"
       end: "2026-06"
-    - employer: "BDO Digital USA"
-      title: "AI/Machine Learning Engineer"
+    - employer: "Example Digital LLC"
+      title: "Your Earlier Title"
       location: null        # resume states no location; Workday fallback: "Remote"
       start: "2023-02"
       end: "2024-06"
-    - employer: "EagleView Technologies"
-      title: "Data Scientist"
+    - employer: "Example Imaging Inc"
+      title: "Your First Title"
       location: null        # resume states no location; Workday fallback: "Remote"
       start: "2019-07"
       end: "2022-07"
   never_name: ["YOUR_CURRENT_EMPLOYER"]
   education:
-    - school: "Georgetown University"
+    - school: "Example University"
       degree: "MS Analytics (Data Science Concentration)"
       start: "2017"
       end: "2019"
-      gpa: "3.7"
-    - school: "University of Washington"
+      gpa: "0.0"
+    - school: "Sample State University"
       degree: "BS Mathematics"
       start: "2013"
       end: "2017"
-      gpa: "3.5"
+      gpa: "0.0"
   eeo:
-    race: "Asian (Chinese)"       # if the form offers only "Asian", use "Asian"
-    gender: "female"
-    disability: "none"            # "No, I do not have a disability and have not had one in the past"
-    veteran: "not a veteran"      # never select any veteran option
+    race: "prefer not to say"       # if the form offers only "Asian", use "Asian"
+    gender: "prefer not to say"
+    disability: "prefer not to say"            # "No, I do not have a disability and have not had one in the past"
+    veteran: "prefer not to say"      # never select any veteran option
   work_authorization:
-    status: "US permanent resident (green card)"
+    status: "YOUR WORK AUTHORIZATION STATUS"
     authorized_to_work_us: true
     sponsorship_required: false
   citizenship:
-    china: "citizen since birth"
-    united_states: "legal permanent resident (green card) since MM/DD/YYYY"
+    china: "YOUR OTHER CITIZENSHIP, if any"
+    united_states: "YOUR US STATUS, with date if it applies"
   notice_period:
     weeks: 2
     months: 0.5
-    ca_roles_note: "CA-based roles need additional time to move before starting (timing note only, not a relocation-assistance item)"
+    ca_roles_note: "Roles in some locations need additional time to move before starting (timing note only, not a relocation-assistance item)"
   ai_notetaker_interview_consent: "yes"   # standing YES (the user, Oct 31, 2026)
   salary_rule: "top of the published range; when no range is published, the researched above-market figure for the role in that city (figure logged with the submission)"
   resume_header:
@@ -79,10 +81,10 @@ applications:
 
 replies_only:
   # For LinkedIn/Gmail replies ONLY. Never on any application form, resume, or portal profile.
-  current_role: "Senior Data Scientist at YOUR_CURRENT_EMPLOYER since YYYY-MM-DD"
-  availability: "free for calls after 2:00 PM CT (standing); no calls YYYY-MM-DD to YYYY-MM-DD (vacation)"
+  current_role: "Your Job Title at YOUR_CURRENT_EMPLOYER since YYYY-MM-DD"
+  availability: "free for calls after YOUR_TIME (standing)"
 
-# Screening answers confirmed live with the user on the Workday (JR-0108977) form, Nov 4, 2026 (the user said "Go"):
+# Example screening answers (form-specific questions one user answered; set your own):
 screening_answers:
   consider_relocating_for_role: true   # CA roles: yes, with extra move time before starting
   non_compete_or_non_solicitation_restrictions: false

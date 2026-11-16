@@ -2,7 +2,7 @@
 id: github-auto-sync
 title: GitHub auto-sync — commit and push program changes (every 4 hours)
 enabled: true
-owner: goal:linkedin-ai-recruiter-outreach-weekly
+owner: goal:YOUR-GOAL
 mode: task
 schedule:
   kind: interval
@@ -15,7 +15,7 @@ delivery:
 
 # GitHub auto-sync (every 4 hours)
 
-Run exactly: python3 ~/workspace/goals/linkedin-ai-recruiter-outreach-weekly/program/tools/github_sync.py
+Run exactly: python3 ~/workspace/goals/YOUR-GOAL/program/tools/github_sync.py
 
 The script does the whole sync deterministically and prints ONE JSON line. Act only on its status:
 

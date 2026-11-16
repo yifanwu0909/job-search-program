@@ -49,7 +49,7 @@ Recruiters will write back. Decide in advance:
 
 ## Your two daily windows
 
-Pick two times a day when you can spend a few minutes on your phone: approving sign-ins and sends, and solving captchas. In this setup they are 1:30 PM and 7:30 PM. Work that needs you waits for those windows instead of interrupting you at random.
+Pick two times a day when you can spend a few minutes on your phone: approving sign-ins and sends, and solving captchas. In this setup they are YOUR_AFTERNOON_TIME and YOUR_EVENING_TIME. Work that needs you waits for those windows instead of interrupting you at random.
 
 ## What happens next
 

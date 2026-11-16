@@ -6,16 +6,21 @@
 
 What it does, in order:
   1. Checks the machine: Python 3.10+, PyYAML importable.
-  2. Creates the runtime state directories the program expects
+  2. Seeds the real config files from the shipped examples
+     (config/answers.yaml from config/answers.example.yaml, and
+     likewise rules.yaml and worker_template.md) — only where the
+     real file is missing. The real files are gitignored and are
+     never committed; the examples are the only config in the repo.
+  3. Creates the runtime state directories the program expects
      (program/state/, program/state/heartbeats/), plus the outreach
      log file config/rules.yaml points at (paths.outreach_log),
      empty if missing — the first status call reads it.
-  3. Installs the career-ops skill files bundled in this repo
+  4. Installs the career-ops skill files bundled in this repo
      (career-ops/) into <home>/workspace/custom-skills/career-ops/,
      unless they are already there. Existing files are never
      overwritten unless --force is passed.
-  4. Smoke-tests the program: spine.py status must run and print.
-  5. Prints the remaining steps (onboarding, accounts, scheduled
+  5. Smoke-tests the program: spine.py status must run and print.
+  6. Prints the remaining steps (onboarding, accounts, scheduled
      jobs) — those need the user and their Muse, so the script
      does not attempt them.
 
@@ -66,7 +71,28 @@ def main():
         failures += not check("PyYAML importable", False,
                               "install it: pip install pyyaml")
 
-    print("\n2. Runtime state directories")
+    print("\n2. Config files (seeded from the shipped examples)")
+    for real, example in (("config/answers.yaml",
+                           "config/answers.example.yaml"),
+                          ("config/rules.yaml",
+                           "config/rules.example.yaml"),
+                          ("worker_template.md",
+                           "worker_template.example.md")):
+        real_path = os.path.join(HERE, real)
+        example_path = os.path.join(HERE, example)
+        if os.path.exists(real_path):
+            check(f"{real} exists (left as is)", True)
+        elif not os.path.exists(example_path):
+            failures += not check(f"{real} seeded", False,
+                                  f"{example} is missing from the repo")
+        elif dry:
+            check(f"{real} would be seeded from {example}", True)
+        else:
+            shutil.copyfile(example_path, real_path)
+            check(f"{real} seeded from {example}",
+                  os.path.exists(real_path))
+
+    print("\n3. Runtime state directories")
     for rel in ("state", os.path.join("state", "heartbeats")):
         path = os.path.join(HERE, rel)
         if os.path.isdir(path):
@@ -101,7 +127,7 @@ def main():
         failures += not check("outreach log ready", False,
                               str(exc)[:120])
 
-    print("\n3. career-ops skill (contacto people-finding)")
+    print("\n4. career-ops skill (contacto people-finding)")
     src = os.path.join(REPO, "career-ops")
     dst = os.path.join(args.home, "workspace", "custom-skills", "career-ops")
     if not os.path.isdir(src):
@@ -117,7 +143,7 @@ def main():
         shutil.copytree(src, dst)
         check(f"copied to {dst}", os.path.isdir(dst))
 
-    print("\n4. Smoke test")
+    print("\n5. Smoke test")
     spine = os.path.join(HERE, "spine.py")
     if dry:
         check("would run spine.py status", os.path.exists(spine))
@@ -131,7 +157,7 @@ def main():
                               if (proc.stderr or proc.stdout).strip()
                               else "no output")
 
-    print("\n5. What remains (needs the user and their Muse)")
+    print("\n6. What remains (needs the user and their Muse)")
     print("  a. Onboarding:  python3 onboarding.py   (the setup")
     print("     conversation — do not skip it)")
     print("  b. Accounts: connect Gmail + Google Calendar + Google Tasks;")

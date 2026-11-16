@@ -32,7 +32,7 @@ Every suite must pass before you continue. A failure here means the install is w
 
 ## Step 4: Onboarding, with your user
 
-This step is a conversation, and it is mandatory. Run it as written in [docs/onboarding.md](docs/onboarding.md): the welcome, the **permissions** first (LinkedIn and Google; each one set up now or skipped for later), then the user's **resume**, then a few **standing questions** (work authorization and the equal-opportunity answers), the user's **job search** (titles, locations, full time or part time, hybrid, remote, or in the office 5 days a week, plus anything else), and a prompt to install the **Jobright autofill plugin** in the user's browser. **LinkedIn alerts and notifications are not a user step**: onboarding records the setup as owed in `program/state/onboarding.json`, and you apply it yourself in Step 5. It records the account decisions in `program/state/onboarding.json` and the resume path and standing answers in `config/answers.yaml` (the copy in this repo is placeholders).
+This step is a conversation, and it is mandatory. Run it as written in [docs/onboarding.md](docs/onboarding.md): the welcome, the **permissions** first (LinkedIn and Google; each one set up now or skipped for later), then the user's **resume**, then a few **standing questions** (work authorization and the equal-opportunity answers), the user's **job search** (titles, locations, full time or part time, hybrid, remote, or in the office 5 days a week, plus anything else), and a prompt to install the **Jobright autofill plugin** in the user's browser. **LinkedIn alerts and notifications are not a user step**: onboarding records the setup as owed in `program/state/onboarding.json`, and you apply it yourself in Step 5. It records the account decisions in `program/state/onboarding.json` and the resume path and standing answers in `config/answers.yaml` (a real file install.py seeded from `config/answers.example.yaml`; it is gitignored and never committed).
 
 Verify when you finish:
 
@@ -40,7 +40,7 @@ Verify when you finish:
 python3 onboarding.py status
 ```
 
-It must say **"Onboarding complete."** If it lists anything missing or unacknowledged, go back and finish that part. Keep the repo private from here on: the user's real `answers.yaml` must never be committed, and the same goes for the personal facts written into `config/rules.yaml` and `worker_template.md` — the committed copies of all three files are placeholders. (The original install marks all three skip-worktree for exactly this reason; do the same, or keep the files out of git entirely.)
+It must say **"Onboarding complete."** If it lists anything missing or unacknowledged, go back and finish that part. The user's real config files (`config/answers.yaml`, `config/rules.yaml`, `worker_template.md`) are **gitignored and are never in this repo** — only the `*.example.*` templates are committed. Never commit a real config file. If the user wants version history for their config, keep it in a separate **private** repo of their own and link or copy the files in.
 
 ## Step 5: Connect the accounts
 
@@ -56,7 +56,7 @@ The program has no scheduler of its own. Its whole daily rhythm lives in **18 sc
 
 Create one job per file with your cron tools, with two adjustments:
 
-1. **Path substitution.** The bodies reference the original install path, `~/workspace/goals/linkedin-ai-recruiter-outreach-weekly`. Replace every occurrence with the path where you placed the program in Step 1 (the goal folder that contains `program/` and `hidden_files/`). Create a `hidden_files/` folder there if your placement does not have one; several jobs write the outreach log into it.
+1. **Path substitution.** The bodies reference the original install path, `~/workspace/goals/YOUR-GOAL`. Replace every occurrence with the path where you placed the program in Step 1 (the goal folder that contains `program/` and `hidden_files/`). Create a `hidden_files/` folder there if your placement does not have one; several jobs write the outreach log into it.
 2. **Session times.** The tap and captcha session jobs (`linkedin-tap-session-*`, `linkedin-captcha-session-*`) run at the two daily windows your user picked (see docs/getting-started.md, "Your two daily windows"). Set their schedules to those times in the user's timezone.
 
 When all 18 exist, list them back and check each one against its file: id, schedule, timezone, enabled. Two jobs to know by name: `linkedin-batch-guardian` (every 30 minutes; it launches and watches the application workers) and `linkedin-nightly-audit` (daily; it re-checks the whole previous day, now including the code/agent interaction track).

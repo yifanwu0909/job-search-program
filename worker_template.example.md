@@ -20,8 +20,8 @@ rules below); and re-read the log immediately before any submit
 click — if another worker's claim or submission for your item
 appeared, stand down on that item and pull the next order.
 
-1. HEARTBEAT: `python3 ~/workspace/goals/linkedin-ai-recruiter-outreach-weekly/program/supervisor.py heartbeat --run __JOB_ID__`
-2. GET THE ORDER: `python3 ~/workspace/goals/linkedin-ai-recruiter-outreach-weekly/program/spine.py next`
+1. HEARTBEAT: `python3 ~/workspace/goals/YOUR-GOAL/program/supervisor.py heartbeat --run __JOB_ID__`
+2. GET THE ORDER: `python3 ~/workspace/goals/YOUR-GOAL/program/spine.py next`
    Fly EXACTLY the work order it returns — never substitute another
    item. If it returns a friction refusal (status "stopped" — a
    full-stop friction flag), STOP all work, alert the user per the friction
@@ -39,7 +39,7 @@ appeared, stand down on that item and pull the next order.
    of any kind in batch work outside the alert-email route. LinkedIn is used ONLY by the
    separate daily outreach job (connection invitations) and the
    alert-email route — never
-   by a batch worker in any other way. The window target is 60 verified, ALL
+   by a batch worker in any other way. The window target is the one in rules.yaml, ALL
    sourced from Jobright + Indeed + LinkedIn alerts (Indeed
    added Nov 12, 2026 on the exact Jobright rules; LinkedIn alerts
    added Nov 12, 2026 via email only; rules.yaml
@@ -82,13 +82,13 @@ appeared, stand down on that item and pull the next order.
    (2) RECORD THE TASK ID (fix 2): the browser.browse acceptance
    receipt names the task id (browser-task:<uuid>). IMMEDIATELY
    after every browser.browse call — before anything else — run:
-   `python3 ~/workspace/goals/linkedin-ai-recruiter-outreach-weekly/program/supervisor.py heartbeat --run __JOB_ID__ --browser-task <task id>`
+   `python3 ~/workspace/goals/YOUR-GOAL/program/supervisor.py heartbeat --run __JOB_ID__ --browser-task <task id>`
    That heartbeat is your last word before the wait: it lets the
    program judge you ALIVE by the task's own progress while you
    are dark. Skip it, and a long wait reads exactly like the
    Nov 10 freezes — you can be stopped as "stuck" mid-flight.
 4. RECORD: write the result JSON and run
-   `python3 ~/workspace/goals/linkedin-ai-recruiter-outreach-weekly/program/spine.py record <result.json>`
+   `python3 ~/workspace/goals/YOUR-GOAL/program/spine.py record <result.json>`
    (item_id + outcome: submitted / staged / captcha / skipped / limbo /
    friction, plus the fields that outcome needs). `record` writes the
    log entry AND the event book together. It also prints the NEXT
@@ -107,7 +107,7 @@ appeared, stand down on that item and pull the next order.
 
 ## Finish (every exit, no exceptions)
 
-1. TOMBSTONE: `python3 ~/workspace/goals/linkedin-ai-recruiter-outreach-weekly/program/supervisor.py done --run __JOB_ID__`
+1. TOMBSTONE: `python3 ~/workspace/goals/YOUR-GOAL/program/supervisor.py done --run __JOB_ID__`
    This tells the supervisor your run ended cleanly, so it starts the
    next worker immediately — no staleness wait.
 2. The guardian's next regular pass (every 30 minutes) reads the
@@ -151,11 +151,9 @@ sources: batch work opens LinkedIn ONLY through the alert-email
 links, under the alert section's rules.
 JOBRIGHT KEYWORD SEARCH (the user, Nov 11, 2026; scan window Nov 12,
 2026): use Jobright SEARCH,
-running the FOUR searches of the search matrix (the user, Nov 12, 2026):
-(1) "Senior Data Scientist" — California/Washington; (2) "Machine
-Learning Engineer" — California/Washington; (3) "Senior Data
-Scientist" — Remote; (4) "Machine Learning Engineer" — Remote.
-(CA/WA is one location scope — run it as the site allows, via the
+running the searches of the search matrix in rules.yaml
+(your titles, each at your locations and at Remote).
+(Your locations are one location scope — run it as the site allows, via the
 location input. REMOTE MECHANICS (the user, Nov 12, 2026): on Jobright,
 set the "Work model" filter to Remote for the remote searches —
 do NOT express remote via Jobright's location box; on Indeed,
@@ -173,8 +171,8 @@ silently scan unfiltered. Do not rely on the Jobright
 recommendations feed as the source.
 INDEED KEYWORD SEARCH (the user, Nov 12, 2026 — the exact Jobright
 rules): use Indeed SEARCH, running the SAME FOUR searches of
-the search matrix (Senior Data Scientist + Machine Learning
-Engineer, each at California/Washington and at Remote), Date
+the search matrix in rules.yaml (your titles, each at your
+locations and at Remote), Date
 sort (ranked by date posted, newest first). STEP
 ONE of every title search: SET THE SITE'S OWN FILTERS (the user,
 Nov 12, 2026) — "Date posted: Last 24 hours" AND job type
@@ -217,9 +215,8 @@ job tied to its place on the list (page + title, company and
 location exactly as printed) — that is how a chosen job is
 re-found on the list and clicked; jobs listed in the email
 body itself carry their own job link in the packet. TITLE SCREEN
-ON THIS LANE (the user, Nov 12, 2026): Senior Machine Learning
-Engineer titles PASS for alert jobs ("Senior Machine Learning
-Engineer", "Senior ML Engineer", "Sr." forms included) —
+ON THIS LANE: the title exceptions in rules.yaml PASS for
+alert jobs —
 Staff/Lead/Principal/Consultant stay out everywhere. Screen from the list BEFORE
 opening any link, in the screening order (the user, Nov 13, 2026):
 blacklist first, duplication second, then the GATE AT
@@ -276,22 +273,20 @@ the external sources (Jobright + Indeed) plus the alert lane —
 LinkedIn opens ONLY through the alert-email links, exactly as in
 the LINKEDIN ALERTS section.
 Screen under the standing rules in rules.yaml + GOAL.md: role filter
-(no Staff/Lead/Principal/Consultant; plain MLE only — EXCEPT the LinkedIn-alert
-lane, where Senior MLE also passes (the user, Nov 12, 2026); DS/Senior DS only when the
-work is technical), locations (CA/WA/US-remote; no Texas onsite or
-hybrid), full-time direct only (no consulting/timesheet roles).
-BENCH INCLUDES PLAIN DATA SCIENTIST (the user, Nov 8, 2026): stocking is
-NOT Senior-only — screen and stock plain "Data Scientist" titles too
+(the banned title words and track rules in rules.yaml, including
+any lane exceptions; only technical work counts), locations (your
+standing locations from rules.yaml), full-time direct only.
+BENCH INCLUDES PLAIN TITLES (design note): stocking is
+NOT senior-only — screen and stock plain titles too
 (technical only, same as Senior DS), and include the plain title in
 discovery searches. Do NOT lower the pay standard for plain DS: the
-same pay bars apply ($200,000 universal city bar; $120,000
-remote-national bar) — a plain DS posting below the bar is a pay
+the pay bars in rules.yaml apply (remote-national bar) — a plain DS posting below the bar is a pay
 skip, not a bench item. SENIOR DS FIRST, THEN PLAIN DS (the user,
 confirmed Nov 8, 2026): when screening and stocking, work Senior DS
 finds ahead of plain DS finds; the program's bench order enforces
 the same order when serving items.
 Stock each find through the program —
-`python3 ~/workspace/goals/linkedin-ai-recruiter-outreach-weekly/program/engine/stock.py format` then `stock.py record` —
+`python3 ~/workspace/goals/YOUR-GOAL/program/engine/stock.py format` then `stock.py record` —
 stock.py decides dedupe and the pay bar IN CODE
 and assigns the item number — its duplicate verdict is the only
 check; do not hand-cross-check the log. A portal "already applied"
@@ -364,7 +359,7 @@ sweep and the audit can see it.
 - Diversification: max 1 application per company per window (the
   program enforces it in the orders it issues).
 - Applications never name YOUR_CURRENT_EMPLOYER: employment history is the base
-  resume exactly (CenterPoint Energy latest). Tailored resumes come
+  resume exactly (YOUR_LATEST_EMPLOYER latest). Tailored resumes come
   from the order's resume path — built from the base resume only,
   bold headings + job-title lines, header with contact line +
   U.S. Green Card Holder, read-back verified. Fill EVERY field that
@@ -435,7 +430,7 @@ sweep and the audit can see it.
   one. Limbo is only for a submission whose outcome is genuinely
   unseen (no success message, no email).
 - Claims ledger: before any externally visible thread action, check
-  ~/workspace/goals/linkedin-ai-recruiter-outreach-weekly/hidden_files/inbox-action-claims.md
+  ~/workspace/goals/YOUR-GOAL/hidden_files/inbox-action-claims.md
   and claim first; any existing claim means stand down.
 - Stop at the first LinkedIn friction/warning/checkpoint: record
   outcome friction at once and end your LinkedIn work — the program
@@ -449,6 +444,6 @@ sweep and the audit can see it.
 
 ## Closeout
 
-If `next` says the window is closed: run `python3 ~/workspace/goals/linkedin-ai-recruiter-outreach-weekly/program/spine.py closeout --date __WINDOW__`
+If `next` says the window is closed: run `python3 ~/workspace/goals/YOUR-GOAL/program/spine.py closeout --date __WINDOW__`
 and append its returned accounting verbatim to the batch section if
 it reports the marker missing. Then Finish (tombstone + bell) and end.
