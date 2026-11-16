@@ -368,7 +368,17 @@ The **application email scan** (every 30 minutes) watches for what comes back. I
 
 ### LinkedIn inbox replies
 
-The **message watch** (every 15 minutes) answers new LinkedIn messages under the user's standing **reply rules** (customizable), one person at a time. A **sweep four times a day** (8:30 AM, 12:30 PM, 4:30 PM, 8:30 PM) picks up anything the watch missed over the past 12 hours, plus **connection invitations** and **job alerts**. The exact scan tests for all three kinds of mail are written out under "The mail parts" above.
+The **message watch** (every 15 minutes) answers new LinkedIn messages under the user's standing **reply rules** (customizable), one person at a time. A **sweep four times a day** (8:30 AM, 12:30 PM, 4:30 PM, 8:30 PM) picks up anything the watch missed over the past 12 hours, plus **connection invitations** and **job alerts**.
+
+**The notification setup this runs on** — Muse sets it during onboarding; the user never sets it by hand. Exactly four LinkedIn notification categories on: **InMail, Messages, Invitations to connect, and Job alerts**. On each one: **in-app notifications off, email on**, and email frequency **Individual** where LinkedIn offers a frequency choice (the Job alerts page offers none). **Every other category off completely.** Because nothing else is on, each LinkedIn sender address carries one kind of mail and nothing else — which is what makes the sender-only tests below safe.
+
+**What each scan looks for in the email:**
+
+- **Inbox messages** — the watch, every 15 minutes: **from messaging-digest-noreply@linkedin.com** AND **subject contains "messaged you"**, past hour only. The sweep additionally re-checks the LinkedIn inbox itself for conversations whose latest incoming message arrived within the past 12 hours and that no earlier run has claimed.
+- **Connection invitations** — the sweep, four times a day: **from invitations@linkedin.com**, **no subject test** (sender-only — under the setup above, that address sends connection invitations and nothing else), past 12 hours. Each one is accepted through the Accept link inside the email, and the acceptance is verified before it is recorded.
+- **Job alerts** — the sweep, four times a day: **from jobalerts-noreply@linkedin.com**, **no subject test** (sender-only — alert subjects are built from the first company on the list and arrive in many formats), past 12 hours. Each alert's job list is vetted up to five pages and feeds the discovery lane.
+
+The same three scans are described again, in the mail-flow order, under "The mail parts" above.
 
 ### Checks that run all day
 
