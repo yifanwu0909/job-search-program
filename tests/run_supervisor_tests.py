@@ -210,8 +210,8 @@ def main() -> int:
           _sup_cfg.get("one_application_per_worker") is False
           and _sup_cfg.get("worker_runs_back_to_back") is True
           and _sup_cfg.get("max_parallel_workers") == 3)
-    _tpl = _pls.Path(__file__).resolve().parent.parent.joinpath(
-        "worker_template.md").read_text()
+    _tpl = " ".join(_pls.Path(__file__).resolve().parent.parent.joinpath(
+        "worker_template.md").read_text().split())
     check("l6 template runs back to back (no one-app leg)",
           "work through applications back to back" in _tpl
           and "TAKE IT and go back to step 3" in _tpl
