@@ -343,17 +343,17 @@ def notifications_step(state, state_path):
     print("  1. Add and save job alerts. LinkedIn's own way: go to")
     print("     Jobs, search with your title and location, set the")
     print("     date posted filter to past 24 hours, turn on the job")
-    print("     alert for that search, pick how often, and save. Do")
-    print("     one for each title and location.")
+    print("     alert for that search, set the frequency to daily,")
+    print("     and save. Do one for each title and location. Daily")
+    print("     is required: the daily run reads these alerts.")
     print("  2. Turn on email notifications (Settings, then")
     print("     Communications, then Email).")
     print("  3. Turn on inbox message notifications (Settings, then")
     print("     Communications, then Messages).")
     print("  4. Turn on invitation notifications (Settings, then")
     print("     Communications, then Notifications).")
-    print("  For each one, pick how often you want it:")
+    print("  For the other three, pick how often you want each one:")
     try:
-        alerts = ask("Job alerts: daily or weekly?", default="daily")
         email = ask("Email notifications: individual (each one as it "
                     "happens) or weekly digest?", default="individual")
         inbox = ask("Inbox message notifications: individual or "
@@ -374,7 +374,7 @@ def notifications_step(state, state_path):
         if raw in ("done", "yes", "y"):
             state["linkedin_notifications"] = {
                 "decision": "done", "at": now_iso(),
-                "frequencies": {"job_alerts": alerts, "email": email,
+                "frequencies": {"job_alerts": "daily", "email": email,
                                 "inbox_messages": inbox,
                                 "invitations": invites}}
             break
