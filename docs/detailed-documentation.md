@@ -279,13 +279,13 @@ Mail does four jobs in this system, all through Gmail. Three of them read Linked
 
 ## Your LinkedIn notification settings (set up for you at onboarding)
 
-You do not set these up yourself. During onboarding, Muse sets your LinkedIn notifications to exactly this, and the mail scans below depend on it:
+**The notification setup this runs on** — Muse sets it during onboarding; the user never sets it by hand. Exactly four categories on, each with in-app notifications off and email on:
 
 - **Exactly four categories on: InMail, Messages, Invitations to connect, and Job alerts.**
 - On each of the four: **in-app notifications OFF**, **email ON**, and email frequency **Individual** (one email per event) where LinkedIn offers a frequency choice. The Job alerts page offers no frequency choice; email on is the whole setting there.
 - **Every other notification category off completely** — in-app and email.
 
-This is why the scans can be simple. With every other category off, each LinkedIn sender address carries one kind of mail and nothing else: invitations@linkedin.com sends you connection invitations only, so the invitation scan never has to test the subject line at all. If you ever change these settings, tell your Muse — the scans' tests assume them. The click-by-click reference for checking the settings yourself is [linkedin-notifications.md](linkedin-notifications.md).
+Every other category is off completely. Because nothing else is on, each LinkedIn sender address carries one kind of mail and nothing else — which is what makes the sender-only tests below safe. If you ever change these settings, tell your Muse — the scans' tests assume them. The click-by-click reference for checking the settings yourself is [linkedin-notifications.md](linkedin-notifications.md).
 
 ## Watching for LinkedIn messages (every 15 minutes)
 
@@ -358,27 +358,19 @@ The **application email scan** (every 30 minutes) watches for what comes back. I
 
 **10:23 AM:** networking (`linkedin-recruiter-outreach-weekly`). For the most recent applications, **contacto** finds the hiring contacts, the program checks them against the rules (**seniority above the user's**, real influence on the role, still at the company), and invitations go out on LinkedIn: up to **30 a day** (customizable), inside LinkedIn's **weekly cap of roughly 100**.
 
-**Incoming connection invitations** run on their own cadence: an **hourly invitation sweep** (24 times a day) searches Gmail over the past 2 hours for **from invitations@linkedin.com** — **sender-only, no subject test** (under the notification setup described under LinkedIn inbox replies, that address sends connection invitations and nothing else) — and the four-times-daily inbox sweep re-checks over the past 12 hours as the backstop. Each invitation is accepted through the **Accept link inside the email**, and the acceptance is verified before it is recorded.
+**Incoming connection invitations** run on their own cadence: an **hourly invitation sweep** (24 times a day) searches Gmail over the past 2 hours for **from invitations@linkedin.com** — **sender-only, no subject test** (under the notification setup described in The mail parts, that address sends connection invitations and nothing else) — and the four-times-daily inbox sweep re-checks over the past 12 hours as the backstop. Each invitation is accepted through the **Accept link inside the email**, and the acceptance is verified before it is recorded.
 
 ### LinkedIn inbox replies
 
 The message watch answers LinkedIn messages.
 
-**The notification setup this runs on** — Muse sets it during onboarding; the user never sets it by hand. Exactly four categories on, each with in-app notifications off and email on:
-
 - **InMail** — email frequency Individual.
 - **Messages** — email frequency Individual.
-- **Invitations to connect** — email frequency Individual.
-- **Job alerts** — the page offers no frequency choice.
-
-Every other category is off completely. Because nothing else is on, each LinkedIn sender address carries one kind of mail and nothing else — which is what makes the sender-only tests below safe.
 
 **What each scan looks for in the email:**
 
 - **Inbox messages** — the watch, every 15 minutes: **from messaging-digest-noreply@linkedin.com** AND **subject contains "messaged you"**, past hour only. The sweep additionally re-checks the LinkedIn inbox itself for conversations whose latest incoming message no earlier run has claimed.
 - **Connection invitations** — documented under **LinkedIn networking** above: an hourly sweep takes them first, and this sweep re-checks as the backstop.
-- **Job alerts** — documented under **Job discovery** above: this sweep picks the alert emails up and feeds the discovery lane.
-- **The sweep itself** — the fourth scan, four times a day: it re-checks the LinkedIn inbox directly and catches anything the notification emails missed in the past 12 hours. Anything that moves a job forward — an interview request or a scheduling ask — is acted on in the same run: the interview is booked on the user's Google Calendar (once the company and role are known), a to-do is created on Google Tasks, and the news is reported to the user, with a researched briefing one hour before the meeting.
 
 The mail-flow view of the inbox work is under "The mail parts" above.
 
