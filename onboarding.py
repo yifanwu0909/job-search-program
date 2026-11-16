@@ -8,11 +8,12 @@ Run it and it walks a new user through setup, step by step:
     python3 onboarding.py status     # what is still missing / unacknowledged
 
 The flow:
-  0. The welcome message opens with a roadmap: the main components of
-     the session, each with its estimated time in [~N minutes]
-     brackets, and a reminder that the user can stop at any point and
-     always come back and finish the onboarding later. Each component
-     repeats its estimate when it starts.
+  0. The welcome message names the main components of the session in
+     one sentence: must-read items, info-gathering, permissions, and
+     the good-to-know items. Each component shows its estimated time
+     in [~N minutes] brackets when it starts, along with a reminder
+     that the user can stop at any point and always come back and
+     finish the onboarding later.
   1. A welcome message.
   2. MUST-READ items on costs, access, the credential vault, and captchas.
      Each one must be acknowledged by typing "I understand" before the
@@ -58,23 +59,8 @@ I'll set this up with you, step by step. It takes about 15 minutes
 in total. You answer questions, I write everything down, and at the
 end I read it all back so you can check it.
 
-Here's what we'll cover: must-read items (costs, access, the vault,
-and captchas) [~2 minutes], the interview (your resume, the facts
-forms ask for, work authorization, education and employers, standing
-choices, what you're looking for, companies, and your reply rules and
-daily windows) [~10 minutes], permissions (the account access I may
-need, set up now or skipped for later) [~2 minutes], and the
-good-to-know items and the final read-back [~1 minute].
-
-You do not have to finish in one sitting. You can stop at any point
-and always come back and finish the onboarding later: your progress
-is saved after every step, and nothing you finished is asked again.
-
-Once we're done, I search for new postings every morning, screen them
-against your rules, apply on the employer's own site with a resume
-tailored from yours, and keep a record of everything. I also find the
-hiring contacts for the roles you apply to, and I watch your inbox so
-recruiter replies don't sit unanswered.
+Here's what we'll cover: must-read items, info-gathering,
+permissions, and the good-to-know items.
 
 First, some must-read items. They cover what this costs, what access
 I need, how your passwords are handled, and how captchas work. After
