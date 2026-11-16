@@ -98,7 +98,7 @@ Indeed, LinkedIn job alerts, and Revelio are free. So are Gmail, Google Calendar
 A few minutes a day, in two forms:
 
 - 👆 **Tap and captcha sessions, twice a day.** **Un-bypassable.** Solve simple one-click tasks at a fixed daily schedule. Guides: <a href="docs/tap-sessions/" target="_blank" rel="noopener">tap sessions</a> and <a href="docs/captcha-sessions/" target="_blank" rel="noopener">captcha sessions</a>.
-- 📦 **A few fully manual applications.** **Un-bypassable.** Apply on the job site yourself, with the <a href="https://jobright.ai" target="_blank" rel="noopener">Jobright</a> AI auto application filling plugin. Tailored resume and a pre-filled application form are provided. Guide: <a href="docs/manual-packets/" target="_blank" rel="noopener">manual packets</a>.
+- 📦 **A few fully manual applications.** **Un-bypassable.** Apply on the job site yourself, with <a href="https://jobright.ai" target="_blank" rel="noopener">Jobright</a>'s free autofill plugin. Tailored resume and a pre-filled application form are provided. Guide: <a href="docs/manual-packets/" target="_blank" rel="noopener">manual packets</a>.
 
 ## Access it needs
 
