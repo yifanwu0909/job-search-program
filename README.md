@@ -69,7 +69,7 @@ Design principle: **code decides and tracks, Muse does the legwork.** The code i
 - 💬 **Replies to your LinkedIn inbox for you.** A watch checks for new recruiter messages every 15 minutes and answers under your standing reply rules. Interview requests and assessments become to-dos. Rejections are logged and left alone.
 - 🌅 Sends you a **short report every morning**: what went out, what moved, what needs you.
 
-## Running costs
+## Costs 💰
 
 Three subscriptions cover the whole thing:
 
