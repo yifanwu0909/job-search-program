@@ -20,8 +20,7 @@ next order.
 1. HEARTBEAT: `python3 ~/workspace/goals/YOUR-GOAL/program/supervisor.py heartbeat --run __JOB_ID__`
 2. GET THE ORDER: `python3 ~/workspace/goals/YOUR-GOAL/program/spine.py next` Fly EXACTLY the work order it returns — never
    substitute another item. If it returns a friction refusal (status
-   "stopped" — a full-stop friction flag), STOP all work, alert the user
-   per the friction rules, and Finish. APPLICATIONS NEVER TOUCH LINKEDIN
+   "stopped" — a full-stop friction flag), STOP all work, record the friction, and Finish — no chat alert (alerts rule: friction needs no action from the user). APPLICATIONS NEVER TOUCH LINKEDIN
    (standing strategy): discovery and applications run through Jobright,
    Indeed, the CareerOps scan, and external employer/ATS sites ONLY — no
    LinkedIn discovery or search of any kind, no LinkedIn SSO (use Google
@@ -259,9 +258,11 @@ STOCKING — every find, every source:
   friction at once and end your LinkedIn work — the program scopes the
   stop by the item's source (a LinkedIn-sourced trigger stops the
   LinkedIn lane only; the external sources carry on under other workers;
-  any other trigger stops everything). LinkedIn sign-in problems alert
-  the user immediately. Every disposition line you write in prose
-  carries a Central-time timestamp.
+  any other trigger stops everything). LinkedIn sign-in problems are
+  recorded and end the LinkedIn work — alert the user only when the
+  problem needs their action (a credential only they can give); any
+  other case is log-only (alerts rule). Every disposition line you
+  write in prose carries a Central-time timestamp.
 
 ## Closeout
 

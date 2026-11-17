@@ -314,6 +314,19 @@ counting:
   # an earlier staged outranks limbo in the head, so the guard reads
   # every event on both sides.
 
+alerts:
+  # NO ACTION NEEDED = NO ALERT: a chat message to the user is earned
+  # ONLY by something that needs the user's action or decision — a
+  # tap / captcha / code step waiting on them, a stale takeover still
+  # waiting, a decision item, a decision outside the standing rules,
+  # or a failure the program cannot repair itself. Everything else
+  # (routine replies sent, invitations accepted, clean sweeps, stalls
+  # already handled, divergences, closeouts) is recorded in the logs
+  # and surfaces in the morning report ONLY. Every job body restates
+  # this gate where it would otherwise message the user; when in
+  # doubt, do not send.
+  only_when_human_action_needed: true
+
 inbox:
   # INBOX IN CODE (design note): the scope limits, dedupe, triage
   # and claim checks for the two LinkedIn inbox jobs are enforced by
