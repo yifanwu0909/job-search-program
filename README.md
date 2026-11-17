@@ -109,6 +109,9 @@ A few minutes a day:
 - ✅ **Always click "Always allow."** **[Un-bypassable]** Vault credentials, entering a security code on a website, uploading your resume or files — "Always allow" means you are not asked again for that site.
 - 📦 **A few fully manual applications.** **[Un-bypassable]** Apply on the job site yourself, with <a href="https://jobright.ai" target="_blank" rel="noopener">Jobright</a>'s free autofill plugin. Tailored resume and a pre-filled application form are provided. Guide: <a href="docs/manual-packets/" target="_blank" rel="noopener">manual packets</a>.
 - 🕑 **Missed one? No problem.** The program parks it, and it comes back in the **tap and captcha sessions — twice a day, on a fixed schedule**. Guides: <a href="docs/tap-sessions/" target="_blank" rel="noopener">tap sessions</a> and <a href="docs/captcha-sessions/" target="_blank" rel="noopener">captcha sessions</a>.
+
+What to expect:
+
 - ⏰ **The more you apply, the more pop-ups.** Depending on how many jobs you go for in a day, more of them appear: allowing an account to be created, a resume upload, email verification code permissions, a captcha. More jobs, more pop-ups.
 - 🖱️ **Sometimes you take over the browser.** A step may need you to operate the page yourself for a moment, then hand it back to Muse.
 - 🔔 **Turn on Muse notifications, and answer fast.** Job sites time out when a page sits with no action for too long, so these steps are time-sensitive — do your best to respond as quickly as you can.
