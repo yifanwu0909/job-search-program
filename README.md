@@ -114,6 +114,8 @@ A few minutes a day:
 - 🔔 **Turn on Muse notifications, and answer fast.** Job sites time out when a page sits with no action for too long, so these steps are time-sensitive — do your best to respond as quickly as you can.
 - 🧺 **The safety catch:** anything you miss gets parked and comes back in the scheduled tap sessions, and that is okay. But clicking and completing fast is the best way to keep tasks from piling up.
 
+After all, this workflow saves you **90% of the load** of job hunting. This part is the **last 10% that still needs you**.
+
 ## Access it needs
 
 - Your LinkedIn account, signed in, Premium Career active.
