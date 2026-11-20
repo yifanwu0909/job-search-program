@@ -743,15 +743,28 @@ def test_jobalert_intake() -> None:
           and "never gets its link opened" in joined
           and joined.index("AT IDENTIFICATION")
           < joined.index("EXTERNAL source"), joined)
-    check("q3c-pace packet stamps the human-like paging pace: a "
-          "varied 20-45s pause between See-all page turns (the "
-          "user, Nov 19, 2026)",
+    _pauses = act[0].get("page_pauses_seconds") if act else None
+    check("q3c-pace packet carries CODE-DRAWN page-turn waits: "
+          "exact random seconds inside 20-45, seeded per email, "
+          "no two in a row alike, stamped as data + instruction "
+          "text (the user, Nov 19, 2026)",
           "PACE THE PAGING like a person reading the list" in joined
-          and "wait 20-45 seconds before turning to the next page"
-          in joined
+          and "code drew this packet's page-turn waits at random "
+          "from 20-45 seconds" in joined
+          and "use them EXACTLY" in joined
           and "never flip pages back to back" in joined
           and joined.index("STOP at page 5")
-          < joined.index("PACE THE PAGING"), joined)
+          < joined.index("PACE THE PAGING")
+          and isinstance(_pauses, list) and len(_pauses) == 5
+          and all(isinstance(w, int) and 20 <= w <= 45
+                  for w in _pauses)
+          and all(a != b for a, b in zip(_pauses, _pauses[1:]))
+          and all(f"wait {w} seconds" in joined for w in _pauses)
+          and ib._jobalert_pauses(
+              (lambda r: (r.get("inbox") or {}))(
+                  __import__("yaml").safe_load(
+                      ib.RULES_PATH.read_text(encoding="utf-8"))),
+              seed="c1c1c1c1c1c1c1c1") == _pauses, joined)
     check("q3c list-scan partition: names off the aggregated list, "
           "brand-new companies first, packet carries the program's "
           "applied-companies record (the user, Nov 12, 2026)",

@@ -434,9 +434,11 @@ inbox:
                                  # Nov 12, 2026: "only click until you reach five pages. Don't go beyond five pages.")
     page_pause_min_seconds: 20   # HUMAN-LIKE PAGING PACE (the user, Nov 19, 2026 — after a LinkedIn HTTP 429
     page_pause_max_seconds: 45   # during alert paging: slow down, mimic human behavior, add a time lag
-                                 # between page flips): the runner waits a varied pause inside this range
-                                 # between See-all page turns; stamped into the packet instructions by
-                                 # inbox.py — never flip pages back to back.
+                                 # between page flips; the exact random seconds are burned into code):
+                                 # CODE draws each packet's exact page-turn waits at random inside this
+                                 # range (inbox.py _jobalert_pauses, seeded by the alert email's Gmail ID)
+                                 # and stamps them into the packet as page_pauses_seconds + exact
+                                 # instruction text — the runner uses the drawn seconds exactly.
     query: 'from:jobalerts-noreply@linkedin.com'   # FROM-ONLY — no subject: term may ever be added to this query
   future_skew_minutes: 5         # a notification dated slightly ahead of the clock still counts as fresh
   # Processed Gmail IDs live in ONE place: program/state/inbox.json
