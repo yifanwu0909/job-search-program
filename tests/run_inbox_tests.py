@@ -743,6 +743,15 @@ def test_jobalert_intake() -> None:
           and "never gets its link opened" in joined
           and joined.index("AT IDENTIFICATION")
           < joined.index("EXTERNAL source"), joined)
+    check("q3c-pace packet stamps the human-like paging pace: a "
+          "varied 20-45s pause between See-all page turns (the "
+          "user, Nov 19, 2026)",
+          "PACE THE PAGING like a person reading the list" in joined
+          and "wait 20-45 seconds before turning to the next page"
+          in joined
+          and "never flip pages back to back" in joined
+          and joined.index("STOP at page 5")
+          < joined.index("PACE THE PAGING"), joined)
     check("q3c list-scan partition: names off the aggregated list, "
           "brand-new companies first, packet carries the program's "
           "applied-companies record (the user, Nov 12, 2026)",
@@ -951,6 +960,10 @@ def test_jobalert_config_and_other_filters() -> None:
           and js.get("query") == "from:jobalerts-noreply@linkedin.com"
           and "subject:" not in (js.get("query") or "")
           and not any("subject" in str(k) for k in js), str(js))
+    check("q19b jobalert paging pace is config data: a varied "
+          "20-45s pause between page turns (the user, Nov 19, 2026)",
+          js.get("page_pause_min_seconds") == 20
+          and js.get("page_pause_max_seconds") == 45, str(js))
     check("q20 gate timing is on_identification",
           (rules.get("gate") or {}).get("timing") == "on_identification",
           str((rules.get("gate") or {}).get("timing")))

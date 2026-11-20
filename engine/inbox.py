@@ -1306,6 +1306,11 @@ def _jobalert_instructions(cfg: dict) -> list:
     returns JSON results. Never improvised per run."""
     cap = int((cfg.get("jobalert_search") or {}).get("max_pages")
               or 5)
+    _js = cfg.get("jobalert_search") or {}
+    pause_min = int(_js.get("page_pause_min_seconds") or 20)
+    pause_max = int(_js.get("page_pause_max_seconds") or 45)
+    if pause_max < pause_min:
+        pause_max = pause_min
     return [
         "Work ONLY from this alert email: its job links and its "
         "'See all jobs' link (see_all_url). Never start a LinkedIn "
@@ -1316,6 +1321,13 @@ def _jobalert_instructions(cfg: dict) -> list:
         "company.",
         f"Page the See-all list through pages 1-{cap}. STOP at "
         f"page {cap} — never open page {cap + 1}.",
+        f"PACE THE PAGING like a person reading the list (the "
+        f"user, Nov 19, 2026): after each page loads, read and "
+        f"scroll through it, then wait {pause_min}-{pause_max} "
+        f"seconds before turning to the next page. Vary the wait "
+        f"inside that range — never the same pause twice, never "
+        f"flip pages back to back. The same varied pause applies "
+        f"before opening the next alert's See-all list.",
         "Sort jobs by company WITHOUT opening any posting, and "
         "keep each job tied to its place (page, title, company, "
         "location as printed). This packet's applied_companies "

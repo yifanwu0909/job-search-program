@@ -432,6 +432,11 @@ inbox:
     window_minutes: 720          # past 12 hours (design note: the sweep runs four times a day scanning 12 hours back, so every alert email is picked up within hours of arriving); the run adds the time bound at search time
     max_pages: 5                 # the See-all-jobs list page cap, stamped into the packet instructions (the user,
                                  # Nov 12, 2026: "only click until you reach five pages. Don't go beyond five pages.")
+    page_pause_min_seconds: 20   # HUMAN-LIKE PAGING PACE (the user, Nov 19, 2026 — after a LinkedIn HTTP 429
+    page_pause_max_seconds: 45   # during alert paging: slow down, mimic human behavior, add a time lag
+                                 # between page flips): the runner waits a varied pause inside this range
+                                 # between See-all page turns; stamped into the packet instructions by
+                                 # inbox.py — never flip pages back to back.
     query: 'from:jobalerts-noreply@linkedin.com'   # FROM-ONLY — no subject: term may ever be added to this query
   future_skew_minutes: 5         # a notification dated slightly ahead of the clock still counts as fresh
   # Processed Gmail IDs live in ONE place: program/state/inbox.json
