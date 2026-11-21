@@ -642,17 +642,19 @@ def _norm(text: str) -> str:
 def check_claim(person: str, message_ts=None, claim_key: str = "",
                 claims_path: Path = CLAIMS_PATH) -> dict:
     """CLAIMED / CLEAR for one thread action. A ledger line matches
-    when it carries the person's name AND the message's normalized
-    timestamp (or at least its date) — the ledger's own key is
-    name + latest-incoming time, matched semantically across the
-    older wordings the file warns about. An explicit claim_key
-    matches as a normalized substring."""
+    only when it claims THIS message: the person's name AND the
+    message's exact normalized timestamp (the 'latest incoming'
+    time in the claim key). A claim for an earlier message the
+    same day does NOT claim a later one (Wu, Nov 21, 2026 —
+    date-only matching stood down two new messages from a sender
+    whose earlier message that day was already claimed, and they
+    were never replied to). An explicit claim_key matches as a
+    normalized substring."""
     claims_path = Path(claims_path)
     text = claims_path.read_text(encoding="utf-8") \
         if claims_path.exists() else ""
     dt = parse_dt(message_ts) if message_ts else None
     stamp = _ct_stamp(dt) if dt else ""
-    date_part = stamp[:10] if stamp else ""
     name = _norm(person)
     matches = []
     for line in text.splitlines():
@@ -662,7 +664,7 @@ def check_claim(person: str, message_ts=None, claim_key: str = "",
             continue
         if not name or name not in low:
             continue
-        if stamp and (stamp.lower() in low or date_part in low):
+        if stamp and stamp.lower() in low:
             matches.append(line.strip())
     return {"verdict": "CLAIMED" if matches else "CLEAR",
             "person": person, "message_ts": stamp or None,

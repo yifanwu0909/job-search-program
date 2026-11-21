@@ -306,6 +306,18 @@ def test_check_claim() -> None:
                           claims_path=env.claims)
     check("g2 unclaimed person is CLEAR", miss["verdict"] == "CLEAR",
           str(miss))
+    later = ib.check_claim("Ian Fay", "2026-11-12T17:05:00-06:00",
+                           claims_path=env.claims)
+    check("g3 same person, same day, NEW message time is CLEAR "
+          "(a claim covers one message, not the whole day)",
+          later["verdict"] == "CLEAR", str(later))
+    by_key = ib.check_claim(
+        "Ian Fay", None,
+        claim_key='latest incoming 2026-11-12 14:58 CT '
+                  '"Hi Alex, Thank you for the note" + linkedin-reply',
+        claims_path=env.claims)
+    check("g4 explicit claim_key still matches",
+          by_key["verdict"] == "CLAIMED", str(by_key))
     env.cleanup()
 
 
