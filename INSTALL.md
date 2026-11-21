@@ -4,7 +4,7 @@
 
 ## Before you start
 
-Your user needs the accounts and subscriptions in the [README](README.md): a Muse plan, LinkedIn Premium Career, a paid Jobright plan, and accounts on LinkedIn, Jobright, and Indeed, plus Gmail with Google Calendar and Google Tasks. The program itself is Python 3.10+ with one dependency, PyYAML.
+Your user needs the accounts and subscriptions in the [README](README.md): a Muse plan, LinkedIn Premium Career, and accounts on LinkedIn, Jobright (free), and Indeed, plus Gmail with Google Calendar and Google Tasks. The program itself is Python 3.10+ with one dependency, PyYAML.
 
 ## Step 1: Place the repo
 
@@ -32,7 +32,7 @@ Every suite must pass before you continue. A failure here means the install is w
 
 ## Step 4: Onboarding, with your user
 
-This step is a conversation, and it is mandatory. Run it as written in [docs/onboarding.md](docs/onboarding.md): the welcome, the **permissions** first (LinkedIn and Google; each one set up now or skipped for later), then the user's **resume**, then a few **standing questions** (work authorization and the equal-opportunity answers), the user's **job search** (titles, locations, full time or part time, hybrid, remote, or in the office 5 days a week, plus anything else), and a prompt to install the **Jobright autofill plugin** in the user's browser. **LinkedIn alerts and notifications are not a user step**: onboarding records the setup as owed in `program/state/onboarding.json`, and you apply it yourself in Step 5. It records the account decisions in `program/state/onboarding.json` and the resume path and standing answers in `config/answers.yaml` (a real file install.py seeded from `config/answers.example.yaml`; it is gitignored and never committed).
+This step is a conversation, and it is mandatory. Run it as written in [docs/onboarding.md](docs/onboarding.md): the welcome, the **permissions** first (LinkedIn and Google; each one set up now or skipped for later), then the user's **resume**, then a few **standing questions** (work authorization and the equal-opportunity answers), the user's **job search** (titles, locations, full time or part time, hybrid, remote, or in the office 5 days a week, plus anything else), and a prompt to install the **Muse browser extension** in the user's browser (with the Muse desktop app). **LinkedIn alerts and notifications are not a user step**: onboarding records the setup as owed in `program/state/onboarding.json`, and you apply it yourself in Step 5. It records the account decisions in `program/state/onboarding.json` and the resume path and standing answers in `config/answers.yaml` (a real file install.py seeded from `config/answers.example.yaml`; it is gitignored and never committed).
 
 Verify when you finish:
 
