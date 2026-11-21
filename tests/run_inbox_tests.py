@@ -622,14 +622,14 @@ def test_invite_record() -> None:
     env.cleanup()
 
 
-INVITE_NOTE = ("Hi Yifan, I came across your profile and would love "
+INVITE_NOTE = ("Hi Alex, I came across your profile and would love "
                "to connect about a Senior Data Scientist role on my "
                "team. Are you open to a quick call this week?")
 INVITE_BODY_WITH_MSG = (
     "Sara, Data Scientist from Example Health is waiting for your "
     "response\n"
     "        \n"
-    "Hi Yifan, I’d like to join your professional network\n"
+    "Hi Alex, I’d like to join your professional network\n"
     + INVITE_NOTE + "\n"
     "Sara Kim\n"
     "Data Scientist at Example Health\n"
@@ -640,7 +640,7 @@ INVITE_BODY_NO_MSG = (
     "Sara, Data Scientist from Example Health is waiting for your "
     "response\n"
     "        \n"
-    "Hi Yifan, I’d like to join your professional network\n"
+    "Hi Alex, I’d like to join your professional network\n"
     "\n"
     "Sara Kim\n"
     "Data Scientist at Example Health\n"
@@ -675,7 +675,7 @@ def test_invite_message() -> None:
         [{"gmail_id": "a2a2a2a2a2a2a2a2", "person": "Sara Kim",
           "outcome": "accepted", "message_outcome": "replied",
           "message_ts": got.get("message_ts"),
-          "first_words": "Hi Yifan, I came across your profile",
+          "first_words": "Hi Alex, I came across your profile",
           "job": "linkedin-invitation-sweep"}],
         now=NOW, **env.record_kw())
     check("v4 invite-record with a message outcome lands + verified",
@@ -700,7 +700,7 @@ def test_invite_message() -> None:
         [{"gmail_id": "a4a4a4a4a4a4a4a4", "person": "Sara Kim",
           "outcome": "accepted", "message_outcome": "replied",
           "message_ts": got.get("message_ts"),
-          "first_words": "Hi Yifan, I came across your profile"}],
+          "first_words": "Hi Alex, I came across your profile"}],
         now=NOW, **env.record_kw())
     check("v8 pre-claimed message: accepted, no second claim line",
           len(res2["recorded"]) == 1
@@ -755,7 +755,7 @@ def test_invite_config() -> None:
           "sampled line",
           len(greet) == 1
           and _re.search(greet[0],
-                         "Hi Yifan, I’d like to join your "
+                         "Hi Alex, I’d like to join your "
                          "professional network", _re.IGNORECASE)
           is not None, str(greet))
     live_cfg = ib._inbox_cfg()

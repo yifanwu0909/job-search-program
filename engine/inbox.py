@@ -1077,7 +1077,7 @@ def extract_invite_message(candidate: dict, person: str | None,
     message produced no message notification, so the note was
     never replied to). In the current email format (sampled
     Nov 16 and Nov 20, 2026) the body prints LinkedIn's fixed
-    greeting line ("Hi Yifan, I'd like to join your professional
+    greeting line ("Hi Alex, I'd like to join your professional
     network", the pattern in rules.yaml inbox
     .invitation_message_greeting_pattern); a note, when the
     inviter wrote one, sits BETWEEN that line and the inviter's

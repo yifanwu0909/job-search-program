@@ -506,7 +506,7 @@ inbox:
     - "invited you to join (a|an|the) .*group"
     - "invitation to join (a|an|the) .*group"
   invitation_message_greeting_pattern:   # ONE regex (case-insensitive, matched line by line): LinkedIn's
-                              # fixed greeting line in every invitation email ("Hi Yifan, I'd like to
+                              # fixed greeting line in every invitation email ("Hi Alex, I'd like to
                               # join your professional network"). A sender-written note, when the
                               # invitation carries one, sits between this line and the inviter's
                               # name/headline block (sampled Nov 16 + Nov 20, 2026); invite-intake
