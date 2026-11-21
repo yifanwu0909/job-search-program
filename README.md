@@ -97,6 +97,8 @@ Jobs still arrive through **Indeed**, the **career-ops scan**, and your **Linked
 
 What you would save: Jobright's paid plan, Turbo, is billed **weekly at $17.99**, monthly at $39.99, or quarterly at $89.99. Jobright has no public pricing page; the prices appear in the app when you sign up, so check the figure it shows you before you commit.
 
+**For captchas and manual applications, Jobright is not necessary either.** Download the Muse desktop app and install the Muse browser extension. Muse then works in the browser on your own PC and applies from there. Many captchas and site blocks are triggered by the IP address — a cloud browser's address draws them, your home PC's usually does not, so applying locally means the captcha or block often never shows up at all. Muse storms through the form in an autofill fashion and lets you know where it needs you.
+
 </details>
 
 Indeed, the career-ops scan, LinkedIn job alerts, and Revelio are free. So are Gmail, Google Calendar, and Google Tasks. There are no per-application fees.
