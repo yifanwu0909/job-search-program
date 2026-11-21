@@ -505,6 +505,15 @@ inbox:
     - "group invitation"
     - "invited you to join (a|an|the) .*group"
     - "invitation to join (a|an|the) .*group"
+  invitation_message_greeting_pattern:   # ONE regex (case-insensitive, matched line by line): LinkedIn's
+                              # fixed greeting line in every invitation email ("Hi Yifan, I'd like to
+                              # join your professional network"). A sender-written note, when the
+                              # invitation carries one, sits between this line and the inviter's
+                              # name/headline block (sampled Nov 16 + Nov 20, 2026); invite-intake
+                              # extracts that span as the packet's "message" (sampled format); the
+                              # invitation flow answers a note carried by an invitation, because no
+                              # message notification ever fires for it.
+    - "^Hi\\s+[^,\\n]+,\\s*I(?:'|’)d like to join your professional network\\.?\\s*$"
   # Ad/marketing refusal for invitations reuses non_message_subject_patterns and
   # non_message_sender_patterns above (newsletter / sponsored / % off / marketing@ …),
   # applied by invite-intake after the group patterns (design note).

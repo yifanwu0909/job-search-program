@@ -106,6 +106,19 @@ Coverage:
       gate_fallback's tracked state refuses the finish even
       when the summary itself is clean; clearing the record
       (the fallback recorded) lets the finish through.
+  (v) INVITATIONS WITH A MESSAGE (the user, Nov 20, 2026 — an
+      invitation sent WITH a message got no reply, because no
+      message notification ever fires for it): invite-intake
+      extracts the sender's note from the email body (between
+      the fixed greeting line and the inviter's name block) and
+      stamps it into the packet with the fixed reply
+      instructions; a note-less invitation carries no message
+      fields. invite-record with a message_outcome writes the
+      claims-ledger line in the message key format (check-claim
+      then finds it), notes the outcome on the acceptance log
+      line, never writes a second claim for a pre-claimed key,
+      and refuses a message_outcome on a skipped invitation or
+      an unknown message_outcome value.
 """
 from __future__ import annotations
 
@@ -609,6 +622,110 @@ def test_invite_record() -> None:
     env.cleanup()
 
 
+INVITE_NOTE = ("Hi Yifan, I came across your profile and would love "
+               "to connect about a Senior Data Scientist role on my "
+               "team. Are you open to a quick call this week?")
+INVITE_BODY_WITH_MSG = (
+    "Sara, Data Scientist from Example Health is waiting for your "
+    "response\n"
+    "        \n"
+    "Hi Yifan, I’d like to join your professional network\n"
+    + INVITE_NOTE + "\n"
+    "Sara Kim\n"
+    "Data Scientist at Example Health\n"
+    "Seattle, Washington, United States\n"
+    "Accept:https://www.linkedin.com/comm/mynetwork/invite-accept/"
+    "invitationId/123/sharedKey/abc/\n")
+INVITE_BODY_NO_MSG = (
+    "Sara, Data Scientist from Example Health is waiting for your "
+    "response\n"
+    "        \n"
+    "Hi Yifan, I’d like to join your professional network\n"
+    "\n"
+    "Sara Kim\n"
+    "Data Scientist at Example Health\n"
+    "Seattle, Washington, United States\n"
+    "1 connection in common\n"
+    "Accept:https://www.linkedin.com/comm/mynetwork/invite-accept/"
+    "invitationId/123/sharedKey/abc/\n")
+
+
+def test_invite_message() -> None:
+    env = Env()
+    c1 = icand("a2a2a2a2a2a2a2a2", 10)
+    c1["body"] = INVITE_BODY_WITH_MSG
+    out = ib.invite_intake([c1], now=NOW, **env.kw())
+    got = out["actionable"][0] if out["actionable"] else {}
+    check("v1 invitation WITH a note: message extracted",
+          got.get("message") == INVITE_NOTE, str(out))
+    check("v2 message packet carries ts + fixed instructions",
+          got.get("message_ts") == got.get("received_at")
+          and len(got.get("message_instructions") or []) >= 5
+          and "check-claim" in " ".join(
+              got.get("message_instructions") or []), str(got))
+    c2 = icand("a3a3a3a3a3a3a3a3", 10)
+    c2["body"] = INVITE_BODY_NO_MSG
+    out2 = ib.invite_intake([c2], now=NOW, **env.kw())
+    got2 = out2["actionable"][0] if out2["actionable"] else {}
+    check("v3 invitation WITHOUT a note: no message fields",
+          "message" not in got2
+          and "message_instructions" not in got2, str(out2))
+
+    res = ib.invite_record(
+        [{"gmail_id": "a2a2a2a2a2a2a2a2", "person": "Sara Kim",
+          "outcome": "accepted", "message_outcome": "replied",
+          "message_ts": got.get("message_ts"),
+          "first_words": "Hi Yifan, I came across your profile",
+          "job": "linkedin-invitation-sweep"}],
+        now=NOW, **env.record_kw())
+    check("v4 invite-record with a message outcome lands + verified",
+          len(res["recorded"]) == 1
+          and res["recorded"][0]["verified"] is True, str(res))
+    claims_text = env.claims.read_text(encoding="utf-8")
+    check("v5 the reply is claimed in the ledger (message key format)",
+          "Sara Kim, latest incoming" in claims_text
+          and "linkedin-reply" in claims_text
+          and "status: SENT" in claims_text, claims_text)
+    log_text = env.log.read_text(encoding="utf-8")
+    check("v6 the acceptance log line records the message outcome",
+          "carried a message" in log_text
+          and "message outcome: replied" in log_text, log_text)
+    verdict = ib.check_claim("Sara Kim", got.get("message_ts"),
+                             claims_path=env.claims)
+    check("v7 check-claim finds the invitation message claim",
+          verdict["verdict"] == "CLAIMED", str(verdict))
+
+    claims_before = env.claims.read_text(encoding="utf-8")
+    res2 = ib.invite_record(
+        [{"gmail_id": "a4a4a4a4a4a4a4a4", "person": "Sara Kim",
+          "outcome": "accepted", "message_outcome": "replied",
+          "message_ts": got.get("message_ts"),
+          "first_words": "Hi Yifan, I came across your profile"}],
+        now=NOW, **env.record_kw())
+    check("v8 pre-claimed message: accepted, no second claim line",
+          len(res2["recorded"]) == 1
+          and res2["recorded"][0].get("claim_preexisting") is True
+          and env.claims.read_text(encoding="utf-8") == claims_before,
+          str(res2))
+    res3 = ib.invite_record(
+        [{"gmail_id": "a5a5a5a5a5a5a5a5", "person": "Sara Kim",
+          "outcome": "skipped", "message_outcome": "replied"}],
+        now=NOW, **env.record_kw())
+    check("v9 message_outcome with a skipped outcome is refused",
+          res3["recorded"] == [] and len(res3["refused"]) == 1
+          and "never replied" in res3["refused"][0]["reason"],
+          str(res3))
+    res4 = ib.invite_record(
+        [{"gmail_id": "a6a6a6a6a6a6a6a6", "person": "Sara Kim",
+          "outcome": "accepted", "message_outcome": "answered"}],
+        now=NOW, **env.record_kw())
+    check("v10 a bad message_outcome is refused",
+          res4["recorded"] == [] and len(res4["refused"]) == 1
+          and "message_outcome must be one of"
+          in res4["refused"][0]["reason"], str(res4))
+    env.cleanup()
+
+
 def test_invite_config() -> None:
     import re as _re
 
@@ -633,6 +750,14 @@ def test_invite_config() -> None:
           and hs.get("window_minutes") == 120
           and (hs.get("query") or "") == "from:invitations@linkedin.com",
           str(hs))
+    greet = cfg.get("invitation_message_greeting_pattern") or []
+    check("o22 invitation greeting pattern configured + matches the "
+          "sampled line",
+          len(greet) == 1
+          and _re.search(greet[0],
+                         "Hi Yifan, I’d like to join your "
+                         "professional network", _re.IGNORECASE)
+          is not None, str(greet))
     live_cfg = ib._inbox_cfg()
     check("o20 invite triage is sender-only (any subject passes)",
           ib._invite_triage(
@@ -1204,6 +1329,7 @@ def main() -> int:
     test_pinned_sender()
     test_invite_intake()
     test_invite_record()
+    test_invite_message()
     test_invite_config()
     test_job_alert_sender()
     test_jobalert_intake()

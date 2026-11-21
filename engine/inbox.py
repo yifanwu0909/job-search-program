@@ -64,8 +64,23 @@ ID processed and, per accepted invitation, appends one outreach-
 log line naming the person (standing rule, the user, Oct 30, 2026:
 accept invitations from real people; skip ads/marketing; decline
 group invitations silently — group invitations are never logged).
-No claims-ledger lines are written for invitations: dedupe is
+A plain acceptance writes NO claims-ledger line: its dedupe is
 the processed pool plus the log line.
+
+An invitation sent WITH a written message is the one exception
+(the user, Nov 20, 2026 — her bug report: the note got no reply
+because no message notification ever fires for it). LinkedIn
+sends no "messaged you" email for a note attached to an
+invitation, so the message watch never sees it and, before this
+fix, the invitation flow accepted the connection and dropped
+the note. Now `invite-intake` extracts the note from the email
+body (it sits between the fixed greeting line and the inviter's
+name block) and stamps it into the packet as `message` with the
+code's fixed reply instructions; the run accepts first, then
+replies in the messaging thread under the same standing rules
+as any message, and `invite-record` records the reply outcome
+AND writes the claims-ledger line for it (same key format as a
+message claim), so no later run replies twice.
 
 Job alerts (the user, Nov 12, 2026 — a third discovery source, via
 email only): the user's saved LinkedIn job alerts send one email per
@@ -162,6 +177,7 @@ MARKER = "(Recorded by inbox program.)"
 
 WATCH_JOB = "linkedin-message-email-watch"
 DAILY_JOB = "linkedin-inbox-replies"
+INVITE_JOB = "linkedin-invitation-sweep"
 OUTCOMES = ("replied", "no_reply_needed", "wu_decision", "skipped")
 _STATUS_BY_OUTCOME = {
     "replied": "SENT",
@@ -305,6 +321,18 @@ Accept link is in the email, accept_url is null and an
 "accept_url_note" says so — then open the email's Accept button
 itself instead.
 
+An invitation sent WITH a written message carries four more
+fields: "message" (the sender's note, extracted from the email
+body), "message_ts" (when it arrived), "profile_url" (the
+inviter's profile link, when found) and "message_instructions"
+— the code's FIXED numbered instructions for answering the
+note. LinkedIn sends NO message notification for a note
+attached to an invitation (the user, Nov 20, 2026: those
+messages were never replied to), so this packet is the only
+place the note is ever worked: follow its message_instructions
+exactly — accept first, then reply in the messaging thread,
+then report the reply outcome through invite-record (below).
+
 7) INVITATION RECORD — `spine.py inbox invite-record results.json`
 After handling, the run returns one result per actionable item:
 
@@ -316,6 +344,15 @@ After handling, the run returns one result per actionable item:
   }
 ]
 
+When the invitation carried a message (the packet had a
+"message" field), the accepted result ALSO returns:
+
+    "message_outcome": "replied",   // replied | no_reply_needed
+                                    // | wu_decision | skipped
+    "message_ts": "<the packet's message_ts>",
+    "first_words": "<first few words of their note, as read in the thread>",
+    "job": "<your job's name>"      // optional; the claims line's owner
+
 The program validates each result, marks the Gmail ID processed,
 and for outcome "accepted" appends ONE outreach-log line naming
 the person (standing rule: log each acceptance by name) and
@@ -323,7 +360,13 @@ prints per-entry results with "verified" from a read-back.
 Outcome "skipped" (an ad/marketing or group invitation the run
 judged not a real person) marks the ID processed with NO log
 line. A replayed record is REFUSED — nothing is written twice.
-No claims-ledger lines are written for invitations.
+No claims-ledger lines are written for a plain acceptance. A
+message outcome is the one exception: invite-record writes the
+claims-ledger line for the reply (same key as a message claim —
+person + message time + first words + linkedin-reply), so the
+message watch and the daily check stand down on that thread.
+message_outcome with outcome "skipped" is refused: a skipped
+invitation is never replied to.
 
 8) JOB-ALERT INTAKE — `spine.py inbox jobalert-intake
 candidates.json`
@@ -965,6 +1008,190 @@ def extract_accept_url(candidate: dict) -> str | None:
     return None
 
 
+_PROFILE_A_RE = re.compile(
+    r"<a\b[^>]*?href=\"([^\"]+)\"[^>]*>(?:(?!</a>).)*?View profile",
+    re.IGNORECASE | re.DOTALL)
+_PROFILE_A_RE_SQ = re.compile(
+    r"<a\b[^>]*?href='([^']+)'[^>]*>(?:(?!</a>).)*?View profile",
+    re.IGNORECASE | re.DOTALL)
+_PROFILE_URL_RE = re.compile(
+    r"https?://(?:www\.)?linkedin\.com/(?:comm/)?in/[^\s\"'<>\]\\)]+")
+
+
+def extract_profile_url(candidate: dict) -> str | None:
+    """The inviter's profile URL from the email's 'View profile'
+    link — the run starts the message reply from the profile's
+    Message button. Sources, in order: the 'View profile' anchor
+    in the HTML; a links-list entry saying so; a linkedin.com/in/
+    URL in the body. None when no profile link is present."""
+    html = candidate.get("html") or ""
+    for rx in (_PROFILE_A_RE, _PROFILE_A_RE_SQ):
+        m = rx.search(html)
+        if m:
+            url = _accept_url_candidate(m.group(1))
+            if url:
+                return url
+    links = candidate.get("links") or []
+    if isinstance(links, (str, bytes)):
+        links = [links]
+    for link in links:
+        if isinstance(link, dict):
+            raw = link.get("href") or link.get("url") or ""
+            context = " ".join(str(link.get(k) or "") for k in
+                               ("text", "label", "title", "context"))
+        else:
+            raw, context = str(link), ""
+        if "profile" in context.lower() or "/in/" in raw:
+            url = _accept_url_candidate(raw)
+            if url:
+                return url
+    m = _PROFILE_URL_RE.search(candidate.get("body") or "")
+    if m:
+        return m.group(0).rstrip(").,")
+    return None
+
+
+def _html_to_text(html_text: str) -> str:
+    """A plain-text reading of an email's HTML part — only a
+    fallback for the invitation-note extraction when a candidate
+    carries no text body."""
+    import html as _html
+    text = re.sub(r"(?is)<(script|style).*?</\1>", " ", html_text or "")
+    text = re.sub(r"(?i)<br\s*/?>", "\n", text)
+    text = re.sub(r"(?i)</(p|div|tr|li|h\d)\s*>", "\n", text)
+    text = _TAG_STRIP_RE.sub(" ", text)
+    return _html.unescape(text)
+
+
+_INVITE_MSG_STOP_PREFIXES = (
+    "accept:", "accept ", "view profile:", "see all connections",
+    "this email was intended for", "you are receiving",
+    "unsubscribe")
+
+
+def extract_invite_message(candidate: dict, person: str | None,
+                           cfg: dict) -> str | None:
+    """The sender-written note inside a connection-invitation
+    email, or None when the invitation carries none (the user,
+    Nov 20, 2026 — the bug this fixes: an invitation sent WITH a
+    message produced no message notification, so the note was
+    never replied to). In the current email format (sampled
+    Nov 16 and Nov 20, 2026) the body prints LinkedIn's fixed
+    greeting line ("Hi Yifan, I'd like to join your professional
+    network", the pattern in rules.yaml inbox
+    .invitation_message_greeting_pattern); a note, when the
+    inviter wrote one, sits BETWEEN that line and the inviter's
+    name block (their full name on its own line, then headline
+    and location). Extraction takes exactly that span and stops
+    at the name line, the Accept line, a connections-in-common
+    line, or the footer — so a note-less invitation (greeting,
+    blank line, name block) extracts nothing."""
+    body = candidate.get("body") or ""
+    if not body.strip() and candidate.get("html"):
+        body = _html_to_text(candidate["html"])
+    if not body.strip():
+        return None
+    pats = _patterns(cfg, "invitation_message_greeting_pattern")
+    if not pats:
+        return None
+    lines = [ln.rstrip()
+             for ln in body.replace("\r\n", "\n").split("\n")]
+    start = None
+    for i, ln in enumerate(lines):
+        if pats[0].search(ln.strip()):
+            start = i
+            break
+    if start is None:
+        return None
+    name_norm = _norm(person or "")
+    note_lines: list[str] = []
+    for ln in lines[start + 1:]:
+        s = ln.strip()
+        low = s.lower()
+        if s and name_norm and _norm(s) == name_norm:
+            break
+        if re.match(r"^-{5,}$", s):
+            break
+        if any(low.startswith(p) for p in _INVITE_MSG_STOP_PREFIXES):
+            break
+        if re.search(r"\bconnections? in common\b", low):
+            break
+        note_lines.append(ln)
+    note = re.sub(r"\n{3,}", "\n\n", "\n".join(note_lines).strip())
+    return note or None
+
+
+def _invite_message_instructions(entry: dict) -> list:
+    """The FIXED runner instructions for an invitation that
+    carries a written message (the user, Nov 20, 2026) — code
+    stamps them into the packet like the job-alert instructions;
+    the runner executes them and returns JSON results."""
+    person = entry.get("person") or "the inviter"
+    return [
+        f"This invitation carries a written message from {person} "
+        f"(this packet's \"message\"). LinkedIn sends NO message "
+        f"notification for a note attached to an invitation, so "
+        f"this pass is the only place it is ever answered. Accept "
+        f"the invitation FIRST (accept_url), then work this "
+        f"message — in this order.",
+        f"Open the conversation with {person}: use this packet's "
+        f"profile_url (the profile's Message button) or find "
+        f"{person} by name in LinkedIn Messaging. Read the whole "
+        f"thread before writing anything — their note is the "
+        f"first message in it, and never ask for information "
+        f"already given in the thread.",
+        f"BEFORE replying, run `spine.py inbox check-claim "
+        f"--person \"{person}\" --message-ts "
+        f"{entry.get('message_ts')}` — a CLAIMED verdict owns the "
+        f"thread: do not reply; still record this item (below) "
+        f"with message_outcome \"skipped\".",
+        "Reply under the SAME standing rules as a message reply: "
+        "greet by first name, match their tone, keep it short and "
+        "human. Standing yes answers: no relocation compensation "
+        "is okay; an on-site interview is okay. Volunteer "
+        "green-card status once, early, when the thread is about "
+        "a role. Decline on sight: a blocked company, a Texas "
+        "onsite/hybrid role, a verified consulting-nature role "
+        "(if it is unclear whether a role is full-time direct, "
+        "ask that one question). No salary numbers, no offer "
+        "decisions, no commitments. The phone number goes only "
+        "inside an active role conversation when asked or needed "
+        "to schedule. Every reply goes through the humanizer "
+        "before sending, and the sent reply must be verified "
+        "visible in the thread.",
+        "If the note moves an application forward (an interview "
+        "request, a scheduling ask, next steps, an offer), ALSO "
+        "follow the standing forward-movement rule: check the "
+        "company's recorded gate verdict in the outreach log "
+        "first and run the gate only when no verdict is on "
+        "record (a company that turns out not to be on Revelio "
+        "is reported to Wu in the chat message, never silently "
+        "dropped), create the forward-movement to-do on Wu's "
+        "Google Tasks \"My Tasks\" list, and report the news to "
+        "Wu in chat.",
+        "If the note needs a decision outside the standing rules, "
+        "do NOT reply: message Wu in chat with the person's name, "
+        "the full note, and the specific decision needed, and "
+        "record message_outcome \"wu_decision\". If on reading "
+        "the thread no reply is needed (Wu spoke last, or the "
+        "note needs no answer), record message_outcome "
+        "\"no_reply_needed\".",
+        "Return this item through invite-record WITH the message "
+        "fields: message_outcome (replied | no_reply_needed | "
+        "wu_decision | skipped), message_ts (this packet's "
+        "message_ts, unchanged), first_words (the first few words "
+        "of their note as it appears in the thread), and job "
+        "(your job's name). invite-record writes the "
+        "claims-ledger line for the reply alongside the "
+        "acceptance — without these fields the message is never "
+        "claimed and a later run could reply twice. If you "
+        "accepted but could not finish the reply (a sign-in stop "
+        "or a checkpoint), record the acceptance WITHOUT the "
+        "message fields and say so in your run report — the "
+        "daily inbox check's conversation pass is the backstop.",
+    ]
+
+
 def _invite_pinned_sender(candidate: dict, cfg: dict) -> bool:
     """True when the candidate's From ADDRESS is the pinned
     invitation address (rules.yaml inbox.invitation_search
@@ -1099,6 +1326,13 @@ def invite_intake(candidates, now: datetime | None = None,
             entry["accept_url_note"] = (
                 "no Accept link found in this email — open the "
                 "email's Accept button itself to accept")
+        note = extract_invite_message(cand, person, cfg)
+        if note:
+            entry["message"] = note
+            entry["message_ts"] = entry["received_at"]
+            entry["profile_url"] = extract_profile_url(cand)
+            entry["message_instructions"] = \
+                _invite_message_instructions(entry)
         actionable.append(entry)
     if dirty:
         save_state(state, state_path)
@@ -1113,6 +1347,7 @@ INVITE_OUTCOMES = ("accepted", "skipped")
 
 def invite_record(results, now: datetime | None = None,
                   log_path: Path = LOG_PATH,
+                  claims_path: Path = CLAIMS_PATH,
                   state_path: Path = STATE_PATH,
                   md_path: Path = WATCH_MD_PATH) -> dict:
     """Record invitation outcomes: per result, validate, mark the
@@ -1122,8 +1357,16 @@ def invite_record(results, now: datetime | None = None,
     outcome (ad/marketing, or a group invitation the run judged)
     marks processed with NO log line, so no ad or group is ever
     named in the log. A replay (already processed) is refused and
-    writes nothing twice. No claims-ledger lines: dedupe here is
-    the processed pool plus the log line."""
+    writes nothing twice. A plain acceptance writes NO
+    claims-ledger line: its dedupe is the processed pool plus the
+    log line. The one exception (the user, Nov 20, 2026): when
+    the result carries a message_outcome — the invitation arrived
+    WITH a written message and the run answered it under the
+    packet's message_instructions — the reply is claimed in the
+    claims ledger with the same key a message claim uses, and
+    the acceptance log line records the message outcome; a key
+    already in the ledger is not written twice (the first claim
+    owns the thread)."""
     if isinstance(results, dict):
         results = results.get("results")
     if not isinstance(results, list) or not results:
@@ -1144,6 +1387,10 @@ def invite_record(results, now: datetime | None = None,
         person = (res.get("person") or "").strip()
         outcome = res.get("outcome") or ""
         mid = res.get("gmail_id") or ""
+        msg_outcome = res.get("message_outcome") or ""
+        if not isinstance(msg_outcome, str):
+            msg_outcome = ""
+        msg_outcome = msg_outcome.strip()
         problem = None
         if outcome not in INVITE_OUTCOMES:
             problem = (f"outcome must be one of {INVITE_OUTCOMES}; "
@@ -1155,42 +1402,91 @@ def invite_record(results, now: datetime | None = None,
         elif _consumed(state["processed"], mid, "inbox"):
             problem = (f"gmail_id {mid} is already processed — a replay "
                        f"records nothing twice")
+        elif msg_outcome and msg_outcome not in OUTCOMES:
+            problem = (f"message_outcome must be one of {OUTCOMES}; "
+                       f"got {msg_outcome!r}")
+        elif msg_outcome and outcome != "accepted":
+            problem = ("message_outcome is only valid with outcome "
+                       "'accepted' — a skipped invitation is never "
+                       "replied to")
         if problem:
             refused.append(dict(label, reason=problem))
             continue
 
+        claim_line = None
+        claim_key = ""
+        claim_preexisting = False
+        if msg_outcome:
+            claim_key = _build_claim_key(
+                {"person": person,
+                 "message_ts": res.get("message_ts"),
+                 "first_words": res.get("first_words"),
+                 "claim_key": res.get("claim_key")})
+            claims_now = Path(claims_path).read_text(encoding="utf-8") \
+                if Path(claims_path).exists() else ""
+            if _norm(claim_key) in _norm(claims_now):
+                claim_preexisting = True
+            else:
+                job_label = res.get("job") \
+                    if res.get("job") in (INVITE_JOB, DAILY_JOB) \
+                    else INVITE_JOB
+                claim_line = _append_claim(
+                    claims_path, claim_key, job_label,
+                    _STATUS_BY_OUTCOME[msg_outcome], now)
+
         log_line = None
         if outcome == "accepted":
-            log_line = log_writer.append_entry(
-                str(log_path),
+            log_text = (
                 f"LINKEDIN INVITATION ACCEPTED (email watch) — "
                 f"{person} — accepted via the invitation email's "
-                f"Accept link (Gmail {mid}); now connected. {MARKER}",
-                when=now)
+                f"Accept link (Gmail {mid}); now connected.")
+            if msg_outcome:
+                log_text += (
+                    f" The invitation carried a message — message "
+                    f"outcome: {msg_outcome}"
+                    + (" (claim recorded in inbox-action-claims.md)."
+                       if claim_line else
+                       " (already claimed in inbox-action-claims.md"
+                       " — stood down)."))
+            log_line = log_writer.append_entry(
+                str(log_path), f"{log_text} {MARKER}", when=now)
         handled = {"outcome": outcome, "job": WATCH_JOB,
                    "via": "invite-record", "at": now.isoformat(),
                    "gmail_id": mid}
         if outcome == "accepted":
             handled["person"] = person
-        _mark_processed(state, mid,
-                        {"at": now.isoformat(), "via": "invite-record",
-                         "outcome": outcome,
-                         **({"person": person}
-                            if outcome == "accepted" else {})},
-                        consumer="inbox")
+        if msg_outcome:
+            handled["message_outcome"] = msg_outcome
+            handled["message_claim_key"] = claim_key
+        proc_entry = {"at": now.isoformat(), "via": "invite-record",
+                      "outcome": outcome}
+        if outcome == "accepted":
+            proc_entry["person"] = person
+            if msg_outcome:
+                proc_entry["message_outcome"] = msg_outcome
+        _mark_processed(state, mid, proc_entry, consumer="inbox")
         state["handled"].append(handled)
         save_state(state, state_path)
 
         landed_state = load_state(state_path, md_path)
         landed_log = Path(log_path).read_text(encoding="utf-8") \
             if Path(log_path).exists() else ""
+        landed_claims = Path(claims_path).read_text(encoding="utf-8") \
+            if Path(claims_path).exists() else ""
         landed = {"processed": mid in landed_state["processed"],
                   "log_entry": (log_line in landed_log)
-                  if log_line else None}
+                  if log_line else None,
+                  "claim": (claim_line in landed_claims)
+                  if claim_line else None}
         problems = [f"the {k} did not land on read-back"
                     for k, v in landed.items() if v is False]
         entry_out = dict(label, outcome=outcome, log_line=log_line,
                          landed=landed, verified=not problems)
+        if msg_outcome:
+            entry_out["message_outcome"] = msg_outcome
+            entry_out["claim_key"] = claim_key
+            entry_out["claim_line"] = claim_line
+            entry_out["claim_preexisting"] = claim_preexisting
         if problems:
             entry_out["problems"] = problems
         recorded.append(entry_out)
