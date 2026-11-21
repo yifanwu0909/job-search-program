@@ -75,7 +75,7 @@ Three subscriptions cover the whole thing:
 
 - **Muse.** This system runs on Muse, Meta's personal AI agent. How much plan you need depends on how hard you run it. A light version can fit on the **free tier**. Running the full daily workflow fits within the **$20/month tier**. You should not need anything above that.
 - **LinkedIn Premium Career.** The outreach side runs on it. LinkedIn also caps invitations at **roughly 100 a week**, Premium or not. When the cap is hit, sending pauses until the week resets.
-- **<a href="https://jobright.ai" target="_blank" rel="noopener">Jobright</a> — free.** Jobright's job recommendations are free, and recommendations are all this system uses it for. There is no paid plan to buy.
+- **<a href="https://jobright.ai" target="_blank" rel="noopener">Jobright</a>.** One of the main sources of fresh postings — the system searches its job recommendations each morning.
 
 <details>
 <summary>🔵 Don't want LinkedIn Premium?</summary>
@@ -89,11 +89,9 @@ What you would save: Premium Career starts at **$39.99 a month**, or **$239.88 a
 </details>
 
 <details>
-<summary>🟢 Do you need to pay for Jobright?</summary>
+<summary>🟢 What about captchas and manual applications?</summary>
 
-No. **Jobright's job recommendations are free**, and recommendations are all this system takes from Jobright — it is one of the four discovery sources, and the searches run on the free tier. The part Jobright charges for is its autofill, and autofill here is done by Muse, not Jobright. There is nothing to pay.
-
-**For captchas and manual applications, Jobright is not necessary either.** Download the Muse desktop app and install the Muse browser extension. Muse then works in the browser on your own PC and applies from there. Many captchas and site blocks are triggered by the IP address — a cloud browser's address draws them, your home PC's usually does not, so applying locally means the captcha or block often never shows up at all. Muse storms through the form in an autofill fashion and lets you know where it needs you.
+Download the Muse desktop app and install the Muse browser extension. Muse then works in the browser on your own PC and applies from there. Many captchas and site blocks are triggered by the IP address — a cloud browser's address draws them, your home PC's usually does not, so applying locally means the captcha or block often never shows up at all. Muse storms through the form in an autofill fashion and lets you know where it needs you.
 
 </details>
 
@@ -133,7 +131,7 @@ After all, this workflow saves you **90% of the load** of job hunting. This part
 - Your targets: job titles, locations or remote, and the lowest pay you will accept for onsite and for remote roles.
 - A block list: companies you will never apply to.
 - Reply rules: what to accept, what to decline, and when a conversation should come back to you.
-- Accounts: LinkedIn with Premium Career, a free Jobright account, Indeed, and a Gmail account connected for mail, calendar, and tasks.
+- Accounts: LinkedIn with Premium Career, Jobright, Indeed, and a Gmail account connected for mail, calendar, and tasks.
 - Two times a day when you can tap approvals and solve captchas.
 
 The longer version, with why each item is needed, is in <a href="docs/getting-started.md" target="_blank" rel="noopener">docs/getting-started.md</a>.

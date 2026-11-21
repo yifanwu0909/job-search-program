@@ -4,7 +4,7 @@
 
 ## Before you start
 
-Your user needs the accounts and subscriptions in the [README](README.md): a Muse plan, LinkedIn Premium Career, and accounts on LinkedIn, Jobright (free), and Indeed, plus Gmail with Google Calendar and Google Tasks. The program itself is Python 3.10+ with one dependency, PyYAML.
+Your user needs the accounts and subscriptions in the [README](README.md): a Muse plan, LinkedIn Premium Career, and accounts on LinkedIn, Jobright, and Indeed, plus Gmail with Google Calendar and Google Tasks. The program itself is Python 3.10+ with one dependency, PyYAML.
 
 ## Step 1: Place the repo
 
