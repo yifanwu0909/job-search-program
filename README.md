@@ -71,11 +71,10 @@ Design principle: **code decides and tracks, Muse does the legwork.** The code i
 
 ## Costs 💰
 
-Three subscriptions cover the whole thing:
+Two subscriptions cover the whole thing:
 
 - **Muse.** This system runs on Muse, Meta's personal AI agent. How much plan you need depends on how hard you run it. A light version can fit on the **free tier**. Running the full daily workflow fits within the **$20/month tier**. You should not need anything above that.
 - **LinkedIn Premium Career.** The outreach side runs on it. LinkedIn also caps invitations at **roughly 100 a week**, Premium or not. When the cap is hit, sending pauses until the week resets.
-- **<a href="https://jobright.ai" target="_blank" rel="noopener">Jobright</a>.** One of the main sources of fresh postings — the system searches its job recommendations each morning.
 
 <details>
 <summary>🔵 Don't want LinkedIn Premium?</summary>
