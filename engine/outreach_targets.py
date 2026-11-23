@@ -25,6 +25,14 @@ A target is ACCEPTED only when ALL of these hold:
     Network suggestions, the Premium hiring list — is refused; if
     contacto finds nobody for a job, the run moves to the next job and
     never searches LinkedIn for outreach);
+  * REPLENISHMENT (the user, Nov 23, 2026): when the contacto pool for
+    the applied jobs runs out before the daily target is met, the run
+    replenishes — still through contacto, never LinkedIn search — by
+    running contacto on California AI/ML/Data job postings and
+    collecting the recruiters it returns. A target flagged
+    "replenishment": true must ALSO pass the replenishment gate in
+    config: a recruiter title carrying a technical/AI/ML/data keyword,
+    and a California location;
   * person, title and company are present (else malformed);
   * the worker did not itself label the person a peer (type "peer");
   * current_employee is exactly true (the run verifies employment on
@@ -100,7 +108,9 @@ def validate_targets(packet, hiring_cfg: dict, blocked_keys) -> dict:
         company = str(t.get("company") or "").strip()
         row = {"person": person, "title": title, "company": company,
                "type": t.get("type"), "link": t.get("link"),
-               "role": t.get("role"), "source": t.get("source")}
+               "role": t.get("role"), "source": t.get("source"),
+               "location": t.get("location"),
+               "replenishment": t.get("replenishment")}
 
         def refuse(reason: str) -> None:
             rejected.append({**row, "reason": reason})
@@ -143,6 +153,27 @@ def validate_targets(packet, hiring_cfg: dict, blocked_keys) -> dict:
         if group is None:
             refuse("peer_or_below_no_influence_title")
             continue
+        if t.get("replenishment") is True:
+            # REPLENISHMENT GATE (the user, Nov 23, 2026): contacto-found
+            # CA AI technical recruiters for ML/Data only — recruiter
+            # title, an AI/ML/data keyword in the title, CA location.
+            rep = cfg.get("replenishment_when_pool_exhausted") or {}
+            if rep.get("enabled") is not True:
+                refuse("replenishment_not_enabled")
+                continue
+            if group != "recruiting":
+                refuse("replenishment_not_recruiter_title")
+                continue
+            title_low = title.lower()
+            if not any(str(k).lower() in title_low
+                       for k in (rep.get("title_keywords_any") or [])):
+                refuse("replenishment_title_not_ai_ml_data")
+                continue
+            loc_low = str(t.get("location") or "").lower()
+            if not any(str(k).lower() in loc_low
+                       for k in (rep.get("location_keywords") or [])):
+                refuse("replenishment_location_not_ca")
+                continue
         if isinstance(max_per_role, int) and max_per_role > 0:
             key = (normalize_company(company),
                    str(t.get("role") or "").strip().lower())
