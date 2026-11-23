@@ -193,8 +193,10 @@ inbox jobs their scope as data. The run never decides scope itself.
 
 1) EMAIL WATCH INTAKE — `spine.py inbox watch-intake candidates.json`
 The run searches Gmail with the search defined in rules.yaml
-inbox.gmail_search (LinkedIn senders + a "messaged you" subject +
-the past hour) and hands EVERY candidate to the program as a JSON
+inbox.gmail_search (the pinned message sender + a "messaged you"
+subject, OR the pinned InMail sender hit-reply@linkedin.com by
+address alone — no subject match for InMail; + the past hour) and
+hands EVERY candidate to the program as a JSON
 list (or {"candidates": [...]}):
 
 [
@@ -850,14 +852,21 @@ def _sender_address(sender: str) -> str:
 
 
 def _pinned_sender(candidate: dict, cfg: dict) -> bool:
-    """True when the candidate's From ADDRESS is the pinned
+    """True when the candidate's From ADDRESS is a pinned
     notification address (rules.yaml inbox.gmail_search.from_address
     — the user, Nov 12, 2026: "It will always come from this email:
-    messaging-digest-noreply@linkedin.com")."""
-    pinned = ((cfg.get("gmail_search") or {}).get("from_address")
-              or "").strip().lower()
+    messaging-digest-noreply@linkedin.com" — or gmail_search
+    .inmail_from_address, hit-reply@linkedin.com, the InMail
+    notification sender added Nov 23, 2026 after an InMail reply was
+    missed: InMail mail is identified by that ADDRESS ONLY, no
+    subject match — the user, Nov 23, 2026: "Don't match subject.
+    Email address match only")."""
+    search = cfg.get("gmail_search") or {}
+    pinned = {(search.get("from_address") or "").strip().lower(),
+              (search.get("inmail_from_address") or "").strip().lower()}
+    pinned.discard("")
     return bool(pinned) and \
-        _sender_address(candidate.get("sender") or "") == pinned
+        _sender_address(candidate.get("sender") or "") in pinned
 
 
 def _job_alert_sender(candidate: dict, cfg: dict) -> bool:

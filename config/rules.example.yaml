@@ -368,8 +368,12 @@ inbox:
                                  # sender (a pass condition) and never lets a sender pattern refuse it.
     subject_contains: "messaged you"
     subject_regex: "(just|has) messaged you"   # the exact subject is "<FirstName> just messaged you"; the "has messaged you" variant is accepted too
+    inmail_from_address: hit-reply@linkedin.com   # SECOND pinned sender: InMail message notifications come from
+                                 # this address and are identified by the ADDRESS ONLY — no subject match. The
+                                 # intake treats this address as a trusted sender exactly like from_address
+                                 # above; the display name carries the person.
     window_minutes: 60           # past hour — mirrors past_hour_window_minutes; the run adds the time bound (an epoch after:, as the email scan computes it) at search time
-    query: 'from:messaging-digest-noreply@linkedin.com subject:"messaged you"'   # the search string; the run appends the past-hour bound
+    query: 'from:messaging-digest-noreply@linkedin.com subject:"messaged you" OR from:hit-reply@linkedin.com'   # the search string (the hit-reply arm is address-only, no subject term); the run appends the past-hour bound
   invitation_search:             # CONNECTION-INVITATION EMAILS — SENDER-ONLY (design note): incoming
                                  # connection invitations come ONLY from invitations@linkedin.com,
                                  # and the user's LinkedIn notifications are configured so that

@@ -432,6 +432,25 @@ def test_real_format() -> None:
     check("l6 InMail subject passes via its pattern slot",
           len(out4["actionable"]) == 1
           and got4.get("person") == "Sara Kim", str(out4))
+
+    # The Nov 23, 2026 miss, as a fixture: an InMail REPLY notice from
+    # the bare hit-reply@linkedin.com address whose subject ("Message
+    # replied: ...") matches NO subject pattern — it must pass on the
+    # ADDRESS alone (the user, Nov 23, 2026: "Don't match subject.
+    # Email address match only"), with the person from the sender
+    # display name and the thread URL out of the body.
+    hit = cand("abababababababab", 10,
+               "Message replied: Exciting opportunity - Data Scientist "
+               "(OR Expert) in Menlo Park, CA (Hybrid)",
+               sender="Alex Rivera <hit-reply@linkedin.com>")
+    hit["body"] = ("InMail: You have a new message — reply: "
+                   + REAL_THREAD_URL)
+    out5 = ib.watch_intake([hit], now=NOW, **env.kw())
+    got5 = out5["actionable"][0] if out5["actionable"] else {}
+    check("l7 hit-reply InMail passes on the address alone",
+          len(out5["actionable"]) == 1
+          and got5.get("person") == "Alex Rivera"
+          and got5.get("thread_url") == REAL_THREAD_URL, str(out5))
     env.cleanup()
 
 
@@ -461,6 +480,11 @@ def test_gmail_search_config() -> None:
     check("m3 'has messaged you' passes intake, full name parsed",
           len(out["actionable"]) == 1
           and got.get("person") == "Pruthvi Desai", str(out))
+    check("m4 InMail sender pinned, query arm is address-only",
+          gs.get("inmail_from_address") == "hit-reply@linkedin.com"
+          and "from:hit-reply@linkedin.com" in (gs.get("query") or "")
+          and "OR from:hit-reply@linkedin.com" in (gs.get("query") or ""),
+          str(gs))
     env.cleanup()
 
 
@@ -488,6 +512,17 @@ def test_pinned_sender() -> None:
           (ib._triage(digest_mail, cfg) or "").startswith(
               "non-message subject pattern"),
           str(ib._triage(digest_mail, cfg)))
+    # The InMail pinned address (Nov 23, 2026): same guard — a config
+    # whose sender patterns WOULD trip on "hit-reply" must still pass
+    # mail from hit-reply@linkedin.com, on the address alone.
+    cfg2 = dict(cfg, non_message_sender_patterns=["hit-reply"])
+    inmail_pinned = {"sender": "Alex Rivera "
+                               "<hit-reply@linkedin.com>",
+                     "subject": "Message replied: A role in Menlo Park",
+                     "body": "InMail: You have a new message"}
+    check("n4 hit-reply is a pinned sender too (address only)",
+          ib._triage(inmail_pinned, cfg2) is None
+          and ib._pinned_sender(inmail_pinned, cfg2) is True)
 
 
 INVITE_ACCEPT_URL = ("https://www.linkedin.com/e/v2?e=inv123"
