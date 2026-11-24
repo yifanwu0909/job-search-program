@@ -25,14 +25,15 @@ A target is ACCEPTED only when ALL of these hold:
     Network suggestions, the Premium hiring list — is refused; if
     contacto finds nobody for a job, the run moves to the next job and
     never searches LinkedIn for outreach);
-  * REPLENISHMENT (the user, Nov 23, 2026): when the contacto pool for
-    the applied jobs runs out before the daily target is met, the run
-    replenishes — still through contacto, never LinkedIn search — by
-    running contacto on California AI/ML/Data job postings and
-    collecting the recruiters it returns. A target flagged
+  * REPLENISHMENT (the user, Nov 23, 2026; widened to US-wide Nov 24,
+    2026): when the contacto pool for the applied jobs runs out before
+    the daily target is met, the run replenishes — still through
+    contacto, never LinkedIn search — by running contacto on
+    AI/ML/Data job postings and collecting the general AI technical
+    recruiters it returns, anywhere in the US. A target flagged
     "replenishment": true must ALSO pass the replenishment gate in
     config: a recruiter title carrying a technical/AI/ML/data keyword,
-    and a California location;
+    and a US location;
   * person, title and company are present (else malformed);
   * the worker did not itself label the person a peer (type "peer");
   * current_employee is exactly true (the run verifies employment on
@@ -154,9 +155,10 @@ def validate_targets(packet, hiring_cfg: dict, blocked_keys) -> dict:
             refuse("peer_or_below_no_influence_title")
             continue
         if t.get("replenishment") is True:
-            # REPLENISHMENT GATE (the user, Nov 23, 2026): contacto-found
-            # CA AI technical recruiters for ML/Data only — recruiter
-            # title, an AI/ML/data keyword in the title, CA location.
+            # REPLENISHMENT GATE (the user, Nov 23, 2026; US-wide Nov 24,
+            # 2026): contacto-found general AI technical recruiters for
+            # ML/Data — recruiter title, an AI/ML/data keyword in the
+            # title, US location.
             rep = cfg.get("replenishment_when_pool_exhausted") or {}
             if rep.get("enabled") is not True:
                 refuse("replenishment_not_enabled")
@@ -172,7 +174,7 @@ def validate_targets(packet, hiring_cfg: dict, blocked_keys) -> dict:
             loc_low = str(t.get("location") or "").lower()
             if not any(str(k).lower() in loc_low
                        for k in (rep.get("location_keywords") or [])):
-                refuse("replenishment_location_not_ca")
+                refuse("replenishment_location_not_us")
                 continue
         if isinstance(max_per_role, int) and max_per_role > 0:
             key = (normalize_company(company),

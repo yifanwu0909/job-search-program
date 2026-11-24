@@ -564,21 +564,23 @@ invitations:
                                  # send that one invitation, and confirm it in Sent.
     fill_sources: []             # no fill sources remain (see contacto_only above)
     replenishment_when_pool_exhausted:
-                                 # REPLENISHMENT (Wu, Nov 23, 2026): when the contacto
-                                 # pool for the applied jobs runs out before the
-                                 # daily target is met, replenish — STILL USING
-                                 # CONTACTO, never LinkedIn search — by running
-                                 # contacto on California AI/ML/Data job postings
-                                 # and collecting the recruiters it returns.
-                                 # Targets are flagged replenishment: true in the
-                                 # packet; code (outreach_targets) accepts only a
-                                 # recruiter title carrying one of the keywords
-                                 # below, with a California location. The source
-                                 # label stays "contacto" on every target and send.
+                                 # REPLENISHMENT (Nov 23, 2026; WIDENED to US-wide
+                                 # Nov 24, 2026): when the contacto pool for the
+                                 # applied jobs runs out before the daily target
+                                 # is met, replenish — STILL USING CONTACTO, never
+                                 # LinkedIn search — by running contacto on
+                                 # AI/ML/Data job postings and collecting the
+                                 # general AI technical recruiters it returns,
+                                 # anywhere in the US. Targets are flagged
+                                 # replenishment: true in the packet; code
+                                 # (outreach_targets) accepts only a recruiter
+                                 # title carrying one of the keywords below, with
+                                 # a US location. The source label stays
+                                 # "contacto" on every target and send.
       enabled: true
-      finder: "career-ops contacto (steps 0-3) on CA AI/ML/Data job postings"
+      finder: "career-ops contacto (steps 0-3) on US AI/ML/Data job postings"
       title_keywords_any: ["technical", "ai", "artificial intelligence", "data", "machine learning", "ml"]
-      location_keywords: ["california", ", ca", "san francisco", "bay area", "silicon valley", "los angeles", "san diego", "san jose", "mountain view", "palo alto", "sunnyvale", "santa clara", "irvine", "pasadena", "berkeley", "oakland", "sacramento", "fresno"]
+      location_keywords: ["united states", "alabama", "alaska", "arizona", "arkansas", "california", "colorado", "connecticut", "delaware", "district of columbia", "florida", "georgia", "hawaii", "idaho", "illinois", "indiana", "iowa", "kansas", "kentucky", "louisiana", "maine", "maryland", "massachusetts", "michigan", "minnesota", "mississippi", "missouri", "montana", "nebraska", "nevada", "new hampshire", "new jersey", "new mexico", "new york", "north carolina", "north dakota", "ohio", "oklahoma", "oregon", "pennsylvania", "rhode island", "south carolina", "south dakota", "tennessee", "texas", "utah", "vermont", "virginia", "washington", "west virginia", "wisconsin", "wyoming", "bay area", "silicon valley"]
     max_per_role: null           # NO PER-ROLE CAP (design note) — use ALL the people contacto
                                  # suggests for the role who pass the peer filter below. The
                                  # daily_target of 30 verified sends still binds; qualifying

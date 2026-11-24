@@ -284,9 +284,10 @@ def main() -> int:
           _rej.get("Nosrc") == "source_missing_contacto_only")
     check("t: target labelled LinkedIn search rejected (contacto only)",
           _rej.get("Linky") == "non_contacto_source_refused")
-    # --- replenishment targets (the user, Nov 23, 2026) ---------------
+    # --- replenishment targets (the user, Nov 23, 2026; US-wide
+    # Nov 24, 2026) ---------------------------------------------------
     # Still contacto-only: the run replenishes a dry pool by running
-    # contacto on CA AI/ML/Data postings; code accepts only CA-based
+    # contacto on US AI/ML/Data postings; code accepts only US-based
     # AI/ML/data recruiter titles flagged replenishment.
     def _r(person, title, location="San Francisco, California"):
         t = _t(person, title, typ="recruiter", source="contacto")
@@ -296,15 +297,17 @@ def main() -> int:
     _out = ot.validate_targets({"targets": [
         _r("Cal", "AI Technical Recruiter"),
         _r("Nyc", "Technical Recruiter", location="New York, New York"),
+        _r("Lon", "Technical Recruiter",
+           location="London, England, United Kingdom"),
         _r("Dir", "Director of Data Science"),
         _r("Gen", "Recruiter"),
     ]}, _hc, _blocked)
     _acc = {r["person"] for r in _out["accepted"]}
     _rej = {r["person"]: r["reason"] for r in _out["rejected"]}
-    check("t: CA AI technical recruiter accepted as replenishment",
-          _acc == {"Cal"}, f"accepted={sorted(_acc)} rejected={_rej}")
-    check("t: replenishment outside CA refused",
-          _rej.get("Nyc") == "replenishment_location_not_ca")
+    check("t: US AI technical recruiters accepted as replenishment",
+          _acc == {"Cal", "Nyc"}, f"accepted={sorted(_acc)} rejected={_rej}")
+    check("t: replenishment outside the US refused",
+          _rej.get("Lon") == "replenishment_location_not_us")
     check("t: replenishment non-recruiter title refused",
           _rej.get("Dir") == "replenishment_not_recruiter_title")
     check("t: replenishment recruiter without AI/ML/data keyword refused",
