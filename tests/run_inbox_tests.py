@@ -483,7 +483,9 @@ def test_gmail_search_config() -> None:
     check("m4 InMail sender pinned, query arm is address-only",
           gs.get("inmail_from_address") == "hit-reply@linkedin.com"
           and "from:hit-reply@linkedin.com" in (gs.get("query") or "")
-          and "OR from:hit-reply@linkedin.com" in (gs.get("query") or ""),
+          and "(from:hit-reply@linkedin.com)" in (gs.get("query") or "")
+          and '(from:messaging-digest-noreply@linkedin.com '
+              'subject:"messaged you")' in (gs.get("query") or ""),
           str(gs))
     env.cleanup()
 

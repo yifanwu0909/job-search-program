@@ -373,7 +373,7 @@ inbox:
                                  # intake treats this address as a trusted sender exactly like from_address
                                  # above; the display name carries the person.
     window_minutes: 60           # past hour — mirrors past_hour_window_minutes; the run adds the time bound (an epoch after:, as the email scan computes it) at search time
-    query: 'from:messaging-digest-noreply@linkedin.com subject:"messaged you" OR from:hit-reply@linkedin.com'   # the search string (the hit-reply arm is address-only, no subject term); the run appends the past-hour bound
+    query: '(from:messaging-digest-noreply@linkedin.com subject:"messaged you") OR (from:hit-reply@linkedin.com)'   # the search string (the hit-reply arm is address-only, no subject term); the run appends the past-hour bound. PARENTHESES (Nov 24, 2026 fix): the arms are grouped explicitly — a combined search in the unparenthesized form was seen returning nothing while one arm alone held live mail; the watch also falls back to per-arm searches when the combined search returns nothing.
   invitation_search:             # CONNECTION-INVITATION EMAILS — SENDER-ONLY (design note): incoming
                                  # connection invitations come ONLY from invitations@linkedin.com,
                                  # and the user's LinkedIn notifications are configured so that
