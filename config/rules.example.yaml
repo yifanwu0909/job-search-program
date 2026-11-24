@@ -623,7 +623,7 @@ blocked_companies:
   # This block only says where to read it and what it must currently equal.
   source_file: "outreach-log.md"
   source_pattern: "Blocked list total: (\\d+) companies"
-  expected_total: 57
+  expected_total: 65
 
 role_filter:
   banned_title_keywords: ["Staff", "Lead", "Principal", "Consultant"]   # any track (Consultant added by the user, Nov 13, 2026 — a title containing "Consultant" is a dead no-go)
