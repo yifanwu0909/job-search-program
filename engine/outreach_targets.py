@@ -25,15 +25,18 @@ A target is ACCEPTED only when ALL of these hold:
     Network suggestions, the Premium hiring list — is refused; if
     contacto finds nobody for a job, the run moves to the next job and
     never searches LinkedIn for outreach);
-  * REPLENISHMENT (the user, Nov 23, 2026; widened to US-wide Nov 24,
-    2026): when the contacto pool for the applied jobs runs out before
-    the daily target is met, the run replenishes — still through
-    contacto, never LinkedIn search — by running contacto on
-    AI/ML/Data job postings and collecting the general AI technical
-    recruiters it returns, anywhere in the US. A target flagged
+  * REPLENISHMENT (the user, Nov 23, 2026; widened Nov 24, 2026, with
+    the order refined the same day — California first, US-wide only
+    when California yields no more): when the contacto pool for the
+    applied jobs runs out before the daily target is met, the run
+    replenishes — still through contacto, never LinkedIn search — by
+    running contacto on AI/ML/Data job postings and collecting the
+    general AI technical recruiters it returns, California-based
+    first, then anywhere else in the US. A target flagged
     "replenishment": true must ALSO pass the replenishment gate in
     config: a recruiter title carrying a technical/AI/ML/data keyword,
-    and a US location;
+    and a US location (the gate is the outer boundary; the CA-first
+    order is the run's);
   * person, title and company are present (else malformed);
   * the worker did not itself label the person a peer (type "peer");
   * current_employee is exactly true (the run verifies employment on
