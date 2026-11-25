@@ -256,9 +256,27 @@ After handling, the run returns one result per actionable item:
                                            //   time (builds the claim key)
     "first_words": "Hi Alex, Thank you",  // optional — first words of
                                            //   their message (claim key)
-    "claim_key": "…"                       // optional — a prebuilt
+    "claim_key": "…",                      // optional — a prebuilt
                                            //   ledger key wins over
                                            //   the fields above
+    "verified_visible": true,             // REQUIRED when outcome is
+                                           //   "replied": the run
+                                           //   reloaded the thread
+                                           //   after sending and saw
+                                           //   the reply in it
+    "sent_text": "Hi Jane, thanks …"      // REQUIRED when outcome is
+                                           //   "replied": the exact
+                                           //   reply text seen in the
+                                           //   thread on that reload.
+                                           //   A "replied" record
+                                           //   without both fields is
+                                           //   REFUSED and nothing is
+                                           //   written — the item
+                                           //   stays unprocessed so
+                                           //   the next run retries it
+                                           //   (Nov 25, 2026: a send
+                                           //   LinkedIn had failed was
+                                           //   recorded as SENT)
   }
 ]
 
@@ -1420,6 +1438,8 @@ def invite_record(results, now: datetime | None = None,
             problem = ("message_outcome is only valid with outcome "
                        "'accepted' — a skipped invitation is never "
                        "replied to")
+        elif msg_outcome == "replied" and _reply_proof_problem(res):
+            problem = _reply_proof_problem(res)
         if problem:
             refused.append(dict(label, reason=problem))
             continue
@@ -2126,6 +2146,30 @@ def watch_intake(candidates, now: datetime | None = None,
 
 # ------------------------------------------------------------------- record
 
+def _reply_proof_problem(res: dict) -> str | None:
+    """A 'replied' outcome claims a message LANDED in the thread.
+    The Nov 25, 2026 Caitlin McCurrie case: LinkedIn showed a send
+    failure, the run still recorded the reply as SENT, and the
+    thank-you only went out an hour later by hand. So code refuses
+    a 'replied' record that carries no proof: verified_visible must
+    be true and sent_text must hold the exact reply text the run
+    saw in the thread AFTER reloading it post-send. No proof =
+    nothing is recorded and the item stays unprocessed, so the
+    next run retries it instead of a false record standing."""
+    if res.get("verified_visible") is not True:
+        return ("outcome 'replied' refused: verified_visible is not "
+                "true — reload the thread after sending and confirm "
+                "the reply is visible in it before recording; a send "
+                "that was not confirmed visible records NOTHING, so "
+                "the next run retries the item")
+    sent_text = res.get("sent_text")
+    if not isinstance(sent_text, str) or len(sent_text.strip()) < 3:
+        return ("outcome 'replied' refused: sent_text missing — the "
+                "record must carry the exact reply text seen in the "
+                "thread after reloading it post-send")
+    return None
+
+
 def _record_results(results, job: str, with_gmail: bool,
                     now: datetime | None = None,
                     log_path: Path = LOG_PATH,
@@ -2162,6 +2206,8 @@ def _record_results(results, job: str, with_gmail: bool,
             problem = "missing required field: person"
         elif outcome not in OUTCOMES:
             problem = f"outcome must be one of {OUTCOMES}; got {outcome!r}"
+        elif outcome == "replied" and _reply_proof_problem(res):
+            problem = _reply_proof_problem(res)
         elif with_gmail and not _GMAIL_ID_RE.fullmatch(mid or ""):
             problem = f"bad gmail_id: {mid!r}"
         elif with_gmail and _consumed(state["processed"], mid, "inbox"):
@@ -2189,6 +2235,8 @@ def _record_results(results, job: str, with_gmail: bool,
         handled = {"person": person, "outcome": outcome, "job": job,
                    "claim_key": key, "at": now.isoformat(),
                    "message_ts": res.get("message_ts")}
+        if outcome == "replied":
+            handled["sent_text"] = res.get("sent_text")
         if with_gmail:
             _mark_processed(state, mid,
                             {"at": now.isoformat(), "via": "watch-record",

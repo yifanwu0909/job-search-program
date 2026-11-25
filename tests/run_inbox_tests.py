@@ -266,7 +266,9 @@ def _record_jane(env: Env) -> dict:
     return ib.watch_record(
         [{"gmail_id": "aaaaaaaaaaaaaaaa", "person": "Jane Doe",
           "outcome": "replied", "message_ts": "2026-11-12T14:30:00-06:00",
-          "first_words": "Hi Alex, thanks for connecting"}],
+          "first_words": "Hi Alex, thanks for connecting",
+          "verified_visible": True,
+          "sent_text": "Hi Jane, thanks for reaching out — happy to talk."}],
         now=NOW, **env.record_kw())
 
 
@@ -293,6 +295,38 @@ def test_watch_record() -> None:
           res2["recorded"] == [] and len(res2["refused"]) == 1
           and env.claims.read_text(encoding="utf-8").count("Jane Doe") == 1,
           str(res2))
+    env.cleanup()
+
+
+def test_watch_record_replied_needs_proof() -> None:
+    # Nov 25, 2026 (Caitlin McCurrie): a send LinkedIn had failed was
+    # recorded as SENT. A 'replied' record now requires proof the
+    # reply was seen in the thread after a reload — without it the
+    # record is refused and NOTHING is written, so the item stays
+    # unprocessed and the next run retries it.
+    env = Env()
+    bare = ib.watch_record(
+        [{"gmail_id": "bbbbbbbbbbbbbbbb", "person": "Pat Poe",
+          "outcome": "replied", "message_ts": "2026-11-12T15:00:00-06:00",
+          "first_words": "Hi, are you open to a call"}],
+        now=NOW, **env.record_kw())
+    check("f6 'replied' without proof is refused, nothing written",
+          bare["recorded"] == [] and len(bare["refused"]) == 1
+          and "verified_visible" in bare["refused"][0]["reason"]
+          and "Pat Poe" not in env.claims.read_text(encoding="utf-8"),
+          str(bare))
+    state = ib.load_state(env.state, env.md)
+    check("f7 unproven reply leaves the Gmail ID unprocessed",
+          "bbbbbbbbbbbbbbbb" not in state["processed"], str(state))
+    no_text = ib.watch_record(
+        [{"gmail_id": "bbbbbbbbbbbbbbbb", "person": "Pat Poe",
+          "outcome": "replied", "message_ts": "2026-11-12T15:00:00-06:00",
+          "first_words": "Hi, are you open to a call",
+          "verified_visible": True}],
+        now=NOW, **env.record_kw())
+    check("f8 verified_visible without sent_text is refused too",
+          no_text["recorded"] == [] and len(no_text["refused"]) == 1
+          and "sent_text" in no_text["refused"][0]["reason"], str(no_text))
     env.cleanup()
 
 
@@ -725,6 +759,8 @@ def test_invite_message() -> None:
           "outcome": "accepted", "message_outcome": "replied",
           "message_ts": got.get("message_ts"),
           "first_words": "Hi Alex, I came across your profile",
+          "verified_visible": True,
+          "sent_text": "Hi Sara, thanks for connecting — happy to chat.",
           "job": "linkedin-invitation-sweep"}],
         now=NOW, **env.record_kw())
     check("v4 invite-record with a message outcome lands + verified",
@@ -749,7 +785,9 @@ def test_invite_message() -> None:
         [{"gmail_id": "a4a4a4a4a4a4a4a4", "person": "Sara Kim",
           "outcome": "accepted", "message_outcome": "replied",
           "message_ts": got.get("message_ts"),
-          "first_words": "Hi Alex, I came across your profile"}],
+          "first_words": "Hi Alex, I came across your profile",
+          "verified_visible": True,
+          "sent_text": "Hi Sara, thanks for connecting — happy to chat."}],
         now=NOW, **env.record_kw())
     check("v8 pre-claimed message: accepted, no second claim line",
           len(res2["recorded"]) == 1
@@ -1369,6 +1407,7 @@ def main() -> int:
     test_intake_triage()
     test_intake_person_fallback_and_batch_dup()
     test_watch_record()
+    test_watch_record_replied_needs_proof()
     test_check_claim()
     test_daily_scope()
     test_daily_record()
