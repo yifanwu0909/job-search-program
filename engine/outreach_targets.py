@@ -35,8 +35,10 @@ A target is ACCEPTED only when ALL of these hold:
     first, then anywhere else in the US. A target flagged
     "replenishment": true must ALSO pass the replenishment gate in
     config: a recruiter title carrying a technical/AI/ML/data keyword,
-    and a US location (the gate is the outer boundary; the CA-first
-    order is the run's);
+    and a US location — matched by _us_location (config keywords incl.
+    US city/metro names, or a ", ST" state abbreviation), because
+    LinkedIn locations rarely spell the state out (the gate is the
+    outer boundary; the CA-first order is the run's);
   * person, title and company are present (else malformed);
   * the worker did not itself label the person a peer (type "peer");
   * current_employee is exactly true (the run verifies employment on
@@ -56,6 +58,43 @@ from __future__ import annotations
 import re
 
 GROUP_ORDER = ("recruiting", "leadership", "senior_ic", "manager")
+
+# US state abbreviations (USPS, incl. DC). LinkedIn profile locations and
+# search snippets very often carry ONLY the abbreviation ("San Jose, CA",
+# "Austin, TX, United States") or a bare city / metro name ("Austin",
+# "Greater Seattle Area") — the config keyword list holds full state
+# names, so a substring pass over it alone refused plainly-US recruiters
+# as replenishment_location_not_us (Nov 25, 2026: 22 of 22 targets in one
+# packet refused on city-only locations; Nov 27, 2026: replenishment
+# produced 0 code-ready targets and the day closed at 5 of 30). The
+# abbreviation is accepted only in the ", ST" position LinkedIn uses, so
+# ordinary words (IN, ME, OR) in a location string can never trip it.
+_US_STATE_ABBR = (
+    "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "DC", "FL", "GA",
+    "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", "MA",
+    "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", "NM", "NY",
+    "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX",
+    "UT", "VT", "VA", "WA", "WV", "WI", "WY",
+)
+_US_ABBR_RE = re.compile(
+    r",\s*(?:" + "|".join(_US_STATE_ABBR) + r")\b")
+
+
+def _us_location(location: str, keywords) -> bool:
+    """True when a free-text location is recognisably in the US.
+
+    Three passes, any one enough: (1) a config keyword (full state
+    names, "united states", and the US city / metro names config also
+    carries) appears in the text; (2) a US state abbreviation in the
+    ", ST" position; (3) nothing else — a bare non-US place name
+    ("London, England, United Kingdom", "Toronto, Ontario, Canada",
+    "Vancouver, British Columbia") matches none of these and stays out.
+    """
+    loc = str(location or "")
+    loc_low = loc.lower()
+    if any(str(k).lower() in loc_low for k in (keywords or [])):
+        return True
+    return bool(_US_ABBR_RE.search(loc))
 
 
 def _keyword_re(keyword: str) -> re.Pattern:
@@ -174,9 +213,8 @@ def validate_targets(packet, hiring_cfg: dict, blocked_keys) -> dict:
                        for k in (rep.get("title_keywords_any") or [])):
                 refuse("replenishment_title_not_ai_ml_data")
                 continue
-            loc_low = str(t.get("location") or "").lower()
-            if not any(str(k).lower() in loc_low
-                       for k in (rep.get("location_keywords") or [])):
+            if not _us_location(t.get("location"),
+                                rep.get("location_keywords")):
                 refuse("replenishment_location_not_us")
                 continue
         if isinstance(max_per_role, int) and max_per_role > 0:

@@ -315,6 +315,33 @@ def main() -> int:
     check("t: config carries the replenishment block (Nov 23 2026)",
           ((_hc.get("replenishment_when_pool_exhausted") or {})
            .get("enabled")) is True)
+    # --- replenishment location forms (fix, Nov 27, 2026) -------------
+    # LinkedIn locations rarely spell the state out: ", ST" abbreviations
+    # and bare city / metro names must pass the US gate, while non-US
+    # places still refuse. (Nov 25, 2026: a whole packet refused on
+    # city-only locations; Nov 27, 2026: replenishment produced 0
+    # code-ready targets and the day closed at 5 of 30.)
+    _out2 = ot.validate_targets({"targets": [
+        _r("Abbr", "AI Technical Recruiter", location="San Jose, CA"),
+        _r("AbbrTx", "Technical Recruiter, AI", location="Austin, TX"),
+        _r("City", "ML Technical Recruiter", location="Austin"),
+        _r("Metro", "Data Technical Recruiter",
+           location="Greater Seattle Area"),
+        _r("MetroLa", "AI Recruiter", location="Los Angeles Metropolitan Area"),
+        _r("Tor", "AI Technical Recruiter",
+           location="Toronto, Ontario, Canada"),
+        _r("Van", "AI Technical Recruiter",
+           location="Vancouver, British Columbia, Canada"),
+    ]}, _hc, _blocked)
+    _acc2 = {r["person"] for r in _out2["accepted"]}
+    _rej2 = {r["person"]: r["reason"] for r in _out2["rejected"]}
+    check("t: replenishment accepts ', ST' and city/metro US locations",
+          _acc2 == {"Abbr", "AbbrTx", "City", "Metro", "MetroLa"},
+          f"accepted={sorted(_acc2)} rejected={_rej2}")
+    check("t: replenishment still refuses non-US locations",
+          _rej2.get("Tor") == "replenishment_location_not_us"
+          and _rej2.get("Van") == "replenishment_location_not_us",
+          f"rejected={_rej2}")
     try:
         ot.validate_targets({"nope": []}, _hc, _blocked)
         check("t: malformed packet refused whole", False)
