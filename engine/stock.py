@@ -246,6 +246,21 @@ RETURN FORM — stock.py record takes a JSON file of this shape:
                                                  //   (the user, Nov 12, 2026):
                                                  //   the verdict comes
                                                  //   from Revelio Labs.
+                                                 //   PUBLIC PAGE, NO
+                                                 //   ACCOUNT (the user,
+                                                 //   Nov 27, 2026): read
+                                                 //   www.reveliolabs.com/
+                                                 //   companies/<slug>/
+                                                 //   employees signed
+                                                 //   out — never sign in
+                                                 //   for a gate, never
+                                                 //   use account. or
+                                                 //   app.reveliolabs.com
+                                                 //   for one; "Unlock"
+                                                 //   prompts are not a
+                                                 //   wall; there is no
+                                                 //   Revelio login
+                                                 //   blocker.
                                                  //   Company NOT on
                                                  //   Revelio: the LINKEDIN
                                                  //   FALLBACK (the user, Nov 13,

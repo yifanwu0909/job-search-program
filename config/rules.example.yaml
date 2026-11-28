@@ -244,6 +244,17 @@ gate:
   # India. (The earlier "fall back whenever Revelio lacks the
   # company" rule is superseded for new applications by the
   # Revelio-required rule above, the user, Nov 12, 2026.)
+  # NO REVELIO ACCOUNT EXISTS OR IS NEEDED (the user, Nov 27, 2026 —
+  # verified live): the user has NO Revelio account; the gate
+  # reads the PUBLIC page
+  # (www.reveliolabs.com/companies/<slug>/employees) signed out.
+  # Workers repeatedly reported a "Revelio login blocker" that
+  # does not exist — the "Unlock" prompts on the public page
+  # cover extra data the gate never uses. A run must never sign
+  # in for a gate, never use account.revelio.com or
+  # app.revelio.com for one, and never report a Revelio login
+  # blocker; an unreadable public page is a page failure
+  # (revelio_insufficient), not a login problem.
   # The company-gate DECISION as code (Nov 4, 2026: "build everything on
   # code"): `spine.py gate --total N --india N --source SRC` returns the
   # verdict; the counts come from Revelio Labs ONLY (design note), and the

@@ -152,6 +152,19 @@ STOCKING — every find, every source:
   stocked before the gate-at-identification rule keep their state; if
   one moves forward still verdict-less, its gate runs then via
   `spine.py gate-packet record`.
+- REVELIO IS PUBLIC — NO ACCOUNT, NO SIGN-IN (the user, Nov 27, 2026,
+  verified live): read the gate numbers off the public page
+  https://www.reveliolabs.com/companies/<slug>/employees SIGNED OUT —
+  it prints the total headcount and the "Employee Count by Region"
+  table with the South Asia count and percent. The user has NO Revelio
+  account and none is needed. Never sign in for a gate, never use
+  account.reveliolabs.com or app.reveliolabs.com for one, and NEVER
+  report a "Revelio login blocker" — there is none. "Unlock" prompts
+  on the page cover extra data the gate does not use (city-level
+  detail, tenure, salaries) — ignore them; they are not a wall. If
+  the public page itself cannot be read after one retry, that is a
+  page failure: hand in gate {"revelio_insufficient": true} through
+  stock.py, never a login story.
 - PREP AT STOCKING: build the item's tailored resume from the base
   resume BEFORE stocking (humanizer pass; read-back verify — header
   contact line + U.S. Green Card Holder printed, zero current-employer

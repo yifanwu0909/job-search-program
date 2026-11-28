@@ -357,6 +357,16 @@ def main() -> int:
                    "page", "item_id", "India")),
               "")
 
+        # Public-page rule (the user, Nov 27, 2026): the gate reads
+        # the PUBLIC Revelio page signed out — no account exists or
+        # is needed, and no run may report a Revelio login blocker.
+        check("i2 format states the no-account public-page rule",
+              all(s in gate_intake.FORMAT_TEXT for s in
+                  ("NO ACCOUNT, NO SIGN-IN", "signed out",
+                   "account.reveliolabs.com", "app.reveliolabs.com",
+                   "no Revelio account and none is needed")),
+              "")
+
     if FAILS:
         print(f"\n{len(FAILS)} FAILURE(S): {FAILS}")
         return 1

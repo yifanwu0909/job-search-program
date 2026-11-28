@@ -120,6 +120,22 @@ Revelio Labs packet (the primary gate source — read the company's
 public page at reveliolabs.com/companies and copy the numbers off
 it; do no math of your own beyond reading them):
 
+NO ACCOUNT, NO SIGN-IN (the user, Nov 27, 2026 — verified live):
+the gate page is PUBLIC. Open
+https://www.reveliolabs.com/companies/<slug>/employees signed out
+and read the total headcount and the "Employee Count by Region"
+table (the South Asia count + the percent printed beside it)
+straight off it. Never sign in for a gate, never use
+account.reveliolabs.com or app.reveliolabs.com for one, and
+never report a "Revelio login" blocker — there is none; the
+user has no Revelio account and none is needed. "Unlock"
+prompts on the page cover extra data (city-level detail,
+tenure, salaries) the gate does not use — ignore them; they
+are not a wall. If the public page itself cannot be read after
+one retry, that is a page failure: hand in gate
+{"revelio_insufficient": true} through stock.py — never a
+login story.
+
 {
   "company": "Tata Consultancy Services",   // required, exact name
   "source": "Revelio Labs",                 // required — the PRIMARY
